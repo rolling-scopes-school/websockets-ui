@@ -2,12 +2,14 @@
     "name": "ws_task",
     "version": "1.0.0",
     "description": "Template for the WebSocket remote control task",
-    "main": "index.js",
-    "type": "module",
+    "main": "index.ts",
+    "type": "commonjs",
     "scripts": {
-        "start": "node ./index.js",
-        "start:dev": "nodemon ./index.js",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "start": "node index.ts",
+        "start:dev": "npm run start:server & npm run start:client",
+        "format": "npx prettier --write .",
+        "start:client": "nodemon index.ts",
+        "start:server": "nodemon server/index.ts"
     },
     "author": "Andrei Auchynnikau",
     "keywords": [],

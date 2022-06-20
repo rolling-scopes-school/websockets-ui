@@ -1,16 +1,10 @@
 {
   "compilerOptions": {
     "baseUrl": "node_modules/@types",
-    "lib": [
-      "es6"
-    ],
+    "lib": ["es6"],
     "outDir": "dist",
-    "esModuleInterop": true,
+    "esModuleInterop": true
   },
-  "exclude": [
-    "node_modules", "**/*.spec.ts"
-  ],
-  "include": [
-    "src/**/*", "*.ts"
-  ],
+  "exclude": ["node_modules", "**/*.spec.ts"],
+  "include": ["src/**/*", "*.ts"]
 }
