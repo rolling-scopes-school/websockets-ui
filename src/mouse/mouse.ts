@@ -35,6 +35,10 @@ class Mouse {
         break;
     }
   }
+
+  mousePosition(): IMousePosition {
+    return this.getMousePosition();
+  }
 }
 
 export default Mouse;

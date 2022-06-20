@@ -1,7 +1,7 @@
 import { COMMANDS } from './constants';
 import robot from 'robotjs';
 import Mouse from './src/mouse/mouse';
-import { IWS } from './interfaces';
+import { IMousePosition, IWS } from './interfaces';
 
 export const commandSwitcher = ({ command, props, ws }: { command: string; props: number[]; ws: IWS }): void => {
   const mouse: Mouse = new Mouse(robot);
@@ -23,6 +23,10 @@ export const commandSwitcher = ({ command, props, ws }: { command: string; props
     case COMMANDS.MOUSE_RIGHT:
       mouse.moseMove({ action: COMMANDS.MOUSE_RIGHT, position: sendPosition });
       ws.send(COMMANDS.MOUSE_RIGHT);
+      break;
+    case COMMANDS.MOUSE_POSITION:
+      const position: IMousePosition = mouse.mousePosition();
+      ws.send(JSON.stringify(position));
       break;
     default:
   }
