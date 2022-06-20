@@ -1,10 +1,13 @@
 import { COMMANDS } from './constants';
-import robot from 'robotjs';
+import robot, { Bitmap } from 'robotjs';
 import Mouse from './src/mouse/mouse';
+import Capture from './src/capture/capture';
 import { IMousePosition, IWS } from './interfaces';
 
 export const commandSwitcher = ({ command, props, ws }: { command: string; props: number[]; ws: IWS }): void => {
   const mouse: Mouse = new Mouse(robot);
+  const capture: Capture = new Capture(robot);
+  const position: IMousePosition = mouse.mousePosition();
   const [sendPosition]: number[] = props;
 
   switch (command) {
@@ -24,9 +27,14 @@ export const commandSwitcher = ({ command, props, ws }: { command: string; props
       mouse.moseMove({ action: COMMANDS.MOUSE_RIGHT, position: sendPosition });
       ws.send(COMMANDS.MOUSE_RIGHT);
       break;
+
     case COMMANDS.MOUSE_POSITION:
-      const position: IMousePosition = mouse.mousePosition();
       ws.send(JSON.stringify(position));
+      break;
+
+    case COMMANDS.PRINT_SCREEN:
+      const img: Bitmap = capture.getScreenCapture();
+      ws.send(JSON.stringify(img));
       break;
     default:
   }
