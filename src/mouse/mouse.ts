@@ -17,7 +17,7 @@ class Mouse {
     };
   }
 
-  moseMove({ action, position }: { action: string; position: number }) {
+  moseMove({ action, position }: { action: string; position: number }): void {
     const mousePosition: IMousePosition = this.getMousePosition();
 
     switch (action) {

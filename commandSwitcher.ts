@@ -2,11 +2,13 @@ import { COMMANDS } from './constants';
 import robot, { Bitmap } from 'robotjs';
 import Mouse from './src/mouse/mouse';
 import Capture from './src/capture/capture';
+import Circle from './src/circle/circle';
 import { IMousePosition, IWS } from './interfaces';
 
 export const commandSwitcher = ({ command, props, ws }: { command: string; props: number[]; ws: IWS }): void => {
   const mouse: Mouse = new Mouse(robot);
   const capture: Capture = new Capture(robot);
+  const circle: Circle = new Circle(robot);
   const position: IMousePosition = mouse.mousePosition();
   const [sendPosition]: number[] = props;
 
@@ -30,6 +32,11 @@ export const commandSwitcher = ({ command, props, ws }: { command: string; props
 
     case COMMANDS.MOUSE_POSITION:
       ws.send(JSON.stringify(position));
+      break;
+
+    case COMMANDS.DRAW_CIRCLE:
+      circle.drawCircle(sendPosition);
+      ws.send(COMMANDS.DRAW_CIRCLE);
       break;
 
     case COMMANDS.PRINT_SCREEN:
