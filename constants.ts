@@ -25,4 +25,12 @@ export const STATUS_COND: Readonly<{ OK: 200; NOT_FOUND: 404 }> = Object.freeze(
   NOT_FOUND: 404,
 });
 
-export const DELAY: number = 500;
+export const DELAY: Readonly<{ CUSTOM: 500; DEFAULT: 10 }> = Object.freeze({
+  CUSTOM: 500,
+  DEFAULT: 10,
+});
+
+export const MOUSE: Readonly<{ DOWN: 'down'; UP: 'up' }> = Object.freeze({
+  DOWN: 'down',
+  UP: 'up',
+});
