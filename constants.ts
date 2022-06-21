@@ -24,3 +24,5 @@ export const STATUS_COND: Readonly<{ OK: 200; NOT_FOUND: 404 }> = Object.freeze(
   OK: 200,
   NOT_FOUND: 404,
 });
+
+export const DELAY: number = 500;
