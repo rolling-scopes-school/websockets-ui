@@ -3,11 +3,21 @@ import Jimp from "jimp";
 
 const IMG_SIZE = 200;
 export async function printScreen() {
-  const { x, y } = robot.getMousePos();
+  const { x: xPos, y: yPos } = robot.getMousePos();
+  const { width: screenWidth, height: screenHeight } = robot.getScreenSize();
+
+  // handling start of screen
+  const centeredX = Math.max(xPos - IMG_SIZE / 2, 0);
+  const centeredY = Math.max(yPos - IMG_SIZE / 2, 0);
+
+  // handling end of screen
+  const x = Math.min(centeredX, screenWidth - IMG_SIZE);
+  const y = Math.min(centeredY, screenHeight - IMG_SIZE);
+
   try {
     const image = captureImage({
-      x: Math.max(x - IMG_SIZE / 2, 0), // handling start of screen
-      y: Math.max(y - IMG_SIZE / 2, 0),
+      x,
+      y,
       w: IMG_SIZE,
       h: IMG_SIZE,
     });
@@ -20,14 +30,7 @@ export async function printScreen() {
 }
 
 function captureImage({ x, y, w, h }: { x: number; y: number; w: number; h: number }) {
-  const { width: screenWidth, height: screenHeight } = robot.getScreenSize();
-
-  const pic = robot.screen.capture(
-    Math.min(x, screenWidth - w), // handling end of screen
-    Math.min(y, screenHeight - h),
-    w,
-    h
-  );
+  const pic = robot.screen.capture(x, y, w, h);
 
   const width = pic.byteWidth / pic.bytesPerPixel; // pic.width is sometimes wrong!
   const height = pic.height;
