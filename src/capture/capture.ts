@@ -16,10 +16,11 @@ class Capture {
     };
   }
 
+  //TODO PASS SIZE FROM SERVER
   getScreenCapture() {
-    const size = 100;
-    const position: IMousePosition = this.getMousePosition();
-    return this.robot.screen.capture(position.x, position.y, size, size);
+    const size = 200;
+    const position = this.getMousePosition();
+    return this.robot.screen.capture(position.x, position.y, size, size).image;
   }
 }
 

@@ -14,6 +14,10 @@ httpServer.listen(HTTP_PORT);
 
 const socket: WebSocket = new WebSocket(SERVER_PORT);
 
+socket.onopen = () => {
+  console.log('Connection opened...');
+};
+
 socket.onmessage = (event): void => {
   console.log(`[message] Data received from the server: ${event}`);
 };
