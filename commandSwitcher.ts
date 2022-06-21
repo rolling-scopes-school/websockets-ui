@@ -52,8 +52,7 @@ export const commandSwitcher = ({ command, props, ws }: { command: string; props
       break;
 
     case COMMANDS.PRINT_SCREEN:
-      const img: Bitmap = capture.getScreenCapture();
-      ws.send(JSON.stringify(img));
+      ws.send(capture.getScreenCapture());
       break;
     default:
   }
