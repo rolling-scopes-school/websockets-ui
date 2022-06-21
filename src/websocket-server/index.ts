@@ -1,7 +1,6 @@
-import type { Server } from 'http';
 import { WebSocketServer } from 'ws';
 
-export default function startWebSocketServer(server:Server){
+export default function startWebSocketServer(){
     let WS_PORT:number = 8080
 
     const ws:WebSocketServer = new WebSocketServer({
