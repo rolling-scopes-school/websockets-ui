@@ -3,19 +3,24 @@
     "version": "1.0.0",
     "description": "Template for the WebSocket remote control task",
     "main": "index.js",
-    "type": "module",
     "scripts": {
-        "start": "node ./index.js",
-        "start:dev": "nodemon ./index.js",
+        "build": "tsc -p .",
+        "start": "tsc -p . && node ./dist/index.js",
+        "start:dev": "tsnd --respawn ./src/index.ts",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "Andrei Auchynnikau",
     "keywords": [],
     "license": "ISC",
     "devDependencies": {
-        "nodemon": "^2.0.16"
+        "@types/node": "^18.0.0",
+        "@types/ws": "^8.5.3",
+        "nodemon": "^2.0.16",
+        "ts-node-dev": "^2.0.0",
+        "typescript": "^4.7.4"
     },
     "dependencies": {
+        "dotenv": "^16.0.1",
         "jimp": "^0.16.1",
         "robotjs": "^0.6.0",
         "ws": "^8.8.0"

@@ -1,0 +1,63 @@
+{
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "**/*.spec.ts"],
+  "compilerOptions": {
+    
+    "lib": [
+      "es6"
+   ],
+   "target": "es6",
+   "module": "commonjs",
+
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    "strict": true,
+    
+    "esModuleInterop": true,
+    
+    // Пропуск проверки библиотеки
+    "skipLibCheck": true,
+
+    // Принудительно использовать согласованный регистр в именах файлов 
+    "forceConsistentCasingInFileNames": true,
+    
+    // Разрешить неиспользуемые метки
+    "allowUnusedLabels": false,
+    
+    // Разрешить недоступный код
+    "allowUnreachableCode": false,
+    
+    // TypeScript применяет более строгие правила в отношении того, как он обрабатывает свойства typeили interfacesкоторые имеют ?префикс.
+    "exactOptionalPropertyTypes": true,
+    
+    // Гарантирует, что любой непустой регистр внутри оператора switch включает либо breakили return
+    "noFallthroughCasesInSwitch": true,
+    
+    "noImplicitOverride": true,
+    
+    // При включении TypeScript проверяет все пути кода в функции, чтобы убедиться, что они возвращают значение.
+    "noImplicitReturns": true,
+    
+    // Неизвестные поля в обьекте и масиве и тд. должны использоваться как obj['value']
+    // "noPropertyAccessFromIndexSignature": true,
+
+    // К любому не добавленному алименту добавляет undefines
+    "noUncheckedIndexedAccess": true,
+    
+    // Нет неиспользуемых локальных файлов - error is declared but its value is never read.
+    "noUnusedLocals": true,
+    
+    // Сообщать об ошибках по неиспользуемым параметрам в функциях.
+    "noUnusedParameters": true,
+    
+    // Импортирует не используемые значения 
+    "importsNotUsedAsValues": "error",
+ 
+    // Разрешите импортировать файлы JavaScript внутри вашего проекта, а не просто .ts.tsx
+    "allowJs":true,
+    "checkJs": true,
+    
+    "moduleResolution": "node"
+  }
+}
