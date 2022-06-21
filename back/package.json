@@ -15,9 +15,9 @@
     "dotenv": "^16.0.1",
     "uuid": "^8.3.2"
   },
-  "name": "crud-api_ts",
+  "name": "remote-control",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
     "test": "jest",
     "build": "npx tsc",
@@ -25,7 +25,7 @@
     "start:back": "node ./index.ts",
     "start:prod": "npm run build && node dist/index.js"
   },
-  "author": "",
+  "author": "anna-left",
   "license": "ISC",
   "description": ""
 }
