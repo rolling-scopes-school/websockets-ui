@@ -1,23 +1,19 @@
-import Jimp from 'jimp';
 import { httpServer } from './src/http_server';
 import WebSocket from 'ws';
-import robot from 'robotjs';
-import { WebSocketServer } from 'ws';
 import 'dotenv/config';
-import { getErrorMessage, reportError } from './utils';
 
 const HTTP_PORT: string = process.env.FRONT_PORT;
-const SERVER_PORT: string = `${process.env.WEB_SOCKET_URL}:${process.env.SERVER_PORT}`;
+const SERVER_URL: string = `${process.env.WEB_SOCKET_URL}:${process.env.SERVER_PORT}`;
 
 httpServer.listen(HTTP_PORT);
 
-const socket: WebSocket = new WebSocket(SERVER_PORT);
+const socket: WebSocket = new WebSocket(SERVER_URL);
 
-socket.onerror = (error) => {
+socket.onerror = (error): void => {
   console.log(error.message);
 };
 
-socket.onopen = () => {
+socket.onopen = (): void => {
   console.log('Connection opened...');
 };
 

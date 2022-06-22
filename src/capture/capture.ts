@@ -1,7 +1,7 @@
 import { IMousePosition } from '../../interfaces';
 import Jimp from 'jimp';
 import { Bitmap } from 'robotjs';
-import { COMMANDS, PRINT_SCREEN_IMAGE_SIZE } from '../../constants';
+import { BASE_64_FORMAT, COMMANDS, PRINT_SCREEN_IMAGE_SIZE } from '../../constants';
 
 class Capture {
   private robot;
@@ -25,7 +25,7 @@ class Capture {
     const jImg = new Jimp(image.width, image.height);
     jImg.bitmap.data = image.image;
     jImg.getBuffer(Jimp.MIME_PNG, (err: Error, result: Buffer) => {
-      base64 = result.toString('base64');
+      base64 = result.toString(BASE_64_FORMAT);
     });
 
     return base64;

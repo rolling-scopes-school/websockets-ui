@@ -2,9 +2,10 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { commandSwitcher } from '../commandSwitcher';
 import { prepareCommands } from '../utils';
 import { IWS } from '../interfaces';
+import 'dotenv/config';
 
 const wws: WebSocket = new WebSocketServer({
-  port: 8080,
+  port: process.env.SERVER_PORT,
 });
 
 wws.on('connection', (ws: IWS): void => {
