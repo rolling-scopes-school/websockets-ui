@@ -9,7 +9,6 @@ import { moveMouse } from "./moveMouse";
 import { printScreen } from "./printScreen";
 
 export function handleMessages(data: string, ws: WebSocket) {
-
   // const messageStream = WebSocket.createWebSocketStream(ws, {
   //   encoding: "utf8",
   // });
@@ -53,8 +52,10 @@ export function handleMessages(data: string, ws: WebSocket) {
 
       break;
     case ActionsEnum.Prnt_scrn:
-      printScreen();
-
+      const screenCapture = printScreen();
+      screenCapture.write("./capture.png");
+      ws.send(screenCapture);
+      return;
       break;
 
     default:
