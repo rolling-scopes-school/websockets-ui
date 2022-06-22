@@ -20,7 +20,7 @@ export const COMMANDS: Readonly<{
   PRINT_SCREEN: 'prnt_scrn',
 });
 
-export const STATUS_COND: Readonly<{ OK: 200; NOT_FOUND: 404 }> = Object.freeze({
+export const STATUS_COD: Readonly<{ OK: 200; NOT_FOUND: 404 }> = Object.freeze({
   OK: 200,
   NOT_FOUND: 404,
 });
@@ -34,3 +34,5 @@ export const MOUSE: Readonly<{ DOWN: 'down'; UP: 'up' }> = Object.freeze({
   DOWN: 'down',
   UP: 'up',
 });
+
+export const PRINT_SCREEN_IMAGE_SIZE: number = 300;

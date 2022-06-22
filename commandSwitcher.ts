@@ -1,5 +1,5 @@
 import { COMMANDS } from './constants';
-import robot, { Bitmap } from 'robotjs';
+import robot from 'robotjs';
 import Mouse from './src/mouse/mouse';
 import Capture from './src/capture/capture';
 import Circle from './src/circle/circle';
