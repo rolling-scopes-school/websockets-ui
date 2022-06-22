@@ -33,7 +33,7 @@ export async function handleMessages(data: string, stream: internal.Duplex) {
 
     case ActionsEnum.Mouse_position:
       const mousePos = robot.getMousePos();
-      resultData = `${action} x:${mousePos.x},y:${mousePos.y}`;
+      resultData = `${action} {${mousePos.x} px}, {${mousePos.y} px}`;
       break;
 
     case ActionsEnum.Draw_rectangle:
@@ -49,11 +49,11 @@ export async function handleMessages(data: string, stream: internal.Duplex) {
       break;
 
     case ActionsEnum.Prnt_scrn:
-      return resultData = await printScreen();
+      return (resultData = await printScreen());
       break;
 
     default:
       break;
   }
-  return resultData.replace(" ", "-");
+  return resultData.replace(/ /g, "\0\t");
 }
