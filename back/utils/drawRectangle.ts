@@ -1,10 +1,12 @@
 import robot from "robotjs";
 
 export function drawRectangle(width: number, height: number) {
+  robot.mouseToggle("down");
   drawLine(width, 1, true);
   drawLine(height, 1, false);
   drawLine(width, -1, true);
   drawLine(height, -1, false);
+  robot.mouseToggle("up");
 }
 
 function drawLine(size: number, coefficient: number, isX: boolean) {

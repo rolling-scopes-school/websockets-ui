@@ -8,8 +8,7 @@ wss.on("connection", function connection(ws) {
     "message",
     function message(data) {
       console.log("received: %s", data);
-      const dataString = data.toString();
-      handleMessages(dataString, ws);
+      handleMessages(data.toString(), ws);
     }
   );
 });

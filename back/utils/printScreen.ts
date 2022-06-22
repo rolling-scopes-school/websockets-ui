@@ -1,13 +1,8 @@
 import robot from "robotjs";
 import jimp from "jimp";
+import { WebSocket } from "ws";
 
-export function printScreen() {
-//   // screenCaptureToFile("./test.png");
-//   captureImage().write("./capture.png");
-// }
-
-
-// function captureImage() {
+export function printScreen(ws: WebSocket) {
   const mousePos = robot.getMousePos();
   const screenCapture = robot.screen.capture(mousePos.x, mousePos.y, 200, 200);
   const width = screenCapture.byteWidth / screenCapture.bytesPerPixel;
@@ -29,22 +24,9 @@ export function printScreen() {
         image.bitmap.data[i] = 255;
     }
   });
-  return image;
-}
+  image.getBase64(jimp.MIME_PNG, function (err, base64) {
+    base64 = base64.replace("data:image/png;base64,",'');
+    ws.send(`prnt_scrn ${base64}`);
+  });
 
-// var screenCaptureToFile = function (path: string) {
-//   return new Promise((resolve, reject) => {
-//     try {
-//       let picture = robot.screen.capture();
-//       let image = new jimp(picture.width, picture.height, function (err, img) {
-//         img.bitmap.data = picture.image;
-//         img.getBuffer(jimp.MIME_PNG, (err, png) => {
-//           image.write(path, resolve);
-//         });
-//       });
-//     } catch (e) {
-//       console.error(e);
-//       reject(e);
-//     }
-//   });
-// };
+}

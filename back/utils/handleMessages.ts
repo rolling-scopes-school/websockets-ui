@@ -49,14 +49,11 @@ export function handleMessages(data: string, ws: WebSocket) {
 
     case ActionsEnum.Draw_circle:
       drawCircle(size1);
+      break;
 
-      break;
-    case ActionsEnum.Prnt_scrn:
-      const screenCapture = printScreen();
-      screenCapture.write("./capture.png");
-      ws.send(screenCapture);
+      case ActionsEnum.Prnt_scrn:
+      printScreen(ws);
       return;
-      break;
 
     default:
       break;
