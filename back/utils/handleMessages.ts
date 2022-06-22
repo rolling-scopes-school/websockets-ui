@@ -1,6 +1,6 @@
 import robot from "robotjs";
+import internal, { Duplex } from "stream";
 import { WebSocket } from "ws";
-// var websocketStream = require('websocket-stream')
 
 import { ActionsEnum } from "./constants";
 import { drawCircle } from "./drawCircle";
@@ -8,13 +8,10 @@ import { drawRectangle } from "./drawRectangle";
 import { moveMouse } from "./moveMouse";
 import { printScreen } from "./printScreen";
 
-export function handleMessages(data: string, ws: WebSocket) {
-  // const messageStream = WebSocket.createWebSocketStream(ws, {
-  //   encoding: "utf8",
-  // });
-
+export async function handleMessages(data: string, stream: internal.Duplex) {
+  let resultData = data;
   const arrData = data.trim().split(" ");
-  let action = arrData[0];
+  const action = arrData[0];
   const size1 = Number(arrData[1]);
   const size2 = Number(arrData[2]);
   switch (action) {
@@ -36,7 +33,7 @@ export function handleMessages(data: string, ws: WebSocket) {
 
     case ActionsEnum.Mouse_position:
       const mousePos = robot.getMousePos();
-      action = `${action}_${mousePos.x},${mousePos.y}`;
+      resultData = `${action} x:${mousePos.x},y:${mousePos.y}`;
       break;
 
     case ActionsEnum.Draw_rectangle:
@@ -51,12 +48,12 @@ export function handleMessages(data: string, ws: WebSocket) {
       drawCircle(size1);
       break;
 
-      case ActionsEnum.Prnt_scrn:
-      printScreen(ws);
-      return;
+    case ActionsEnum.Prnt_scrn:
+      return resultData = await printScreen();
+      break;
 
     default:
       break;
   }
-  ws.send(action);
+  return resultData.replace(" ", "-");
 }

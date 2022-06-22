@@ -1,4 +1,4 @@
-import { WebSocketServer } from "ws";
+import { createWebSocketStream, WebSocketServer } from "ws";
 import { handleMessages } from "./utils/handleMessages";
 import "dotenv/config";
 
@@ -7,21 +7,17 @@ const wss = new WebSocketServer({ port: PORT });
 
 wss.on("connection", function connection(ws) {
   console.log(`Start websocket on the ${PORT} port!`);
+  const stream = createWebSocketStream(ws, {
+    encoding: "utf8",
+    decodeStrings: false,
+  });
   ws.on(
     "message",
-    function message(data) {
+    async function message() {
+      const data = stream.read();
       console.log("received: %s", data);
-      handleMessages(data.toString(), ws);
+      const newData = await handleMessages(data.toString(), stream);
+      stream.write(newData);
     }
   );
 });
-
-// https://github.com/websockets/ws
-// import WebSocket, { createWebSocketStream } from "ws";
-
-// const ws = new WebSocket("wss://websocket-echo.com/");
-
-// const duplex = createWebSocketStream(ws, { encoding: "utf8" });
-
-// duplex.pipe(process.stdout);
-// process.stdin.pipe(duplex);
