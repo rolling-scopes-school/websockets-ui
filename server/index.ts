@@ -1,6 +1,6 @@
 import { WebSocketServer, createWebSocketStream } from 'ws';
 import { commandSwitcher } from '../commandSwitcher';
-import { getErrorMessage, prepareCommands, reportError, showWebSocketInfo } from '../utils';
+import { getErrorMessage, prepareCommands, reportError, showCommands, showWebSocketInfo } from '../utils';
 import { IWS } from '../interfaces';
 import { IncomingMessage } from 'http';
 import 'dotenv/config';
@@ -16,6 +16,7 @@ wws.on('connection', (ws: IWS, request: IncomingMessage) => {
 
   duplex.on('data', (data: Buffer) => {
     if (Buffer.isBuffer(data)) {
+      showCommands(data.toString());
       commandSwitcher({ ...prepareCommands(data.toString()), ws });
     }
   });

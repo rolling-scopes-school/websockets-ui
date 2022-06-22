@@ -33,3 +33,7 @@ export const showWebSocketInfo = (request: IncomingMessage): void => {
   });
   console.log('client connected');
 };
+
+export const showCommands = (inputCommand: string): void => {
+  console.log('<-' + inputCommand);
+};
