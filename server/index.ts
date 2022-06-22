@@ -1,15 +1,16 @@
 import { WebSocketServer, createWebSocketStream } from 'ws';
 import { commandSwitcher } from '../commandSwitcher';
-import { prepareCommands } from '../utils';
+import { getErrorMessage, prepareCommands, reportError, showWebSocketInfo } from '../utils';
 import { IWS } from '../interfaces';
+import { IncomingMessage } from 'http';
 import 'dotenv/config';
 
 const wws = new WebSocketServer({
   port: process.env.SERVER_PORT,
 });
 
-wws.on('connection', (ws: IWS) => {
-  console.log('client connected');
+wws.on('connection', (ws: IWS, request: IncomingMessage) => {
+  showWebSocketInfo(request);
 
   const duplex = createWebSocketStream(ws);
 
@@ -20,10 +21,10 @@ wws.on('connection', (ws: IWS) => {
   });
 
   duplex.on('close', () => {
-    console.log('the duplex channel has closed');
+    console.log('the channel has closed');
   });
 
-  ws.on('close', () => {
-    console.log('error');
+  wws.on('close', (event) => {
+    reportError({ message: getErrorMessage(event) });
   });
 });

@@ -1,4 +1,5 @@
 import { ICommands } from './interfaces';
+import { IncomingMessage } from 'http';
 
 export const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) return error.message;
@@ -18,4 +19,17 @@ export const prepareCommands = (inputCommand: string): ICommands => {
     command,
     props: commandsString.map((prop: string) => Number(prop)),
   };
+};
+
+export const showWebSocketInfo = (request: IncomingMessage): void => {
+  const { headers } = request;
+
+  console.log('client info');
+  console.table({
+    host: headers.host ? headers.host : '',
+    connection: headers.connection ? headers.connection : '',
+    upgrade: headers.upgrade ? headers.upgrade : '',
+    'user-agent': headers['user-agent'] ? headers['user-agent'] : '',
+  });
+  console.log('client connected');
 };
