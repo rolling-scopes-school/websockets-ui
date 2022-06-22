@@ -1,10 +1,12 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import * as http from 'http';
-
-export const httpServer = http.createServer(function (req, res) {
-    const __dirname = path.resolve(path.dirname(''));
-    const file_path = __dirname + (req.url === '/' ? '/front/index.html' : '/front' + req.url);
+"use strict";
+exports.__esModule = true;
+exports.httpServer = void 0;
+var fs = require("fs");
+var path = require("path");
+var http = require("http");
+exports.httpServer = http.createServer(function (req, res) {
+    var __dirname = path.resolve(path.dirname(''));
+    var file_path = __dirname + (req.url === '/' ? '/front/index.html' : '/front' + req.url);
     fs.readFile(file_path, function (err, data) {
         if (err) {
             res.writeHead(404);
