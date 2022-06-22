@@ -14,3 +14,6 @@ Thumbs.db
 
 # Logs
 npm-debug.log
+
+# dotenv environment variables file
+.env
