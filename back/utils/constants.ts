@@ -7,4 +7,5 @@ export enum ActionsEnum {
   Draw_rectangle = "draw_rectangle",
   Draw_square = "draw_square",
   Draw_circle = "draw_circle",
+  Prnt_scrn = "prnt_scrn",
 }
