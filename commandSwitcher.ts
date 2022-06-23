@@ -35,7 +35,7 @@ export const commandSwitcher = ({ command, props, ws }: { command: string; props
       break;
 
     case COMMANDS.MOUSE_POSITION:
-      ws.send(JSON.stringify(position));
+      ws.send(`${COMMANDS.MOUSE_POSITION} ${JSON.stringify(position)})}`);
       break;
 
     case COMMANDS.DRAW_CIRCLE:
