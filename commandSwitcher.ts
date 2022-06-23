@@ -5,9 +5,17 @@ import Capture from './src/capture/capture';
 import Circle from './src/circle/circle';
 import Square from './src/square/square';
 import Rectangle from './src/rectangle/rectangle';
-import { IMousePosition, IWS } from './interfaces';
+import { IMousePosition, IDuplex } from './interfaces';
 
-export const commandSwitcher = ({ command, props, duplex }: { command: string; props: number[]; duplex }): void => {
+export const commandSwitcher = ({
+  command,
+  props,
+  duplex,
+}: {
+  command: string;
+  props: number[];
+  duplex: IDuplex;
+}): void => {
   const mouse: Mouse = new Mouse(robot);
   const capture: Capture = new Capture(robot);
   const circle: Circle = new Circle(robot);

@@ -1,7 +1,7 @@
 import { WebSocketServer, createWebSocketStream } from 'ws';
 import { commandSwitcher } from '../commandSwitcher';
 import { getErrorMessage, prepareCommands, reportError, showCommands, showWebSocketInfo } from '../utils';
-import { IWS } from '../interfaces';
+import { IDuplex, IWS } from '../interfaces';
 import { IncomingMessage } from 'http';
 import 'dotenv/config';
 
@@ -12,7 +12,7 @@ const wws = new WebSocketServer({
 wws.on('connection', (ws: IWS, request: IncomingMessage) => {
   showWebSocketInfo(request);
 
-  const duplex = createWebSocketStream(ws, {
+  const duplex: IDuplex = createWebSocketStream(ws, {
     decodeStrings: false,
   });
 

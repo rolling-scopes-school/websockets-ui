@@ -3,6 +3,11 @@ export interface IWS {
   send: (message: string | Buffer) => void;
 }
 
+export interface IDuplex {
+  on: (event: string, fn: (data: Buffer) => void) => void;
+  write: (message: string | Buffer) => void;
+}
+
 export interface IMousePosition {
   x: number;
   y: number;
