@@ -11,13 +11,20 @@ wss.on("connection", function connection(ws) {
     encoding: "utf8",
     decodeStrings: false,
   });
-  ws.on(
-    "message",
-    async function message() {
-      const data = stream.read();
-      console.log("received: %s", data);
-      const newData = await handleMessages(data.toString());
-      stream.write(newData);
-    }
-  );
+  ws.on("message", async function message() {
+    const data = stream.read();
+    console.log("received: %s", data);
+    const newData = await handleMessages(data.toString());
+    stream.write(newData);
+  });
+
+  ws.on("close", () => {
+    console.log("Websocket completed");
+    process.exit(0);
+  });
+});
+
+wss.on("close", () => {
+  console.log("WebSocketServer completed");
+  process.exit(0);
 });
