@@ -1,5 +1,5 @@
-# RSSchool NodeJS websocket task template
-> Static http server and base task packages.
+# RSSchool NodeJS websocket
+> Implementation of the remote control server part using the RobotJS library and a web socket.
 
 ## Installation
 1. `git clone https://github.com/anna-left/remote-control`
@@ -44,10 +44,8 @@ open 2 servers in different windows
 Command | Mode | Description
 --- | --- | ---
 `npm run start` | prod | Back served @ `http://localhost:8080`, Front served @ `http://localhost:3000`
---- | --- | ---
 `npm run start:back` | prod | Back served @ `http://localhost:8080`
 `npm run start:front` | prod | Front served @ `http://localhost:3000`
---- | --- | ---
 `npm run start:devback` | dev | Back served @ `http://localhost:8080`
 `npm run start:devfront` | dev | Front served @ `http://localhost:3000`
 
