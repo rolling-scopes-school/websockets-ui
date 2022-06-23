@@ -7,11 +7,8 @@ export enum Direction {
   RIGHT = "right",
 }
 
-const { getMousePos } = robot;
-
-export async function moveMouse(direction: Direction, distanceRaw: string) {
-  const { x, y } = getMousePos();
-  const distance = Number(distanceRaw);
+export function moveMouse(direction: Direction, distance: number) {
+  const { x, y } = robot.getMousePos();
 
   if (direction === Direction.UP) {
     robot.moveMouse(x, y - distance);
@@ -30,7 +27,7 @@ export async function moveMouse(direction: Direction, distanceRaw: string) {
   }
 }
 
-export async function getMousePosition() {
+export function getMousePosition() {
   const { x, y } = robot.getMousePos();
   return ` ${x},${y}`;
 }

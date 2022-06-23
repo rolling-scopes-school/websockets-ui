@@ -1,17 +1,18 @@
-import { drawFigure, Shapes } from "./commands/drawing.js";
+import { drawCircle, drawRectangle, drawSquare } from "./commands/drawing.js";
 import { Direction, moveMouse, getMousePosition } from "./commands/navigation.js";
 import { printScreen } from "./commands/print-screen.js";
 
 export const routes: Record<string, Function> = {
-  mouse_up: async (distance: string) => moveMouse(Direction.UP, distance),
-  mouse_down: async (distance: string) => moveMouse(Direction.DOWN, distance),
-  mouse_left: async (distance: string) => moveMouse(Direction.LEFT, distance),
-  mouse_right: async (distance: string) => moveMouse(Direction.RIGHT, distance),
-  mouse_position: async () => getMousePosition(),
+  mouse_up: (distance: string) => moveMouse(Direction.UP, Number(distance)),
+  mouse_down: (distance: string) => moveMouse(Direction.DOWN, Number(distance)),
+  mouse_left: (distance: string) => moveMouse(Direction.LEFT, Number(distance)),
+  mouse_right: (distance: string) => moveMouse(Direction.RIGHT, Number(distance)),
+  mouse_position: () => getMousePosition(),
 
-  draw_circle: async (shape: Shapes) => drawFigure(shape),
-  draw_rectangle: async (shape: Shapes) => drawFigure(shape),
-  draw_square: async (shape: Shapes) => drawFigure(shape),
+  draw_circle: (radius: string) => drawCircle(Number(radius)),
+  draw_rectangle: (length: string, width: string) =>
+    drawRectangle(Number(length), Number(width)),
+  draw_square: (length: string) => drawSquare(Number(length)),
 
-  prnt_scrn: async () => printScreen(),
+  prnt_scrn: () => printScreen(),
 };

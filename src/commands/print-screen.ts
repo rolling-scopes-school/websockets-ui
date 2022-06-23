@@ -6,11 +6,11 @@ export async function printScreen() {
   const { x: xPos, y: yPos } = robot.getMousePos();
   const { width: screenWidth, height: screenHeight } = robot.getScreenSize();
 
-  // handling start of screen
+  // centering and handling going out of start of screen
   const centeredX = Math.max(xPos - IMG_SIZE / 2, 0);
   const centeredY = Math.max(yPos - IMG_SIZE / 2, 0);
 
-  // handling end of screen
+  // handling going out of end of screen
   const x = Math.min(centeredX, screenWidth - IMG_SIZE);
   const y = Math.min(centeredY, screenHeight - IMG_SIZE);
 
