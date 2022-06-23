@@ -18,6 +18,7 @@
         "@typescript-eslint/parser": "^5.29.0",
         "eslint": "^8.18.0",
         "eslint-config-airbnb-base": "^15.0.0",
+        "eslint-config-airbnb-typescript": "^17.0.0",
         "eslint-plugin-import": "^2.26.0",
         "nodemon": "^2.0.16",
         "ts-loader": "^9.3.0",

@@ -1,8 +1,6 @@
 import WebSocket from 'ws'
 import { httpServer } from './server'
-import robot from 'robotjs'
-import { getNewMousePosition } from './utils/getNewMousePosition'
-import { handleDraw } from './utils/handleDraw'
+import { handleMessage } from './utils/handleMessage'
 
 export const startWsServer = (): WebSocket.Server => {
     function onConnect(wsClient: WebSocket) {
@@ -11,29 +9,7 @@ export const startWsServer = (): WebSocket.Server => {
             console.log('user send message')
             const parsedMessage = message.toString()
             console.log(parsedMessage)
-            switch (true) {
-                case parsedMessage === 'mouse_position': {
-                    const { x, y } = robot.getMousePos()
-                    wsClient.send(`mouse_position ${[x, y]}`)
-                    break
-                }
-                case parsedMessage.startsWith('mouse_'): {
-                    const { x, y } = robot.getMousePos()
-                    const [newX, newY] = getNewMousePosition(parsedMessage, x, y)
-                    wsClient.send('mouse_move')
-                    robot.moveMouse(newX, newY)
-                    break
-                }
-                case parsedMessage.startsWith('draw_'): {
-                    wsClient.send(parsedMessage)
-                    handleDraw(parsedMessage)
-                    break
-                }
-                default:
-                    wsClient.send('unknow_command')
-                    console.log('unknow command')
-                    break
-            }
+            wsClient.send(handleMessage(parsedMessage))
         })
         wsClient.on('close', () => {
             console.log('user disconnected')
