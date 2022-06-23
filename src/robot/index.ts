@@ -1,47 +1,52 @@
 import robot from 'robotjs';
-import type { IMousePosition, IScreen } from '../interfaces';
+import type { IMousePosition } from '../interfaces';
 
-const screen: IScreen = robot.getScreenSize();
 let mouse: IMousePosition = robot.getMousePos();
+
 export async function circle(radius: number) {
-  console.log(screen);
-  console.log(mouse);
-  const upCord: number = mouse.y - radius;
-  const downCord: number = mouse.y + radius;
-  const rightCord: number = mouse.x + radius;
-  const leftCord: number = mouse.x - radius;
-  console.log(
-    'up y =',
-    upCord,
-    ' , right x =',
-    rightCord,
-    ' , down y =',
-    downCord,
-    ' , left x =',
-    leftCord
-  );
+  const xValues: number[] = [mouse.x];
+
+  const yValues: number[] = [mouse.y];
+
+  for (let i = 0; i < 360; i++) {
+    xValues[i] = mouse.x + radius * Math.cos((2 * Math.PI * i) / 360);
+    yValues[i] = mouse.y + radius * Math.sin((2 * Math.PI * i) / 360);
+  }
+
+  for (let i = 0; i < 360; i++) {
+    const x: number | undefined = xValues[i];
+    const y: number | undefined = yValues[i];
+    if (x && y) {
+      robot.dragMouse(x, y);
+    }
+  }
 }
+
 export async function square(x: number, y: number) {
   if (x && y) {
-    // SUCCESS
     if (x !== y) {
       y = x;
     }
+
     rightMouse(x);
 
     mouse = { ...robot.getMousePos() };
 
     downMouse(y);
+
     mouse = { ...robot.getMousePos() };
+
     leftMouse(y);
+
     mouse = { ...robot.getMousePos() };
+
     upMouse(y);
+
     mouse = { ...robot.getMousePos() };
   }
 }
 
 export async function rectangle(x: number, y?: number) {
-  // SUCCESS
   if (!y) y = x + 200;
   if (x === y) y += 100;
   if (x + 50 >= y) y += 50;
