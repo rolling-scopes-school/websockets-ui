@@ -16,7 +16,7 @@ wss.on("connection", function connection(ws) {
     async function message() {
       const data = stream.read();
       console.log("received: %s", data);
-      const newData = await handleMessages(data.toString(), stream);
+      const newData = await handleMessages(data.toString());
       stream.write(newData);
     }
   );
