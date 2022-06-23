@@ -12,12 +12,14 @@
   "keywords": [],
   "license": "ISC",
   "devDependencies": {
-    "nodemon": "^2.0.16",
+    "@types/node": "^18.0.0",
+    "@types/ws": "^8.5.3",
     "@typescript-eslint/eslint-plugin": "^5.28.0",
-    "@typescript-eslint/parser": "^5.28.0"
+    "@typescript-eslint/parser": "^5.28.0",
+    "nodemon": "^2.0.16",
+    "prettier": "^2.7.1"
   },
   "dependencies": {
-    "@types/node": "^18.0.0",
     "@types/uuid": "^8.3.4",
     "jimp": "^0.16.1",
     "robotjs": "^0.6.0",
