@@ -1,12 +1,14 @@
 import { createWebSocketStream, WebSocketServer } from "ws";
 import { handleMessages } from "./utils/handleMessages";
 import "dotenv/config";
+import { displayMessage } from "./utils/displayMessage";
 
 const PORT = Number(process.env.BACK_PORT) || 8080;
 const wss = new WebSocketServer({ port: PORT });
 
 wss.on("connection", function connection(ws) {
-  console.log(`Start websocket on the ${PORT} port!`);
+  
+  displayMessage(`Start websocket on the ${PORT} port!`);
   const stream = createWebSocketStream(ws, {
     encoding: "utf8",
     decodeStrings: false,
@@ -19,12 +21,12 @@ wss.on("connection", function connection(ws) {
   });
 
   ws.on("close", () => {
-    console.log("Websocket completed");
+    displayMessage("Websocket completed");
     process.exit(0);
   });
 });
 
 wss.on("close", () => {
-  console.log("WebSocketServer completed");
+  displayMessage("WebSocketServer completed");
   process.exit(0);
 });
