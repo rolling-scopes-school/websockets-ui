@@ -8,7 +8,8 @@
     "start": "start npm run start:front && start npm run start:back",
     "start:front": "node ./index.js",
     "start:back": "cd back && npm run start:prod",
-    "start:dev": "nodemon ./index.js"
+    "start:devfront": "nodemon ./index.js",
+    "start:devback": "cd back && npm run start:dev"
   },
   "author": "Andrei Auchynnikau",
   "keywords": [],
