@@ -14,3 +14,10 @@ Thumbs.db
 
 # Logs
 npm-debug.log
+
+# dotenv environment variables file
+.env
+.env.test
+
+# build / generate output
+dist
