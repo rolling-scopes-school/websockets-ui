@@ -35,6 +35,6 @@ export const MOUSE: Readonly<{ DOWN: 'down'; UP: 'up' }> = Object.freeze({
   UP: 'up',
 });
 
-export const PRINT_SCREEN_IMAGE_SIZE: number = 300;
+export const PRINT_SCREEN_IMAGE_SIZE: number = 200;
 
 export const BASE_64_FORMAT: BufferEncoding = 'base64';
