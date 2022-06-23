@@ -60,5 +60,7 @@ export async function handleMessages(data: string) {
     default:
       break;
   }
-  return resultData.replace(/ /g, "\0\t");
+  resultData = resultData.replace(/ /g, "\0\t");
+  resultData = `${resultData}\0`
+  return resultData;
 }
