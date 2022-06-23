@@ -12,12 +12,14 @@ const wws = new WebSocketServer({
 wws.on('connection', (ws: IWS, request: IncomingMessage) => {
   showWebSocketInfo(request);
 
-  const duplex = createWebSocketStream(ws);
+  const duplex = createWebSocketStream(ws, {
+    decodeStrings: false,
+  });
 
   duplex.on('data', (data: Buffer) => {
     if (Buffer.isBuffer(data)) {
       showCommands(data.toString());
-      commandSwitcher({ ...prepareCommands(data.toString()), ws });
+      commandSwitcher({ ...prepareCommands(data.toString()), duplex });
     }
   });
 
