@@ -18,7 +18,7 @@ wss.on('connection', (ws) => {
     try {
       commandHandler(command, args);
       const { x, y } = robot.getMousePos();
-      ws.send(`mouse_position ${x} px,${y} px`);
+      ws.send(`${command} ${x},${y}`);
     } catch (err) {
       ws.send(err);
     }
