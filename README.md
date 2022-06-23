@@ -20,9 +20,9 @@ default ports:
 
 **Production**
 
-open 2 separate windows:
+open 2 separate windows with one command:
 
-`npm run start` 
+- `npm run start` 
 
 open 2 servers in different windows
 
@@ -48,6 +48,7 @@ Command | Mode | Description
 `npm run start:front` | prod | Front served @ `http://localhost:3000`
 `npm run start:devback` | dev | Back served @ `http://localhost:8080`
 `npm run start:devfront` | dev | Front served @ `http://localhost:3000`
+---
 
 **Note**: replace `npm` with `yarn` in `package.json` if you use yarn.
 
