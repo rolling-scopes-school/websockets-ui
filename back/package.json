@@ -15,7 +15,9 @@
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
-    "start:dev": "nodemon ./index.ts"
+    "build": "npx tsc",
+    "start:dev": "nodemon ./index.ts",
+    "start:prod": "npm run build && node dist/index.js"
   },
   "author": "anna-left",
   "license": "ISC",

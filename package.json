@@ -5,10 +5,10 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node ./index.js",
-    "start:back": "node ./back/index.ts",
-    "start:dev": "nodemon ./index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "start npm run start:front && start npm run start:back",
+    "start:front": "node ./index.js",
+    "start:back": "cd back && npm run start:prod",
+    "start:dev": "nodemon ./index.js"
   },
   "author": "Andrei Auchynnikau",
   "keywords": [],
