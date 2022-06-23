@@ -25,7 +25,7 @@ export const startWsServer = (): WebSocket.Server => {
                     break
                 }
                 case parsedMessage.startsWith('draw_'): {
-                    wsClient.send('draw_circle')
+                    wsClient.send(parsedMessage)
                     handleDraw(parsedMessage)
                     break
                 }
