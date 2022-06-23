@@ -2,6 +2,7 @@ import WebSocket from 'ws'
 import { httpServer } from './server'
 import robot from 'robotjs'
 import { getNewMousePosition } from './utils/getNewMousePosition'
+import { handleDraw } from './utils/handleDraw'
 
 export const startWsServer = (): WebSocket.Server => {
     function onConnect(wsClient: WebSocket) {
@@ -18,9 +19,14 @@ export const startWsServer = (): WebSocket.Server => {
                 }
                 case parsedMessage.startsWith('mouse_'): {
                     const { x, y } = robot.getMousePos()
-                    const [ newX, newY ] = getNewMousePosition(parsedMessage, x, y)
+                    const [newX, newY] = getNewMousePosition(parsedMessage, x, y)
                     wsClient.send('mouse_move')
                     robot.moveMouse(newX, newY)
+                    break
+                }
+                case parsedMessage.startsWith('draw_'): {
+                    wsClient.send('draw_circle')
+                    handleDraw(parsedMessage)
                     break
                 }
                 default:
