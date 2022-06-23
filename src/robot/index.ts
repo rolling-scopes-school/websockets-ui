@@ -4,6 +4,7 @@ import type { IMousePosition } from '../interfaces';
 let mouse: IMousePosition = robot.getMousePos();
 
 export async function circle(radius: number) {
+  mouse = robot.getMousePos();
   const xValues: number[] = [mouse.x];
 
   const yValues: number[] = [mouse.y];
@@ -22,31 +23,20 @@ export async function circle(radius: number) {
   }
 }
 
-export async function square(x: number, y: number) {
-  if (x && y) {
-    if (x !== y) {
-      y = x;
-    }
-
-    rightMouse(x);
-
-    mouse = { ...robot.getMousePos() };
-
-    downMouse(y);
-
-    mouse = { ...robot.getMousePos() };
-
-    leftMouse(y);
-
-    mouse = { ...robot.getMousePos() };
-
-    upMouse(y);
-
-    mouse = { ...robot.getMousePos() };
-  }
+export async function square(x: number) {
+  mouse = robot.getMousePos();
+  rightMouse(x);
+  mouse = { ...robot.getMousePos() };
+  downMouse(x);
+  mouse = { ...robot.getMousePos() };
+  leftMouse(x);
+  mouse = { ...robot.getMousePos() };
+  upMouse(x);
+  mouse = { ...robot.getMousePos() };
 }
 
-export async function rectangle(x: number, y?: number) {
+export async function rectangle(x: number, y: number) {
+  mouse = robot.getMousePos();
   if (!y) y = x + 200;
   if (x === y) y += 100;
   if (x + 50 >= y) y += 50;
