@@ -1,4 +1,3 @@
-import Jimp from 'jimp';
 import { httpServer } from './src/http_server/index';
 import robot from 'robotjs';
 import { WebSocketServer } from 'ws';
@@ -16,7 +15,7 @@ wss.on('connection', (ws) => {
   ws.on('message', (data: any) => {
     const [command, ...args] = data.toString().split(' ');
     try {
-      commandHandler(command, args);
+      commandHandler(command, args, ws);
       const { x, y } = robot.getMousePos();
       ws.send(`${command} ${x},${y}`);
     } catch (err) {
