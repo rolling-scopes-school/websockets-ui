@@ -12,6 +12,7 @@ class Rectangle {
     const [width, height]: number[] = rectangleProps;
     const mouse: IMousePosition = this.robot.getMousePos();
     this.robot.setMouseDelay(DELAY.CUSTOM);
+    this.robot.mouseClick();
     this.robot.mouseToggle(MOUSE.DOWN);
     this.robot.dragMouse(mouse.x + width, mouse.y);
     this.robot.dragMouse(mouse.x + width, mouse.y + height);

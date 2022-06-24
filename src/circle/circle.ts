@@ -11,6 +11,7 @@ class Circle {
   drawCircle(radius: number): void {
     const mousePos: IMousePosition = this.robot.getMousePos();
     this.robot.setMouseDelay(DELAY.DEFAULT);
+    this.robot.mouseClick();
     this.robot.moveMouse(mousePos.x + radius, mousePos.y);
     this.robot.mouseToggle(MOUSE.DOWN);
 

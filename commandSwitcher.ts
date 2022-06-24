@@ -43,7 +43,7 @@ export const commandSwitcher = ({
       break;
 
     case COMMANDS.MOUSE_POSITION:
-      duplex.write(`${COMMANDS.MOUSE_POSITION} ${JSON.stringify(position)})}`);
+      duplex.write(`${COMMANDS.MOUSE_POSITION} ${position.x},${position.y}`);
       break;
 
     case COMMANDS.DRAW_CIRCLE:
