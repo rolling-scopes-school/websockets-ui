@@ -1,7 +1,7 @@
 import { httpServer } from './src/http_server';
 import 'dotenv/config';
 
-const HTTP_PORT: string = process.env.FRONT_PORT;
+const HTTP_PORT: string | number = process.env.FRONT_PORT || 3000;
 
 httpServer.listen(HTTP_PORT);
 

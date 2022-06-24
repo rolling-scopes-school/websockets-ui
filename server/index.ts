@@ -6,7 +6,7 @@ import { IncomingMessage } from 'http';
 import 'dotenv/config';
 
 const wws = new WebSocketServer({
-  port: process.env.SERVER_PORT,
+  port: process.env.SERVER_PORT || 8080,
 });
 
 wws.on('connection', (ws: IWS, request: IncomingMessage) => {
