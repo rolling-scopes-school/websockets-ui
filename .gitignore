@@ -4,6 +4,7 @@
 
 # System Files
 .DS_Store
+.env
 Thumbs.db
 [Dd]esktop.ini
 
