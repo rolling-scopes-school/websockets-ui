@@ -1,4 +1,4 @@
-import { COMMANDS } from './constants';
+import { COMMANDS, NULL_TERMINATED } from './constants';
 import robot from 'robotjs';
 import Mouse from './src/mouse/mouse';
 import Capture from './src/capture/capture';
@@ -43,7 +43,7 @@ export const commandSwitcher = ({
       break;
 
     case COMMANDS.MOUSE_POSITION:
-      duplex.write(`${COMMANDS.MOUSE_POSITION} ${position.x},${position.y}`);
+      duplex.write(`${COMMANDS.MOUSE_POSITION} ${position.x},${position.y}${NULL_TERMINATED}`);
       break;
 
     case COMMANDS.DRAW_CIRCLE:

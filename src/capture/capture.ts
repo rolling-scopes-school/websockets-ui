@@ -1,7 +1,7 @@
 import { IMousePosition } from '../../interfaces';
 import Jimp from 'jimp';
 import { Bitmap } from 'robotjs';
-import { BASE_64_FORMAT, COMMANDS, PRINT_SCREEN_IMAGE_SIZE } from '../../constants';
+import { BASE_64_FORMAT, COMMANDS, NULL_TERMINATED, PRINT_SCREEN_IMAGE_SIZE } from '../../constants';
 
 class Capture {
   private robot;
@@ -52,7 +52,7 @@ class Capture {
     const transformImage = Capture.transformImageColor(img);
     const base64: string = Capture.transformToPNGBuffer(transformImage);
 
-    return `${COMMANDS.PRINT_SCREEN} ${base64}`;
+    return `${COMMANDS.PRINT_SCREEN} ${base64}${NULL_TERMINATED}`;
   }
 }
 
