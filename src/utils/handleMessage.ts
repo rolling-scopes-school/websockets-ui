@@ -1,7 +1,7 @@
 import robot from 'robotjs'
 import { getNewMousePosition } from './getNewMousePosition'
 import { handleDraw } from './handleDraw'
-import { captureScreen } from './handleScreen'
+import { captureScreen } from './captureScreen'
 
 export const handleMessage = async (parsedMessage: string) => {
     switch (true) {
