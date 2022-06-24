@@ -5,10 +5,12 @@ import { handleMessage } from './utils/handleMessage'
 export const startWsServer = (): WebSocket.Server => {
     function onConnect(wsClient: WebSocket) {
         console.log(`Client connected`)
+
         const duplex: Duplex = createWebSocketStream(wsClient, {
             encoding: 'utf8',
             decodeStrings: false
         })
+
         const writeStream = new Writable({
             async write(data, encoding, callback) {
                 const parsedMessage = data.toString('utf8').trim()
@@ -19,6 +21,7 @@ export const startWsServer = (): WebSocket.Server => {
                 callback()
             }
         })
+        
         duplex.pipe(writeStream)
     }
 
@@ -28,8 +31,10 @@ export const startWsServer = (): WebSocket.Server => {
 
     wsServer.on('connection', onConnect)
 
-    wsServer.on('close', () => {
-        console.log('user disconnected')
+    process.on('SIGINT', () => {
+        console.log('\nserver closes connections before shut down.\n')
+        wsServer.close()
+        process.exit()
     })
 
     return wsServer
