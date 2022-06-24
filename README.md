@@ -2,13 +2,19 @@
 > Implementation of the remote control server part using the RobotJS library and a web socket.
 
 ## Installation
-1. `git clone https://github.com/anna-left/remote-control`
+1. `git clone` https://github.com/anna-left/remote-control
 2. `cd remote-control`
 3. `git checkout develop`
 4. `npm install`
 
+---
+
+## Demo
+https://youtu.be/iV38Y3DmpC8
+
+---
+
 ## Usage
-**Development**
 
 You can change the launch ports in the file .env
 
