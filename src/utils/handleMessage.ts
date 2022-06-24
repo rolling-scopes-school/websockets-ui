@@ -1,8 +1,9 @@
 import robot from 'robotjs'
 import { getNewMousePosition } from './getNewMousePosition'
 import { handleDraw } from './handleDraw'
+import { captureScreen } from './handleScreen'
 
-export const handleMessage = (parsedMessage: string) => {
+export const handleMessage = async (parsedMessage: string) => {
     switch (true) {
         case parsedMessage === 'mouse_position': {
             const { x, y } = robot.getMousePos()
@@ -17,6 +18,11 @@ export const handleMessage = (parsedMessage: string) => {
         case parsedMessage.startsWith('draw_'): {
             handleDraw(parsedMessage)
             return parsedMessage
+        }
+        case parsedMessage === 'prnt_scrn': {
+            console.log(parsedMessage)
+            const result = await captureScreen()
+            return result
         }
         default:
             return 'unknow command'

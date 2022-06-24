@@ -1,24 +1,25 @@
-import WebSocket from 'ws'
-import { httpServer } from './server'
+import WebSocket, { WebSocketServer } from 'ws'
 import { handleMessage } from './utils/handleMessage'
 
 export const startWsServer = (): WebSocket.Server => {
     function onConnect(wsClient: WebSocket) {
         console.log(`Client connected`)
-        wsClient.on('message', (message: WebSocket.MessageEvent) => {
+        wsClient.on('message', async (message: WebSocket.MessageEvent) => {
             console.log('user send message')
             const parsedMessage = message.toString()
             console.log(parsedMessage)
-            wsClient.send(handleMessage(parsedMessage))
+            const result = await handleMessage(parsedMessage)
+            wsClient.send(result)
         })
         wsClient.on('close', () => {
             console.log('user disconnected')
         })
     }
 
-    const wsServer = new WebSocket.WebSocketServer({
-        server: httpServer,
+    const wsServer = new WebSocketServer({
+        port: 8080
     })
+
 
     wsServer.on('connection', onConnect)
 
