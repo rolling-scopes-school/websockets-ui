@@ -26,6 +26,7 @@ module.exports = {
     'no-use-before-define': 'off',
     'no-param-reassign': 'off',
     'prefer-destructuring': 'off',
+    'no-new': 'off',
   },
   settings: {
     'import/parsers': {
