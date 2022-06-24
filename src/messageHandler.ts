@@ -1,12 +1,16 @@
 import { RawData, WebSocket } from "ws";
-import { getMousePos, moveMouse, mouseToggle } from 'robotjs';
+import { getMousePos, moveMouse } from 'robotjs';
 import { drawRectangle } from "./drawRectangle";
+import { drawCircle } from "./drawCircle";
 
 export const messageHandler = (data: RawData, instant: WebSocket) => {
   const dataString = data.toString();
   const [command, firstProp, secondProp] = dataString.split(' ');
 
   const [commandType, commandName] = command.split('_');
+
+  const firstDigit = Number(firstProp);
+  const secondDigit = Number(secondProp);
 
   const {x, y} = getMousePos();
   if(commandType === 'mouse') {
@@ -15,16 +19,16 @@ export const messageHandler = (data: RawData, instant: WebSocket) => {
         instant.send(`mouse_position ${x},${y}`)
         break;
       case 'up':
-        moveMouse(x, y - Number(firstProp))
+        moveMouse(x, y - firstDigit)
         break;
       case 'down':
-        moveMouse(x, y + Number(firstProp))
+        moveMouse(x, y + firstDigit)
         break;
       case 'left':
-        moveMouse(x - Number(firstProp), y)
+        moveMouse(x - firstDigit, y)
         break;
       case 'right':
-        moveMouse(x + Number(firstProp), y)
+        moveMouse(x + firstDigit, y)
         break;
     }
   } 
@@ -34,19 +38,23 @@ export const messageHandler = (data: RawData, instant: WebSocket) => {
       case 'square':
         drawRectangle({
           coordinates: {x, y},
-          bias: {x: Number(firstProp)}
+          bias: {x: firstDigit}
         })
         break;
       
-      case 'rectangle': {
+      case 'rectangle': 
         drawRectangle({
           coordinates: {x, y},
           bias: {
-            x: Number(firstProp), 
-            y: Number(secondProp)
+            x: firstDigit, 
+            y: secondDigit,
           }
         })
-      }
+        break;
+      
+      case 'circle': 
+        drawCircle({x, y}, firstDigit)
+        break;
     }
   }
 
