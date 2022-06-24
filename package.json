@@ -1,17 +1,16 @@
 {
-    "name": "ws_task",
+    "name": "remote_control",
     "version": "1.0.0",
     "description": "Template for the WebSocket remote control task",
     "main": "index.ts",
-    "type": "commonjs",
     "scripts": {
-        "start": "node index.ts",
+        "start": "ts-node index.ts & ts-node ./server/index.ts",
         "start:dev": "npm run start:server & npm run start:client",
         "format": "npx prettier --write .",
         "start:client": "nodemon index.ts",
         "start:server": "nodemon server/index.ts"
     },
-    "author": "Andrei Auchynnikau",
+    "author": "Alexey Krukovich",
     "keywords": [],
     "license": "ISC",
     "devDependencies": {
