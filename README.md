@@ -1,4 +1,4 @@
-# RSSchool NodeJS websocket task template
+# RSSchool NodeJS websocket task
 
 > Static http server and base task packages.
 
@@ -15,21 +15,14 @@
 
 `npm run start:dev`
 
-- App served @ `http://localhost:8181` with nodemon
+- Frontend served @ `http://localhost:3000` with nodemon
+- Websockets served @ `http://localhost:8080` with nodemon
 
 **Production**
 
 `npm run start`
 
-- App served @ `http://localhost:8181` without nodemon
-
----
-
-**All commands**
-
-| Command         | Description                                          |
-| --------------- | ---------------------------------------------------- |
-| `npm run dev`   | App served @ `http://localhost:8181` with nodemon    |
-| `npm run start` | App served @ `http://localhost:8181` without nodemon |
+- Frontend served @ `http://localhost:3000` without nodemon
+- Websockets served @ `http://localhost:8080` without nodemon
 
 **Note**: replace `npm` with `yarn` in `package.json` if you use yarn.
