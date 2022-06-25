@@ -1,7 +1,7 @@
 {
     "name": "nodejs_remotecontrol_task",
     "version": "1.0.0",
-    "description": "WebSocket remote control task",
+    "description": "WebSocket remote control task ",
     "main": "index.js",
     "scripts": {
         "start": "npx ts-node servers"
