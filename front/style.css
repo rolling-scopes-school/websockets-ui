@@ -1,0 +1,5 @@
+.ant-card-body > span,
+.ant-space-item:last-child .ant-card-body > div:nth-child(2),
+.ant-space-item:nth-child(1) .ant-card-body > div:last-child > div:last-child {
+  font-family: monospace;
+}

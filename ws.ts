@@ -5,11 +5,38 @@ import jimp from 'jimp';
 const socket = new WebSocket('ws://localhost:8080');
 const wss = new WebSocketServer({ port: 8080 });
 
+const screenCaptureToFile2 = (robotScreenPic: robot.Bitmap, ws: WebSocket.WebSocket) => {
+  return new Promise(async (resolve: any, reject) => {
+      try {
+          const image = new jimp(robotScreenPic.width, robotScreenPic.height);
+          let pos = 0;
+          image.scan(0, 0, image.bitmap.width, image.bitmap.height, (x, y, idx) => {
+              image.bitmap.data[idx + 2] = robotScreenPic.image.readUInt8(pos++);
+              image.bitmap.data[idx + 1] = robotScreenPic.image.readUInt8(pos++);
+              image.bitmap.data[idx + 0] = robotScreenPic.image.readUInt8(pos++);
+              image.bitmap.data[idx + 3] = robotScreenPic.image.readUInt8(pos++);
+          });
+          let base64: string | string[] = await image.getBase64Async(jimp.MIME_PNG);
+
+          base64 = base64.split(',')
+          base64.shift();
+          base64 = base64.join();
+          
+          ws.send(`prnt_scrn ${base64}`);
+
+      } catch (e) {
+          console.error(e);
+          reject(e);
+      }
+  });
+}
+
+
 const drawCircle = (radius: string) => {
   console.log(100 + radius);
   const mousePos = robot.getMousePos();
 
-  for (let i = 0; i <= Math.PI * 2; i += 0.01 * Math.PI) {
+  for (let i = 0; i <= Math.PI * 2 + 0.1; i += 0.1) {
     robot.mouseToggle('down');
 
     const x = mousePos.x - 100 + +radius * Math.cos(i);
@@ -59,6 +86,10 @@ const drawRectangle = (value: string) => {
 };
 
 
+wss.on('headers', (data) => {
+  console.log(data);
+});
+
 wss.on('connection', (ws) => {
   const duplex = createWebSocketStream(ws, {
     encoding: 'utf-8',
@@ -67,13 +98,23 @@ wss.on('connection', (ws) => {
 
   duplex.on('data', (chunk) => {
     const [command, value] = chunk.toString().split(' ');
+    let mouse = robot.getMousePos();
+
+    switch(command){
+      case 'mouse_up':
+        let limitValue = +value;
+        limitValue > mouse.y ? (limitValue = mouse.y - 1) : limitValue;
+        robot.moveMouse(mouse.x, mouse.y - limitValue);
+        duplex.write(`${command}\0`);
+    }
 
     if (command === 'mouse_position') {
       let { x, y } = robot.getMousePos();
       const message = `mouse_position ${x},${y}`;
-      duplex.write(message, 'utf-8');
+      duplex.write(`${command} ${x},${y}\0`);
     }
   });
+
 
   console.log('New user');
   const screenSize = robot.getScreenSize();
@@ -84,11 +125,12 @@ wss.on('connection', (ws) => {
     const [command, value] = [dataArray.shift(), dataArray.join(' ')];
     let mouse = robot.getMousePos();
 
-    if (command === 'mouse_up') {
-      let limitValue = +value;
-      limitValue > mouse.y ? (limitValue = mouse.y - 1) : limitValue;
-      robot.moveMouse(mouse.x, mouse.y - limitValue);
-    } else if (command === 'mouse_down' && mouse.y < screenSize.height - 25) {
+    // if (command === 'mouse_up') {
+    //   let limitValue = +value;
+    //   limitValue > mouse.y ? (limitValue = mouse.y - 1) : limitValue;
+    //   robot.moveMouse(mouse.x, mouse.y - limitValue);
+    // } else 
+    if (command === 'mouse_down' && mouse.y < screenSize.height - 25) {
       robot.moveMouse(mouse.x, mouse.y + +value);
     } else if (command === 'mouse_left') {
       let limitValue = +value;
@@ -107,15 +149,9 @@ wss.on('connection', (ws) => {
       robot.mouseToggle('up');
     } else if (command === "prnt_scrn") {
       var bitMap = robot.screen.capture(mouse.x, mouse.y, 200, 200);
-      const img = new jimp(200, 200);
-      img.bitmap.data = bitMap.image;
-      let base64: string | string[] = await img.getBase64Async(jimp.MIME_PNG);
+      screenCaptureToFile2(bitMap, ws)
 
-      base64 = base64.split(',')
-      base64.shift();
-      base64 = base64.join();
-
-      ws.send(`prnt_scrn ${base64}`);
+      // ws.send(`prnt_scrn ${base64}`);
     }
   });
   ws.send(`hello`);
@@ -128,3 +164,12 @@ wss.on('error', (error) => {
 wss.on('close', () => {
   console.log('close');
 });
+
+process.on( "SIGINT", function() {
+  console.log( "\ngracefully shutting down from SIGINT (Crtl-C)" );
+  
+  socket.close();
+
+  process.exit();
+} );
+
