@@ -1,31 +1,37 @@
 import { RawData, WebSocket } from "ws";
 import { getMousePos, moveMouse } from 'robotjs';
-import { drawRectangle } from "./drawRectangle";
-import { drawCircle } from "./drawCircle";
 
-export const messageHandler = (data: RawData, instant: WebSocket) => {
+import { drawRectangle, drawCircle, prntScreen } from "./utils";
+
+export const messageHandler = async (data: RawData, instant: WebSocket) => {
   const dataString = data.toString();
   const [command, firstProp, secondProp] = dataString.split(' ');
 
   const [commandType, commandName] = command.split('_');
-
   const firstDigit = Number(firstProp);
   const secondDigit = Number(secondProp);
 
   const {x, y} = getMousePos();
+
+  let payload:string;
+
+  const instantSend = (payload: string = '') => {
+    instant.send(`${commandType}_${commandName} ${payload} \0`)
+  }
+
   if(commandType === 'mouse') {
     switch(commandName) {
       case 'position':
-        instant.send(`mouse_position ${x},${y}`)
+        payload = `${x},${y}`;
         break;
       case 'up':
-        moveMouse(x, y - firstDigit)
+        moveMouse(x, y - firstDigit);
         break;
       case 'down':
-        moveMouse(x, y + firstDigit)
+        moveMouse(x, y + firstDigit);
         break;
       case 'left':
-        moveMouse(x - firstDigit, y)
+        moveMouse(x - firstDigit, y);
         break;
       case 'right':
         moveMouse(x + firstDigit, y)
@@ -58,5 +64,10 @@ export const messageHandler = (data: RawData, instant: WebSocket) => {
     }
   }
 
+  if(commandType === 'prnt') {
+    const base64 = await prntScreen({x, y});
+    payload = base64;
+  }
 
+  instantSend(payload);
 }

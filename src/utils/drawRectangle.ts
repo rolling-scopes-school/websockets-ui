@@ -1,7 +1,8 @@
 import { mouseToggle, moveMouse } from "robotjs";
-import { DrawRectangleType } from "./types";
 
-export const drawRectangle = ({
+import { DrawRectangleType } from "../types";
+
+const drawRectangle = ({
   coordinates: {x, y},
   bias, 
 }:DrawRectangleType) => {
@@ -17,3 +18,5 @@ export const drawRectangle = ({
   mouseToggle('up');
 
 }
+
+export default drawRectangle;

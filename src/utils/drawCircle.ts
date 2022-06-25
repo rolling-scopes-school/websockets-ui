@@ -1,10 +1,10 @@
 import { mouseToggle, moveMouse } from "robotjs";
 
-import { Coordinates } from "./types";
+import { Coordinates } from "../types";
 
 const STEP = 0.02;
 
-export const drawCircle = (coordinates:Coordinates, radius: number) => {
+const drawCircle = (coordinates:Coordinates, radius: number) => {
 
   for (let i = 0; i <= Math.PI * 2; i += STEP) {
     if(i === STEP) {
@@ -19,3 +19,5 @@ export const drawCircle = (coordinates:Coordinates, radius: number) => {
   mouseToggle('up');
 
 }
+
+export default drawCircle;
