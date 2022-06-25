@@ -1,20 +1,21 @@
 {
-    "name": "nodejs_remotecontrol_task",
-    "version": "1.0.0",
-    "description": "WebSocket remote control task ",
-    "main": "index.js",
-    "scripts": {
-        "start": "npx ts-node servers"
-      },
-    "author": "PAVEL BOBRYESHEV",
-    "keywords": [],
-    "license": "ISC",
-    "dependencies": {
-        "@types/node": "^17.0.42",
-        "@types/ws": "^8.5.3",
-        "jimp": "^0.16.1",
-        "robotjs": "^0.6.0",
-        "ts-node": "^10.8.1",
-        "ws": "^8.8.0"
-      }
+  "name": "remotecontrol",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx ts-node index",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^17.0.42",
+    "@types/ws": "^8.5.3",
+    "jimp": "^0.16.1",
+    "robotjs": "^0.6.0",
+    "ts-node": "^10.8.1",
+    "ws": "^8.8.0"
+  }
 }
