@@ -1,4 +1,3 @@
-import WebSocket from "ws";
 import { messages } from "./messages.js";
 import { routes } from "./router.js";
 import { Duplex } from "stream";

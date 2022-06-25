@@ -9,15 +9,17 @@ export function drawSquare(length: number) {
   robot.moveMouseSmooth(x, y);
   robot.mouseToggle("up");
 }
+
 export function drawRectangle(length: number, width: number) {
   const { x, y } = robot.getMousePos();
   robot.mouseToggle("down");
-  robot.moveMouseSmooth(x + length, y);
-  robot.moveMouseSmooth(x + length, y + width);
-  robot.moveMouseSmooth(x, y + width);
+  robot.moveMouseSmooth(x + width, y);
+  robot.moveMouseSmooth(x + width, y + length);
+  robot.moveMouseSmooth(x, y + length);
   robot.moveMouseSmooth(x, y);
   robot.mouseToggle("up");
 }
+
 export function drawCircle(radius: number) {
   const { x, y } = robot.getMousePos();
   robot.mouseToggle("down");

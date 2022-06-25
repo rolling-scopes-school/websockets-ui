@@ -6,11 +6,11 @@ export async function printScreen() {
   const { x: xPos, y: yPos } = robot.getMousePos();
   const { width: screenWidth, height: screenHeight } = robot.getScreenSize();
 
-  // centering and handling going out of start of screen
+  // centering and handling going out of start bounds of screen
   const centeredX = Math.max(xPos - IMG_SIZE / 2, 0);
   const centeredY = Math.max(yPos - IMG_SIZE / 2, 0);
 
-  // handling going out of end of screen
+  // handling going out of end bounds of screen
   const x = Math.min(centeredX, screenWidth - IMG_SIZE);
   const y = Math.min(centeredY, screenHeight - IMG_SIZE);
 
@@ -32,7 +32,7 @@ export async function printScreen() {
 function captureImage({ x, y, w, h }: { x: number; y: number; w: number; h: number }) {
   const pic = robot.screen.capture(x, y, w, h);
 
-  const width = pic.byteWidth / pic.bytesPerPixel; // pic.width is sometimes wrong!
+  const width = pic.byteWidth / pic.bytesPerPixel;
   const height = pic.height;
   const image = new Jimp(width, height);
 

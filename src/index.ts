@@ -1,8 +1,8 @@
-import { httpServer } from "./src/http_server/index.js";
-import { startWebsocketsServer } from "./src/ws-server.js";
+import { httpServer } from "./http_server/index.js";
+import { startWebsocketsServer } from "./ws-server/server.js";
 import "dotenv/config";
 
-const HTTP_PORT = Number(process.env.HTTP_PORT) || 3000;
+const HTTP_PORT = Number(process.env.HTTP_PORT) || 3000
 const WS_PORT = Number(process.env.WS_PORT) || 8080;
 
 httpServer.listen(HTTP_PORT);
