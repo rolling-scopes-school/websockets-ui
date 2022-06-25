@@ -16,21 +16,19 @@ https://youtu.be/iV38Y3DmpC8
 
 ## Usage
 
-You can change the launch ports in the file .env
+launch ports:
 
-default ports:
+`FRONT: 3000`
 
-`FRONT_PORT=3000`
-
-`BACK_PORT=8080`
+`BACK: 8080`
 
 **Production**
 
-open 2 separate windows with one command:
+to open 2 separate windows with one command:
 
 - `npm run start` 
 
-open 2 servers in different windows
+to open 2 servers in different windows
 
 - `npm run start:front` 
 
