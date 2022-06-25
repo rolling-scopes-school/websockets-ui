@@ -16,6 +16,7 @@
         "nodemon": "^2.0.16"
     },
     "dependencies": {
+        "dotenv": "^16.0.1",
         "jimp": "^0.16.1",
         "robotjs": "^0.6.0",
         "ws": "^8.8.0"
