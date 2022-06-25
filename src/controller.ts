@@ -1,8 +1,9 @@
 import WebSocket from "ws";
 import { messages } from "./messages.js";
 import { routes } from "./router.js";
+import { Duplex } from "stream";
 
-export async function controller(connection: WebSocket.WebSocket, request: string) {
+export async function controller(duplex: Duplex, request: string) {
   try {
     const [commandName, ...parameters] = request.split(" ");
     const command = routes[commandName];
@@ -10,8 +11,8 @@ export async function controller(connection: WebSocket.WebSocket, request: strin
     if (!command) throw new Error(messages.ROUTE_NOT_FOUND);
 
     const output = await command(...parameters);
-    connection.send(`${commandName}${output ? output : ""}\0`);
+    duplex.write(`${commandName}${output ? output : ""}\0`);
   } catch (error) {
-    connection.send(String(error));
+    duplex.write(String(error));
   }
 }
