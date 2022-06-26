@@ -11,6 +11,7 @@ Thumbs.db
 .idea/
 *.PEM
 .vscode/
+/dist
 
 # Logs
 npm-debug.log
