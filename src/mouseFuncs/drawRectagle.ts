@@ -1,5 +1,7 @@
 import robot from 'robotjs';
 import { WebSocket } from 'ws';
+import { createClietCommand } from '../utils';
+import constants from '../constants';
 
 const drawReactagle = (socket: WebSocket, param1: string, param2: string) => {
   const width = Number(param1);
@@ -38,7 +40,7 @@ const drawReactagle = (socket: WebSocket, param1: string, param2: string) => {
     robot.dragMouse(x, y);
   }
 
-  socket.send('draw_rectangle\0');
+  socket.send(createClietCommand(constants.DRAW_RECTANGLE));
 };
 
 export default drawReactagle;
