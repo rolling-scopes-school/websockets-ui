@@ -1,14 +1,10 @@
 import robot from 'robotjs';
-// import fs from 'fs';
-// import Jimp from 'jimp';
+import { IMousePosition } from '../interfaces'
 
-interface IMousePosition{
-  x: number, y: number 
-}
 // Add speed for for slow drawing
 const SPEED = 75;
 let mouse: IMousePosition = robot.getMousePos();
-
+// TODO: refactor drawSquare method using Promice + then
 export const drawSquare = (x: number): void =>{
   mouse = robot.getMousePos();
   rightMouse(x);
@@ -59,3 +55,25 @@ const upMouse = (coord: number): void => {
     robot.moveMouseSmooth(x, i, SPEED);
   }
 }
+
+export const drawRectangle = (x: number, y: number): void =>{
+  mouse = robot.getMousePos();
+  rightMouse(x);
+  mouse = robot.getMousePos();
+  downMouse(y);
+  mouse = robot.getMousePos();
+  leftMouse(x);
+  mouse = robot.getMousePos();
+  upMouse(y);
+ }
+
+export const drawCircle = (radius: number) => {
+  mouse = robot.getMousePos();
+
+  for (let i = 0; i <= Math.PI * 2 + 0.1; i += 0.01) {
+    const x = mouse.x + (radius * Math.cos(i));
+    const y = mouse.y + (radius * Math.sin(i));
+    robot.dragMouse(x, y);
+    robot.mouseToggle('down');
+  }
+};
