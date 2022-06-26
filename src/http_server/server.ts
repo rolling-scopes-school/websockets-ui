@@ -1,6 +1,6 @@
-import fs from "fs";
-import http from "http";
-import path from "path";
+import * as fs from "fs";
+import * as http from "http";
+import * as path from "path";
 
 export const httpServer = http.createServer((req, res) => {
   const __dirname = path.resolve(path.dirname(""));
@@ -8,9 +8,9 @@ export const httpServer = http.createServer((req, res) => {
     __dirname + (req.url === "/" ? "/front/index.html" : "/front" + req.url);
 
   try {
-    const stream = fs.createReadStream(file_path);
+    const readStream = fs.createReadStream(file_path);
     res.writeHead(200);
-    stream.pipe(res);
+    readStream.pipe(res);
   } catch (error) {
     res.writeHead(404);
     res.end(JSON.stringify(error));

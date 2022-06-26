@@ -1,30 +1,26 @@
 # RSSchool NodeJS websocket task template
+
 > Static http server and base task packages.
 
 ## Installation
+
 1. Clone/download repo
 2. `npm install`
 
 ## Usage
-**Development**
-
-`npm run start:dev`
-
-* App served @ `http://localhost:8181` with nodemon
-
-**Production**
-
-`npm run start`
-
-* App served @ `http://localhost:8181` without nodemon
-
----
 
 **All commands**
 
-Command | Description
---- | ---
-`npm run dev` | App served @ `http://localhost:8181` with nodemon
-`npm run start` | App served @ `http://localhost:8181` without nodemon
+- Move mouse_up (↑ arrow on keyboard)
+- Move mouse_down (↓ arrow)
+- Move mouse_right (→ arrow)
+- Move mouse_left (← arrow)
+- Send mouse coordinates ("p" key)
+- Draw circle ("c" key)
+- Draw rectangle ("r" key)
+- Draw square ("s" key)
 
-**Note**: replace `npm` with `yarn` in `package.json` if you use yarn.
+**Production**
+
+In development mode: npm run start:dev
+In product mode: npm run start
