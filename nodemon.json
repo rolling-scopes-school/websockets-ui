@@ -1,0 +1,6 @@
+{
+  "events": {
+    "start": "cls || clear"
+  },
+  "watch": ["./src/**/*"]
+}
