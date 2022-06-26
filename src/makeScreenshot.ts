@@ -1,5 +1,5 @@
-import robot from 'robotjs';
 import Jimp from 'jimp';
+import robot from 'robotjs';
 import WebSocket from 'ws';
 
 export const makeScreenshot = async (ws: WebSocket) => {
@@ -15,5 +15,5 @@ export const makeScreenshot = async (ws: WebSocket) => {
 
   const response = await image.getBase64Async(Jimp.MIME_PNG);
 
-  ws.send(`prnt_scrn ${response.split(';base64,')[1]}`);
+  ws.send(`prnt_scrn ${response.split(';base64,')[1] || ''}`);
 };
