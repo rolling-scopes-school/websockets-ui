@@ -15,6 +15,7 @@ import {
   left,
 } from './src/mouseFuncs';
 import printScreen from './src/screen/printScreen';
+import constants from './src/constants';
 
 const { pid, env }: { pid: number; env: object } = process;
 const { PORT, WSPORT }: any = env;
@@ -30,43 +31,44 @@ const wss = new WebSocketServer({ port: WSPORT });
 
 wss.on('connection', (ws: WebSocket) => {
   ws.send('open');
-  sendCoords(ws);
+  const { x, y } = robot.getMousePos();
+  const msg: string =
+    constants.MOUSE_POSITION + ' ' + x + 'px' + ',' + y + 'px';
+  sendCoords(ws, msg);
 
   ws.on('message', async (data: Buffer) => {
     const input = String(data);
     const [command, param1, param2] = input.split(' ');
 
     switch (command) {
-      case 'mouse_position':
+      case constants.MOUSE_POSITION:
         const { x, y } = robot.getMousePos();
-        const msg: string = 'mouse_position' + '_x_' + x + '_y_' + y;
-        return makeOperations(msg, sendCoords(ws));
-      case 'mouse_up':
+        const msg: string =
+          constants.MOUSE_POSITION + ' ' + x + 'px' + ',' + y + 'px';
+        return makeOperations(msg, sendCoords(ws, msg));
+      case constants.MOUSE_UP:
         return makeOperations(input, up(ws, param1));
-      case 'mouse_down':
+      case constants.MOUSE_DOWN:
         return makeOperations(input, down(ws, param1));
-      case 'mouse_right':
+      case constants.MOUSE_RIGHT:
         return makeOperations(input, right(ws, param1));
-      case 'mouse_left':
+      case constants.MOUSE_LEFT:
         return makeOperations(input, left(ws, param1));
-      case 'draw_circle':
+      case constants.DRAW_CIRCLE:
         return makeOperations(input, drawCircle(ws, param1));
-      case 'draw_square':
+      case constants.DRAW_SQAURE:
         return makeOperations(input, drawSquare(ws, param1));
-      case 'draw_rectangle':
+      case constants.DRAW_RECTANGLE:
         return makeOperations(input, drawReactagle(ws, param1, param2));
-      case 'prnt_scrn':
-        return makeOperations(
-          'prnt_scrn base64 string (png buf)',
-          printScreen(ws)
-        );
+      case constants.PRINT_SCREEN:
+        return makeOperations(constants.PRINT_SCREN_SETTINGS, printScreen(ws));
       default:
         write(`Unknown input: ${input}`);
     }
   });
 
   ws.on('close', () => {
-    ws.send('closed\0');
+    ws.send('closed');
     write('Websocket closed');
     ws.close();
   });

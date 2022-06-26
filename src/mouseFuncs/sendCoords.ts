@@ -1,10 +1,9 @@
 import robot from 'robotjs';
 import { WebSocket } from 'ws';
+import { createClietCommand } from '../utils';
 
-const sendCoords = (ws: WebSocket) => {
-  const { x, y } = robot.getMousePos();
-  const msg: string = `mouse_position ${x}px,${y}px`;
-  ws.send(msg);
+const sendCoords = (socket: WebSocket, msg: string) => {
+  return socket.send(createClietCommand(msg));
 };
 
 export default sendCoords;

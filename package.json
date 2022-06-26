@@ -4,7 +4,7 @@
     "description": "Template for the WebSocket remote control task",
     "main": "index.js",
     "scripts": {
-        "start": "tsc && node dist/index.js",
+        "start": "tsc && node build/index.js",
         "start:dev": "nodemon ./index.ts"
     },
     "author": "Andrei Auchynnikau, Vitalii Iakunin",
