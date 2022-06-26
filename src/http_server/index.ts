@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import * as http from 'http';
+import { createServer, IncomingMessage, ServerResponse } from 'http';
 
-export const httpServer = http.createServer(function (req, res) {
+export const httpServer = createServer((req: IncomingMessage, res: ServerResponse) => {
     const __dirname = path.resolve(path.dirname(''));
     const file_path = __dirname + (req.url === '/' ? '/front/index.html' : '/front' + req.url);
     fs.readFile(file_path, function (err, data) {
