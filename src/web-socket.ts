@@ -2,8 +2,10 @@ import { Duplex, Writable } from 'stream'
 import WebSocket, { createWebSocketStream, WebSocketServer } from 'ws'
 import { handleMessage } from './utils/handleMessage'
 
+const port = 8080
+
 export const startWsServer = (): WebSocket.Server => {
-    function onConnect(wsClient: WebSocket) {
+    const onConnect = (wsClient: WebSocket) => {
         console.log(`Client connected`)
 
         const duplex: Duplex = createWebSocketStream(wsClient, {
@@ -21,13 +23,15 @@ export const startWsServer = (): WebSocket.Server => {
                 callback()
             }
         })
-        
+
         duplex.pipe(writeStream)
     }
 
     const wsServer = new WebSocketServer({
-        port: 8080
+        port
     })
+
+    console.log(`Start static websocket server on the ${port} port!`)
 
     wsServer.on('connection', onConnect)
 

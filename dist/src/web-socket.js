@@ -13,12 +13,10 @@ exports.startWsServer = void 0;
 const stream_1 = require("stream");
 const ws_1 = require("ws");
 const handleMessage_1 = require("./utils/handleMessage");
+const port = 8080;
 const startWsServer = () => {
-    function onConnect(wsClient) {
+    const onConnect = (wsClient) => {
         console.log(`Client connected`);
-        wsClient.on('disconnect', function () {
-            console.log('gg');
-        });
         const duplex = (0, ws_1.createWebSocketStream)(wsClient, {
             encoding: 'utf8',
             decodeStrings: false
@@ -36,24 +34,15 @@ const startWsServer = () => {
             }
         });
         duplex.pipe(writeStream);
-    }
+    };
     const wsServer = new ws_1.WebSocketServer({
-        port: 8080
+        port
     });
-    wsServer.on('request', function (request) {
-        const connection = request.accept(null, request.origin);
-        // connection.on('message', function(message) {
-        //  console.log('Received Message:', message.utf8Data);
-        //  connection.sendUTF('Hi this is WebSocket server!');
-        // });
-        connection.on('close', function () {
-            console.log('Client has disconnected.');
-        });
+    console.log(`Start static websocket server on the ${port} port!`);
+    wsServer.on('headers', (data) => {
+        console.log(data);
     });
     wsServer.on('connection', onConnect);
-    wsServer.on('request', () => {
-        console.log('request');
-    });
     process.on('SIGINT', () => {
         console.log('\nserver closes connections before shut down.\n');
         wsServer.close();
