@@ -19,4 +19,5 @@ export const drawRectangle = (value: string) => {
 
     robot.dragMouse(x, y);
   });
+  robot.mouseToggle('up');
 };
