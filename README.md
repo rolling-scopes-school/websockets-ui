@@ -30,7 +30,7 @@
 **All commands**
 
 | Command         | Description                                          |
-| --------------- |------------------------------------------------------|
+| --------------- | ---------------------------------------------------- |
 | `npm run dev`   | App served @ `http://localhost:8080` with nodemon    |
 | `npm run start` | App served @ `http://localhost:8080` without nodemon |
 

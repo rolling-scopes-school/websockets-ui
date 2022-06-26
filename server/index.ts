@@ -31,3 +31,11 @@ wws.on('connection', (ws: IWS, request: IncomingMessage) => {
     reportError({ message: getErrorMessage(event) });
   });
 });
+
+process.on('SIGINT', () => {
+  wws.clients.forEach((socket) => {
+    socket.close();
+  });
+  console.log('connection closed');
+  process.exit();
+});
