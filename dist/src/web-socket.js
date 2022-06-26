@@ -39,9 +39,6 @@ const startWsServer = () => {
         port
     });
     console.log(`Start static websocket server on the ${port} port!`);
-    wsServer.on('headers', (data) => {
-        console.log(data);
-    });
     wsServer.on('connection', onConnect);
     process.on('SIGINT', () => {
         console.log('\nserver closes connections before shut down.\n');
