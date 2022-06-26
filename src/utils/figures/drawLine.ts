@@ -1,35 +1,40 @@
 import robot from 'robotjs'
 
 export const drawLine = (length: number, destination: string) => {
-    const mousePos = robot.getMousePos()
-    robot.mouseToggle('down', 'left')
-    switch (destination) {
-        case 'right': {
-            for (let i = 0; i < length; i += 1) {
-                robot.dragMouse(mousePos.x + i, mousePos.y)
+    try {
+        const mousePos = robot.getMousePos()
+        robot.mouseToggle('down', 'left')
+        switch (destination) {
+            case 'right': {
+                for (let i = 0; i < length; i += 1) {
+                    robot.dragMouse(mousePos.x + i, mousePos.y)
+                }
+                break
             }
-            break
-        }
-        case 'down': {
-            for (let i = 0; i < length; i += 1) {
-                robot.dragMouse(mousePos.x, mousePos.y + i)
+            case 'down': {
+                for (let i = 0; i < length; i += 1) {
+                    robot.dragMouse(mousePos.x, mousePos.y + i)
+                }
+                break
             }
-            break
-        }
-        case 'left': {
-            for (let i = 0; i < length; i += 1) {
-                robot.dragMouse(mousePos.x - i, mousePos.y)
+            case 'left': {
+                for (let i = 0; i < length; i += 1) {
+                    robot.dragMouse(mousePos.x - i, mousePos.y)
+                }
+                break
             }
-            break
-        }
-        case 'up': {
-            for (let i = 0; i < length; i += 1) {
-                robot.dragMouse(mousePos.x, mousePos.y - i)
+            case 'up': {
+                for (let i = 0; i < length; i += 1) {
+                    robot.dragMouse(mousePos.x, mousePos.y - i)
+                }
+                break
             }
-            break
+            default:
+                break
         }
-        default:
-            break
+        robot.mouseToggle('up', 'left')
     }
-    robot.mouseToggle('up', 'left')
+    catch (e) {
+        console.log('drawLine error', e)
+    }
 }

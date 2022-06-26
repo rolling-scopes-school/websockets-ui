@@ -6,36 +6,41 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.drawLine = void 0;
 const robotjs_1 = __importDefault(require("robotjs"));
 const drawLine = (length, destination) => {
-    const mousePos = robotjs_1.default.getMousePos();
-    robotjs_1.default.mouseToggle('down', 'left');
-    switch (destination) {
-        case 'right': {
-            for (let i = 0; i < length; i += 1) {
-                robotjs_1.default.dragMouse(mousePos.x + i, mousePos.y);
+    try {
+        const mousePos = robotjs_1.default.getMousePos();
+        robotjs_1.default.mouseToggle('down', 'left');
+        switch (destination) {
+            case 'right': {
+                for (let i = 0; i < length; i += 1) {
+                    robotjs_1.default.dragMouse(mousePos.x + i, mousePos.y);
+                }
+                break;
             }
-            break;
-        }
-        case 'down': {
-            for (let i = 0; i < length; i += 1) {
-                robotjs_1.default.dragMouse(mousePos.x, mousePos.y + i);
+            case 'down': {
+                for (let i = 0; i < length; i += 1) {
+                    robotjs_1.default.dragMouse(mousePos.x, mousePos.y + i);
+                }
+                break;
             }
-            break;
-        }
-        case 'left': {
-            for (let i = 0; i < length; i += 1) {
-                robotjs_1.default.dragMouse(mousePos.x - i, mousePos.y);
+            case 'left': {
+                for (let i = 0; i < length; i += 1) {
+                    robotjs_1.default.dragMouse(mousePos.x - i, mousePos.y);
+                }
+                break;
             }
-            break;
-        }
-        case 'up': {
-            for (let i = 0; i < length; i += 1) {
-                robotjs_1.default.dragMouse(mousePos.x, mousePos.y - i);
+            case 'up': {
+                for (let i = 0; i < length; i += 1) {
+                    robotjs_1.default.dragMouse(mousePos.x, mousePos.y - i);
+                }
+                break;
             }
-            break;
+            default:
+                break;
         }
-        default:
-            break;
+        robotjs_1.default.mouseToggle('up', 'left');
     }
-    robotjs_1.default.mouseToggle('up', 'left');
+    catch (e) {
+        console.log('drawLine error', e);
+    }
 };
 exports.drawLine = drawLine;

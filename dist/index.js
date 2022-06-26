@@ -5,4 +5,9 @@ const web_socket_1 = require("./src/web-socket");
 const httpPort = 3000;
 console.log(`Start static http server on the ${httpPort} port!`);
 server_1.httpServer.listen(httpPort);
+// try {
 (0, web_socket_1.startWsServer)();
+// }
+// catch(e) {
+//     console.log('error', e)
+// }

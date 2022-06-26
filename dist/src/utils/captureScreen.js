@@ -33,17 +33,22 @@ const getValidatedMousePos = (currentMousePos, direction, size) => {
     return result;
 };
 const captureScreen = () => __awaiter(void 0, void 0, void 0, function* () {
-    const { x, y } = robotjs_1.default.getMousePos();
-    const { width: maxX, height: maxY } = robotjs_1.default.getScreenSize();
-    const size = 200;
-    let newX = getValidatedMousePos(x, 'x', size);
-    let newY = getValidatedMousePos(y, 'y', size);
-    const bitmap = robotjs_1.default.screen.capture(newX, newY, size, size);
-    const img = new jimp_1.default(size * 2, size * 2);
-    img.bitmap.data = bitmap === null || bitmap === void 0 ? void 0 : bitmap.image;
-    const buffer = yield img.getBufferAsync(jimp_1.default.MIME_PNG);
-    const base64String = buffer.toString('base64');
-    const result = 'prnt_scrn ' + base64String;
-    return result;
+    try {
+        const { x, y } = robotjs_1.default.getMousePos();
+        const { width: maxX, height: maxY } = robotjs_1.default.getScreenSize();
+        const size = 200;
+        let newX = getValidatedMousePos(x, 'x', size);
+        let newY = getValidatedMousePos(y, 'y', size);
+        const bitmap = robotjs_1.default.screen.capture(newX, newY, size, size);
+        const img = new jimp_1.default(size * 2, size * 2);
+        img.bitmap.data = bitmap === null || bitmap === void 0 ? void 0 : bitmap.image;
+        const buffer = yield img.getBufferAsync(jimp_1.default.MIME_PNG);
+        const base64String = buffer.toString('base64');
+        const result = 'prnt_scrn ' + base64String;
+        return result;
+    }
+    catch (e) {
+        console.log('captureScreen error', e);
+    }
 });
 exports.captureScreen = captureScreen;

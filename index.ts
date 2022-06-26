@@ -7,4 +7,10 @@ const httpPort = 3000
 
 console.log(`Start static http server on the ${httpPort} port!`)
 httpServer.listen(httpPort)
-startWsServer()
+
+// try {
+    startWsServer()
+// }
+// catch(e) {
+//     console.log('error', e)
+// }

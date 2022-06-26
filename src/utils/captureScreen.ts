@@ -19,16 +19,21 @@ const getValidatedMousePos = (currentMousePos: number, direction: string, size: 
 }
 
 export const captureScreen = async () => {
-        const { x, y } = robot.getMousePos()
-        const { width: maxX, height: maxY } = robot.getScreenSize()
-        const size = 200
-        let newX = getValidatedMousePos(x, 'x', size)
-        let newY = getValidatedMousePos(y, 'y', size)
-        const bitmap = robot.screen.capture(newX, newY, size, size)
-        const img = new Jimp(size * 2, size * 2)
-        img.bitmap.data = bitmap?.image
-        const buffer = await img.getBufferAsync(Jimp.MIME_PNG)
-        const base64String = buffer.toString('base64')
-        const result = 'prnt_scrn ' + base64String
-        return result
+        try {
+                const { x, y } = robot.getMousePos()
+                const { width: maxX, height: maxY } = robot.getScreenSize()
+                const size = 200
+                let newX = getValidatedMousePos(x, 'x', size)
+                let newY = getValidatedMousePos(y, 'y', size)
+                const bitmap = robot.screen.capture(newX, newY, size, size)
+                const img = new Jimp(size * 2, size * 2)
+                img.bitmap.data = bitmap?.image
+                const buffer = await img.getBufferAsync(Jimp.MIME_PNG)
+                const base64String = buffer.toString('base64')
+                const result = 'prnt_scrn ' + base64String
+                return result
+        }
+        catch (e) {
+                console.log('captureScreen error', e)
+        }
 }

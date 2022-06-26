@@ -2,12 +2,12 @@ import robot from 'robotjs'
 import { getNewMousePosition } from './getNewMousePosition'
 import { handleDraw } from './handleDraw'
 import { captureScreen } from './captureScreen'
+import { getMousePosition } from './getMousePosition'
 
 export const handleMessage = async (parsedMessage: string) => {
     switch (true) {
         case parsedMessage === 'mouse_position': {
-            const { x, y } = robot.getMousePos()
-            return `mouse_position ${[x, y]}`
+            return `mouse_position ${getMousePosition()}`
         }
         case parsedMessage.startsWith('mouse_'): {
             const { x, y } = robot.getMousePos()

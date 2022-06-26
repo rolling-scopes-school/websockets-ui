@@ -17,11 +17,11 @@ const robotjs_1 = __importDefault(require("robotjs"));
 const getNewMousePosition_1 = require("./getNewMousePosition");
 const handleDraw_1 = require("./handleDraw");
 const captureScreen_1 = require("./captureScreen");
+const getMousePosition_1 = require("./getMousePosition");
 const handleMessage = (parsedMessage) => __awaiter(void 0, void 0, void 0, function* () {
     switch (true) {
         case parsedMessage === 'mouse_position': {
-            const { x, y } = robotjs_1.default.getMousePos();
-            return `mouse_position ${[x, y]}`;
+            return `mouse_position ${(0, getMousePosition_1.getMousePosition)()}`;
         }
         case parsedMessage.startsWith('mouse_'): {
             const { x, y } = robotjs_1.default.getMousePos();
