@@ -1,0 +1,15 @@
+// {
+//     "compilerOptions": {
+//       "target": "ES6",
+//       "module": "Node16",
+//       "moduleResolution": "Node",
+//       "resolveJsonModule": true,
+//       "strict": true,
+//       "esModuleInterop": true,
+//       "noImplicitAny": true,
+//       "skipLibCheck": true,
+//       "outDir": "./dist",
+//     },
+//     "include": ["src/**/*"],
+//     "exclude": ["node_modules"]
+//   } 
