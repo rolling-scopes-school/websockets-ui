@@ -3,7 +3,6 @@ import httpServer from './http_server';
 // import robot from 'robotjs';
 import startWebSocketServer from './websocket_server';
 import './config';
-import './robot';
 
 const HTTP_PORT: string | undefined = process.env.PORT;
 
