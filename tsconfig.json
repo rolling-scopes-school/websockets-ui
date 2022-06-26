@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+      "types": ["node"],
+      "target": "es2020",
+      "lib": [
+        "es2020"
+      ],
+      "outDir": "./dist",
+      "moduleResolution": "node",
+      "removeComments": true,
+      "esModuleInterop": true,
+      "forceConsistentCasingInFileNames": true,
+      "module": "commonjs",
+  
+      "declaration": true,
+      "incremental": true,
+      "emitDecoratorMetadata": true,
+      "experimentalDecorators": true,
+      "allowSyntheticDefaultImports": true,
+      "resolveJsonModule": true,
+  
+      "strict": true,
+      "noImplicitAny": true,
+      "skipLibCheck": true
+    },
+  }
