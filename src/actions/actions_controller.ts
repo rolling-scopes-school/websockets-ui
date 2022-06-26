@@ -1,6 +1,4 @@
 import robot from 'robotjs';
-import { Duplex } from 'stream';
-import { WebSocketServer } from 'ws';
 import { drawCircle, drawSquare, drawRectangle } from './drawing';
 import { printScreen } from './print_screen';
 
