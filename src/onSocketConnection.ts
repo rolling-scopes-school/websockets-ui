@@ -3,21 +3,19 @@ import { Transform } from 'stream';
 
 import { messageHandler } from "./messageHandler";
 
-// const onSocketConnection = (instant: WebSocket) => {
-//   const duplex = createWebSocketStream(instant, { encoding: 'utf8' });
-//   const transform = new Transform({
-//     transform: async (chunk, encoding, callback) => {
-//       console.log({chunk});
-      
-//         const transformed = await messageHandler(chunk);
-//         console.log({transformed});
-        
-//         callback(null, transformed)
-//     }
-//   })
+const onSocketConnection = (instant: WebSocket) => {
+  const duplex = createWebSocketStream(instant, { encoding: 'utf8', decodeStrings: false });
+  const transform = new Transform({
+    transform: async (chunk, _, callback) => {
+      const transformed = await messageHandler(chunk);
+      callback(null, transformed)
+    }
+  })
 
-//   duplex.pipe(transform);
-//   transform.pipe(duplex);
-// }
+  duplex.pipe(transform);
+  transform.on('data', (data) => {
+    instant.send(data.toString())
+  })
+}
 
-// export default onSocketConnection;
+export default onSocketConnection;

@@ -1,9 +1,9 @@
-import { RawData, WebSocket } from "ws";
+import { RawData } from "ws";
 import { getMousePos, moveMouse } from 'robotjs';
 
 import { drawRectangle, drawCircle, prntScreen } from "./utils";
 
-export const messageHandler = async (data: RawData, instant: WebSocket) => {
+export const messageHandler = async (data: RawData) => {
   const dataString = data.toString();
   const [command, firstProp, secondProp] = dataString.split(' ');
 
@@ -14,10 +14,6 @@ export const messageHandler = async (data: RawData, instant: WebSocket) => {
   const {x, y} = getMousePos();
 
   let payload:string;
-
-  const instantSend = (payload: string = '') => {
-    instant.send(`${commandType}_${commandName} ${payload} \0`)
-  }
 
   if(commandType === 'mouse') {
     switch(commandName) {
@@ -69,5 +65,5 @@ export const messageHandler = async (data: RawData, instant: WebSocket) => {
     payload = base64;
   }
 
-  instantSend(payload);
+  return `${commandType}_${commandName} ${payload || ''} \0`;
 }
