@@ -6,7 +6,6 @@ export function startWebsocketsServer(port: number) {
   wss.on("connection", function connection(ws: WebSocket.WebSocket) {
     const duplex = createWebSocketStream(ws, { encoding: "utf8", decodeStrings: false });
     duplex.on("data", async function message(data) {
-      console.log("received: %s", data.toString());
       await controller(duplex, data.toString());
     });
   });
