@@ -35,8 +35,7 @@ export async function handleMessages(data: string) {
 
     case ActionsEnum.Mouse_position:
       const mousePos = robot.getMousePos();
-      resultData = `${action} {${mousePos.x} px}, {${mousePos.y} px}`;
-      break;
+      return `mouse_position ${mousePos.x}px,${mousePos.y}px`;
 
     case ActionsEnum.Draw_rectangle:
       resultData = `${action} {${size1} px}, {${size2} px}`;
