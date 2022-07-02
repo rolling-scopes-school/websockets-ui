@@ -1,9 +1,7 @@
-import Jimp from 'jimp';
-import {httpServer} from './src/http_server/index.js';
-import robot from 'robotjs';
-import { WebSocketServer } from 'ws';
-
-const HTTP_PORT = 3000;
-
-console.log(`Start static http server on the ${HTTP_PORT} port!`);
-httpServer.listen(HTTP_PORT);
+"use strict";
+exports.__esModule = true;
+var index_js_1 = require("./src/http_server/index.js");
+var HTTP_PORT = 3000;
+var WS_PORT = 8080;
+console.log("Start static http server on the ".concat(HTTP_PORT, " port!"));
+index_js_1.httpServer.listen(HTTP_PORT);
