@@ -1,4 +1,4 @@
-# RSSchool NodeJS websocket task template
+# NodeJS Websocket Remote Control
 > Static http server and base task packages. 
 > By default WebSocket client tries to connect to the 8080 port.
 

@@ -1,0 +1,7 @@
+{
+    "execMap": {
+        "ts": "ts-node"
+    },
+    "ignore":[".git", ".idea", "node_modules", "dist"],
+    "ext": "ts"
+}
