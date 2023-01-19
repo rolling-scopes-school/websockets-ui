@@ -1,14 +1,15 @@
 import { WebSocketServer, WebSocket, createWebSocketStream } from 'ws';
-import { handleCommand } from './handler/command';
+import { handleCommand, parseCommand } from './command/commandHandler';
+import log from '../shared/logger';
 
 const wsServer = (port: number) => {
   const server = new WebSocketServer({ port });
 
   server.on('connection', (ws: WebSocket) => {
-    console.log('New connection');
+    log('New connection');
 
     ws.on('close', () => {
-      console.log('Connection closed');
+      log('Connection closed!');
     });
 
     const duplex = createWebSocketStream(ws, {
@@ -22,15 +23,18 @@ const wsServer = (port: number) => {
 
     duplex.on('data', async (data: string) => {
       try {
-        console.log(data);
+        log(data);
 
         const response = await handleCommand(data);
+
         duplex.write(response);
-      } catch (error: unknown) {
+      } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : 'Unknown error';
 
-        console.log('Error: ', errorMessage);
+        log(`Error: ${errorMessage}`);
+
+        duplex.write(`error`);
       }
     });
   });

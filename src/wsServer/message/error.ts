@@ -1,3 +1,3 @@
-const COMMAND_NOT_FOUND = 'command_not_found';
+const COMMAND_NOT_FOUND = 'Command not found';
 
 export { COMMAND_NOT_FOUND };

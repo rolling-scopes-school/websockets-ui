@@ -1,11 +1,12 @@
 import { mouse, down, up, left, right } from '@nut-tree/nut-js';
 import parseStep from '../../parser/stepParser';
-import { MouseMoveDtoResponseType, MouseMoveType } from './mouseType';
+import { MouseMoveResultType } from './type/mouseActionType';
+import MouseMoveType from './type/mouseMoveType';
 
 const mouseMove = async (
   direction: MouseMoveType,
   args: string[],
-): Promise<MouseMoveDtoResponseType> => {
+): Promise<MouseMoveResultType> => {
   const step = parseStep(args);
 
   await mouse.move(await direction(step));
@@ -13,19 +14,19 @@ const mouseMove = async (
   return { step };
 };
 
-const mouseUp = async (args: string[]): Promise<MouseMoveDtoResponseType> => {
+const mouseUp = async (args: string[]): Promise<MouseMoveResultType> => {
   return mouseMove(up, args);
 };
 
-const mouseDown = (args: string[]) => {
+const mouseDown = (args: string[]): Promise<MouseMoveResultType> => {
   return mouseMove(down, args);
 };
 
-const mouseLeft = (args: string[]) => {
+const mouseLeft = (args: string[]): Promise<MouseMoveResultType> => {
   return mouseMove(left, args);
 };
 
-const mouseRight = (args: string[]) => {
+const mouseRight = (args: string[]): Promise<MouseMoveResultType> => {
   return mouseMove(right, args);
 };
 
