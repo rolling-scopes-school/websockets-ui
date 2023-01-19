@@ -29,7 +29,7 @@ const execCommand = async (inputCommand) => {
         await mouse.move(left(+arrParams[1]));
         break;
       case navigationCommands.mouse_position:
-        const target = new Point(500, 350);
+        const target = new Point(0, 0);
         await mouse.setPosition(target);
         break;        
       default:
