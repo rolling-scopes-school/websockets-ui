@@ -14,7 +14,10 @@ export const parseCommand = (rawCommand: string) => {
   return parsedCommand;
 };
 
-const getCommandConfig = (action: string | undefined) => {
+const getCommandActionFromConfig = (
+  action: string | undefined,
+  args: string[],
+) => {
   assertNotEmpty(action, COMMAND_NOT_FOUND);
 
   if (!(action in commandConfig)) {
@@ -25,17 +28,17 @@ const getCommandConfig = (action: string | undefined) => {
 
   assertNotEmpty(commandHandler, COMMAND_NOT_FOUND);
 
-  return commandHandler;
+  return commandHandler(args);
 };
 
 const handleCommand = async (rawCommand: string): Promise<string> => {
   const parsedCommand = parseCommand(rawCommand);
   const { action, args } = parsedCommand;
-  const command = getCommandConfig(action);
-  const result = await command.action({ ...args });
-  const response = command.formatResponse(result);
+  const commandAction = getCommandActionFromConfig(action, args);
 
-  return response;
+  const result = await commandAction.execute();
+
+  return result;
 };
 
 export { handleCommand };

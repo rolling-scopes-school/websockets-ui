@@ -1,9 +1,7 @@
+import ActionInterface from '../action/ActionInterface';
+
 type CommandConfigType = {
-  [key: string]: {
-    action: (args: string[]) => Promise<any>;
-    validate: (args: string[]) => boolean;
-    formatResponse: (result: any) => string;
-  };
+  [key: string]: (args: string[]) => ActionInterface;
 };
 
 export default CommandConfigType;
