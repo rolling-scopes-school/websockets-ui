@@ -3,11 +3,11 @@ import { COMMAND_NOT_FOUND } from '../message/error';
 import {
   mouseDown,
   mouseLeft,
-  MouseMoveDtoResponseType,
   mouseRight,
   mouseUp,
-} from '../action/mouse';
+} from '../action/mouse/mouseAction';
 import assertArrayLength from '../../shared/assert/assertArrayLength';
+import { MouseMoveDtoResponseType } from '../action/mouse/mouseType';
 
 type DtoResponseType = MouseMoveDtoResponseType;
 
@@ -34,24 +34,24 @@ const commandConfig: CommandConfigType = {
     formatResponse: (result: MouseMoveDtoResponseType) =>
       `mouse_up ${result.step}`,
   },
-  // mouse_down: {
-  //   action: async (args: string[]) => mouseDown(args),
-  //   validate: (args: string[]) => validateArgs(args, MOUSE_ARGS_LENGTH),
-  //   formatResponse: (result: MouseMoveDtoResponseType) =>
-  //     `mouse_up ${result.step}`,
-  // },
-  // mouse_left: {
-  //   action: async (args: string[]) => mouseLeft(args),
-  //   validate: (args: string[]) => validateArgs(args, MOUSE_ARGS_LENGTH),
-  //   formatResponse: (result: MouseMoveDtoResponseType) =>
-  //     `mouse_up ${result.step}`,
-  // },
-  // mouse_right: {
-  //   action: async (args: string[]) => mouseRight(args),
-  //   validate: (args: string[]) => validateArgs(args, MOUSE_ARGS_LENGTH),
-  //   formatResponse: (result: MouseMoveDtoResponseType) =>
-  //     `mouse_up ${result.step}`,
-  // },
+  mouse_down: {
+    action: async (args: string[]) => mouseDown(args),
+    validate: (args: string[]) => validateArgs(args, MOUSE_ARGS_LENGTH),
+    formatResponse: (result: MouseMoveDtoResponseType) =>
+      `mouse_down ${result.step}`,
+  },
+  mouse_left: {
+    action: async (args: string[]) => mouseLeft(args),
+    validate: (args: string[]) => validateArgs(args, MOUSE_ARGS_LENGTH),
+    formatResponse: (result: MouseMoveDtoResponseType) =>
+      `mouse_left ${result.step}`,
+  },
+  mouse_right: {
+    action: async (args: string[]) => mouseRight(args),
+    validate: (args: string[]) => validateArgs(args, MOUSE_ARGS_LENGTH),
+    formatResponse: (result: MouseMoveDtoResponseType) =>
+      `mouse_right ${result.step}`,
+  },
   // mouse_position
   // draw_circle 100
   // draw_square 100
