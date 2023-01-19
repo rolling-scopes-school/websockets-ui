@@ -2,6 +2,7 @@ import {WebSocketServer} from "ws";
 import { httpServer } from "./src/http_server/index";
 import screenShot from "./src/screenshot";
 import mouseMove from "./src/mouse_move";
+import mouseDraw from "./src/mouse_figures";
 
 const HTTP_PORT = 8181;
 
@@ -15,6 +16,7 @@ ws.on("connection", (socket) => {
             const dataFront = data.toString("utf-8")
         const moveParam = dataFront.split(" ")
         const mousePosition = await mouseMove(moveParam)
+        await mouseDraw(moveParam)
         if(moveParam[0] === "prnt_scrn"){
             const img = await screenShot()
             socket.send(img, (err: any) => {
