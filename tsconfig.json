@@ -1,0 +1,28 @@
+{
+    "compilerOptions": {
+        "target": "es2016",
+        "module": "commonjs",
+        "baseUrl": "./",
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "strict": true,
+        "noImplicitAny": false,
+        "strictNullChecks": false,
+        "skipLibCheck": true
+    },
+    "ts-node": {
+        "esm": true
+    },
+    "exclude": [
+        "node_modules",
+        "test",
+        "dist",
+        "**/*spec.ts",
+    ],
+    "include": [
+        "src", "http-server.ts", "src/http_server/index.ts", "src/http_server/remote-control.ts", "src/http_server/websocket-server.ts",
+    ]
+}
