@@ -1,7 +1,8 @@
-import { Button, down, left, mouse, Point, right, up } from '@nut-tree/nut-js';
 import AbstractDrawAction from './AbstractDrawAction';
 import { ARGS_INDEX_FIRST, ARGS_INDEX_SECOND } from '../../../shared/argsIndex';
 import assertNotEmpty from '../../../shared/assert/assertNotEmpty';
+import { RECTANGLE_ARGUMENTS_LENGTH } from './argumentsLength';
+import drawRectangle from './dratRectangle';
 
 class RectangleDrawAction extends AbstractDrawAction {
   protected x!: number;
@@ -13,7 +14,7 @@ class RectangleDrawAction extends AbstractDrawAction {
   protected length!: number;
 
   protected getArgsLength(): number {
-    return 2;
+    return RECTANGLE_ARGUMENTS_LENGTH;
   }
 
   protected parseArgs(): void {
@@ -31,23 +32,8 @@ class RectangleDrawAction extends AbstractDrawAction {
     return `draw_rectangle ${this.width} ${this.length}`;
   }
 
-  protected drawLine = async (destination: Point[]): Promise<void> => {
-    await mouse.pressButton(Button.LEFT);
-
-    await mouse.move(destination);
-
-    await mouse.releaseButton(Button.LEFT);
-  };
-
-  protected drawRectangle = async (): Promise<void> => {
-    await this.drawLine(await down(this.width));
-    await this.drawLine(await right(this.length));
-    await this.drawLine(await up(this.width));
-    await this.drawLine(await left(this.length));
-  };
-
   protected draw = async (): Promise<void> => {
-    await this.drawRectangle();
+    await drawRectangle(this.width, this.length);
   };
 }
 

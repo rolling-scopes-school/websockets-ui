@@ -1,15 +1,15 @@
 import { Button, mouse, Point, straightTo } from '@nut-tree/nut-js';
 import AbstractDrawAction from './AbstractDrawAction';
-import { ARGS_LENGTH_1 } from '../../../shared/argLength';
 import { ARGS_INDEX_FIRST } from '../../../shared/argsIndex';
 import assertNotEmpty from '../../../shared/assert/assertNotEmpty';
 import { CIRCLE_END_POSITION } from './drawingConfig';
+import { CIRCLE_ARGUMENTS_LENGTH } from './argumentsLength';
 
 class CircleDrawAction extends AbstractDrawAction {
   protected radius!: number;
 
   protected getArgsLength(): number {
-    return ARGS_LENGTH_1;
+    return CIRCLE_ARGUMENTS_LENGTH;
   }
 
   protected parseArgs(): void {
