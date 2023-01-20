@@ -1,5 +1,5 @@
 import { WebSocketServer } from 'ws';
-import { mouse, left, right, up, down, Point, getActiveWindow } from '@nut-tree/nut-js';
+import { mouse, left, right, up, down, Point, straightTo, Button } from '@nut-tree/nut-js';
 
 const navigationCommands = {
   mouse_up: 'mouse_up',
@@ -26,14 +26,36 @@ const drawRectangle = async (startPosition, lenX, lenY) => {
     await mouse.drag([new Point(startPosition.x+lenX, startPosition.y+lenX), new Point(startPosition.x, startPosition.y+lenX)]);
     await mouse.drag([new Point(startPosition.x, startPosition.y+lenX), new Point(startPosition.x, startPosition.y)]);
   }
+
+  await mouse.releaseButton(Button.LEFT);
+}
+
+const drawCircle = async (startPosition, radius) => {
+  const step = 0.01;
+  const positionX = startPosition.x + radius;
+  const limit = Math.PI * 2;
+
+  await mouse.pressButton(Button.LEFT);
+
+  for (let i = 0; i <= limit; i += step) {
+    const x = positionX - radius * Math.cos(i);
+    const y = startPosition.y - radius * Math.sin(i);
+
+    await mouse.move(straightTo(new Point(x, y)));
+  }
+
+   await mouse.releaseButton(Button.LEFT);
 }
 
 const execCommand = async (inputCommand) => {
   const arrParams = inputCommand.split(' ');
+
+  const { x: currentX, y: currentY } = await mouse.getPosition();
   const startPosition = {
-    x: 500,
-    y: 800
+    x: currentX,
+    y: currentY
   };
+
   switch (navigationCommands[arrParams[0]]) {
     case navigationCommands.mouse_up:
       await mouse.move(up(+arrParams[1]));
@@ -51,17 +73,13 @@ const execCommand = async (inputCommand) => {
       await mouse.setPosition(startPosition);
       break;
     case navigationCommands.draw_circle:
-      //console.log('getActiveWindow: ', await getActiveWindow());
-      console.log('draw_circle');
+      await drawCircle(startPosition, +arrParams[1]);
       break;
     case navigationCommands.draw_rectangle:
-      const lenX = +arrParams[1];
-      const lenY = +arrParams[2];
-      await drawRectangle(startPosition, lenX, lenY);
+      await drawRectangle(startPosition, +arrParams[1], +arrParams[2]);
       break;
     case navigationCommands.draw_square:
-      const len = +arrParams[1];
-      await drawRectangle(startPosition, len);
+      await drawRectangle(startPosition, +arrParams[1]);
       break;
     case navigationCommands.prnt_scrn:
       console.log('arrParams: ', arrParams);
@@ -78,7 +96,6 @@ wss.on('connection', function connection(ws, req) {
   ws.on('message', function message(data) {
     execCommand(data.toString());
   });
-
 });
 
 wss.on('close', () => { console.log('Disconnected!')});
