@@ -1,5 +1,5 @@
 import { WebSocketServer } from 'ws';
-import { mouse, left, right, up, down, Point, straightTo, Button } from '@nut-tree/nut-js';
+import { mouse, left, right, up, down, straightTo, Point, Button } from '@nut-tree/nut-js';
 
 const navigationCommands = {
   mouse_up: 'mouse_up',
@@ -14,17 +14,17 @@ const navigationCommands = {
 }
 
 const drawRectangle = async (startPosition, lenX, lenY) => {
-  if(lenY) {
-    await mouse.drag([new Point(startPosition.x, startPosition.y), new Point(startPosition.x+lenX, startPosition.y)]);
-    await mouse.drag([new Point(startPosition.x+lenX, startPosition.y), new Point(startPosition.x+lenX, startPosition.y+lenY)]);
-    await mouse.drag([new Point(startPosition.x+lenX, startPosition.y+lenY), new Point(startPosition.x, startPosition.y+lenY)]);
-    await mouse.drag([new Point(startPosition.x, startPosition.y+lenY), new Point(startPosition.x, startPosition.y)]);   
+  if (lenY) {
+    await mouse.drag([new Point(startPosition.x, startPosition.y), new Point(startPosition.x + lenX, startPosition.y)]);
+    await mouse.drag([new Point(startPosition.x + lenX, startPosition.y), new Point(startPosition.x + lenX, startPosition.y + lenY)]);
+    await mouse.drag([new Point(startPosition.x + lenX, startPosition.y + lenY), new Point(startPosition.x, startPosition.y + lenY)]);
+    await mouse.drag([new Point(startPosition.x, startPosition.y + lenY), new Point(startPosition.x, startPosition.y)]);
   }
   else {
-    await mouse.drag([new Point(startPosition.x, startPosition.y), new Point(startPosition.x+lenX, startPosition.y)]);
-    await mouse.drag([new Point(startPosition.x+lenX, startPosition.y), new Point(startPosition.x+lenX, startPosition.y+lenX)]);
-    await mouse.drag([new Point(startPosition.x+lenX, startPosition.y+lenX), new Point(startPosition.x, startPosition.y+lenX)]);
-    await mouse.drag([new Point(startPosition.x, startPosition.y+lenX), new Point(startPosition.x, startPosition.y)]);
+    await mouse.drag([new Point(startPosition.x, startPosition.y), new Point(startPosition.x + lenX, startPosition.y)]);
+    await mouse.drag([new Point(startPosition.x + lenX, startPosition.y), new Point(startPosition.x + lenX, startPosition.y + lenX)]);
+    await mouse.drag([new Point(startPosition.x + lenX, startPosition.y + lenX), new Point(startPosition.x, startPosition.y + lenX)]);
+    await mouse.drag([new Point(startPosition.x, startPosition.y + lenX), new Point(startPosition.x, startPosition.y)]);
   }
 
   await mouse.releaseButton(Button.LEFT);
@@ -44,7 +44,7 @@ const drawCircle = async (startPosition, radius) => {
     await mouse.move(straightTo(new Point(x, y)));
   }
 
-   await mouse.releaseButton(Button.LEFT);
+  await mouse.releaseButton(Button.LEFT);
 }
 
 const execCommand = async (inputCommand) => {
@@ -82,7 +82,7 @@ const execCommand = async (inputCommand) => {
       await drawRectangle(startPosition, +arrParams[1]);
       break;
     case navigationCommands.prnt_scrn:
-      console.log('arrParams: ', arrParams);
+      await makeScreenshot();
       break;
     default:
       console.log('Command not found');
@@ -92,10 +92,12 @@ const execCommand = async (inputCommand) => {
 
 const wss = new WebSocketServer({ port: 8080 });
 
-wss.on('connection', function connection(ws, req) {
+wss.on('connection', function connection(ws) {
   ws.on('message', function message(data) {
-    execCommand(data.toString());
+    const inputMessage = data.toString();
+    execCommand(inputMessage);
+    ws.send(inputMessage);
   });
 });
 
-wss.on('close', () => { console.log('Disconnected!')});
+wss.on('close', () => { console.log('Disconnected!') });
