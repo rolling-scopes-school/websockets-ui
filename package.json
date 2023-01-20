@@ -2,18 +2,18 @@
   "name": "ws_task",
   "version": "0.1.0",
   "description": "WebSocket remote control task",
-  "main": "index.js",
-  "type": "module",
+  "main": "src/index.ts",
   "scripts": {
     "start": "tsc && node ./dist/index.js",
-    "start:dev": "nodemon ./src/index.ts",
+    "start:dev": "nodemon",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Andrei Auchynnikau, Stanislav Kolpakov",
   "keywords": [],
   "license": "ISC",
   "devDependencies": {
-    "nodemon": "^2.0.20"
+    "nodemon": "^2.0.20",
+    "ts-loader": "^9.4.2"
   },
   "dependencies": {
     "@nut-tree/nut-js": "^2.3.0",
