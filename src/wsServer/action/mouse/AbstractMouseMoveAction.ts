@@ -1,9 +1,12 @@
-import parseStep from '../../parser/stepParser';
 import validateArgs from '../../command/commandArgsValidator';
 import ActionInterface from '../ActionInterface';
+import { ARGS_LENGTH_1 } from '../../../shared/argLength';
+import { RADIX_10 } from '../../../shared/radix';
+import { ARGS_INDEX_FIRST } from '../../../shared/argsIndex';
+import assertNotEmpty from '../../../shared/assert/assertNotEmpty';
 
 abstract class AbstractMouseMoveAction implements ActionInterface {
-  private MOUSE_ARGS_LENGTH = 1;
+  private argsLength = ARGS_LENGTH_1;
 
   protected step!: number;
 
@@ -12,13 +15,17 @@ abstract class AbstractMouseMoveAction implements ActionInterface {
   constructor(protected args: string[]) {}
 
   private validate = (): boolean => {
-    return validateArgs(this.args, this.MOUSE_ARGS_LENGTH);
+    return validateArgs(this.args, this.argsLength);
   };
 
   private formatResponse = (): string => `${this.mouseMoveType} ${this.step}`;
 
   protected processStep = (): void => {
-    this.step = parseStep(this.args);
+    const step = this.args[ARGS_INDEX_FIRST];
+
+    assertNotEmpty(step);
+
+    this.step = parseInt(step, RADIX_10);
   };
 
   protected abstract setMouseMoveType(): void;
