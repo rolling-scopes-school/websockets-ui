@@ -3,20 +3,24 @@
     "version": "1.0.0",
     "description": "Template for the WebSocket remote control task",
     "main": "index.js",
-    "type": "module",
     "scripts": {
-        "start": "node ./index.js",
-        "start:dev": "nodemon ./index.js",
+        "start": "ts-node-esm ./index.ts",
+        "start:dev": "nodemon --esm ./index.ts",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "Andrei Auchynnikau",
     "keywords": [],
     "license": "ISC",
     "devDependencies": {
-        "nodemon": "^2.0.16"
+        "@types/node": "^18.11.18",
+        "@types/ws": "^8.5.4",
+        "nodemon": "^2.0.16",
+        "ts-node": "^10.9.1",
+        "tslib": "^2.4.1",
+        "typescript": "^4.9.4"
     },
     "dependencies": {
         "@nut-tree/nut-js": "^2.3.0",
-        "ws": "^8.8.0"
+        "ws": "^8.12.0"
     }
 }
