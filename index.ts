@@ -1,8 +1,9 @@
 import { httpServer } from "./src/http_server";
 import { WebSocketServer } from 'ws';
-import { mouse, left, right, up, down, straightTo, Point, getActiveWindow } from "@nut-tree/nut-js";
+import { mouse, left, right, up, down, straightTo, Point, getActiveWindow, centerOf, Region } from "@nut-tree/nut-js";
 
-import { Command } from "./src/enums";
+import { Command, Angle } from "./src/enums";
+import { RADIAN_PER_DEGREE } from "./src/const";
 
 const HTTP_PORT = 8181;
 
@@ -39,29 +40,45 @@ wss.on('connection', async (ws) => {
         let response = '';
 
         switch (command) {
-            case (Command.MOUSE_POSITION):
+            case (Command.MOUSE_POSITION): {
                 const { x, y } = await mouse.getPosition();
                 response = `${Command.MOUSE_POSITION} ${x},${y}`;
                 break;
+            }
             case (Command.MOUSE_UP):
-                mouse.move(up(+value));
+                await mouse.move(up(+value));
                 response = command;
                 break;
             case (Command.MOUSE_DOWN):
-                mouse.move(down(+value));
+                await mouse.move(down(+value));
                 response = command;
                 break;
             case (Command.MOUSE_LEFT):
-                mouse.move(left(+value));
+                await mouse.move(left(+value));
                 response = command;
                 break;
             case (Command.MOUSE_RIGHT):
-                mouse.move(right(+value));
+                await mouse.move(right(+value));
                 response = command;
                 break;
-            case (Command.DRAW_SQUARE):
-                // await mouse.drag();
+            case (Command.DRAW_CIRCLE): {
+                const { x: x0, y } = await mouse.getPosition();
+                const points = [];
+                const y0 = y - +value;
+
+                points.push(new Point(x0, y))
+
+                for (let i = Angle.RIGHT; i !== Angle.FULL + Angle.RIGHT; i++) {
+                    const x = x0 + +value * Math.cos(i * RADIAN_PER_DEGREE);
+                    const y = y0 + +value * Math.sin(i * RADIAN_PER_DEGREE);
+                    
+                    points.push(new Point(x, y));
+                }
+                
+                await mouse.drag(points);
+                response = command;
                 break;
+            }
         }
 
         ws.send(response);

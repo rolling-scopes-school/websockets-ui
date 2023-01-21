@@ -4,5 +4,12 @@ export enum Command {
     MOUSE_DOWN = 'mouse_down',
     MOUSE_LEFT = 'mouse_left',
     MOUSE_RIGHT = 'mouse_right',
+    DRAW_CIRCLE = 'draw_circle',
+    DRAW_RECT = 'draw_rectangle',
     DRAW_SQUARE = 'draw_square',
+};
+
+export enum Angle {
+    FULL = 360,
+    RIGHT = 90
 };
