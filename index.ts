@@ -1,14 +1,16 @@
-import { httpServer } from "./src/http_server";
-import { WebSocketServer } from 'ws';
-import { mouse, left, right, up, down, straightTo, Point, getActiveWindow, centerOf, Region } from "@nut-tree/nut-js";
+import { env } from 'node:process';
+import { config } from 'dotenv';
+import { createWebSocketStream, WebSocketServer } from 'ws';
+import { getActiveWindow } from '@nut-tree/nut-js';
 
-import { Command, Angle } from "./src/enums";
-import { RADIAN_PER_DEGREE } from "./src/const";
+import { Command } from './src/enums';
+import { httpServer } from './src/http_server';
+import { Commander } from './src/commander';
 
-const HTTP_PORT = 8181;
+config();
 
-console.log(`Start static http server on the ${HTTP_PORT} port!`);
-httpServer.listen(HTTP_PORT);
+console.log(`Start static http server on the ${env.HTTP_PORT} port!`);
+httpServer.listen(env.HTTP_PORT);
 
 // (async () => {
 //     mouse.config.mouseSpeed = 2000;
@@ -19,7 +21,7 @@ httpServer.listen(HTTP_PORT);
 //     await mouse.move(down(500));
 
 //     const target = new Point(500, 350);
-    
+
 //     await mouse.move(straightTo(target));
 
 //     const newTarget = new Point(1500, 350);
@@ -27,62 +29,36 @@ httpServer.listen(HTTP_PORT);
 //     await mouse.setPosition(newTarget);
 // })();
 
-const wss = new WebSocketServer({ port: 8080 });
+const wss = new WebSocketServer({ port: +env.WSS_PORT! });
 
 wss.on('connection', async (ws) => {
-    const windowRef = await getActiveWindow();
-    const [title, region] = await Promise.all([windowRef.title, windowRef.region]);
+  const duplex = createWebSocketStream(ws, { encoding: 'utf8', decodeStrings: false });
+  const windowRef = await getActiveWindow();
+  const [title, region] = await Promise.all([
+    windowRef.title,
+    windowRef.region
+  ]);
 
-    console.log(region.toString());
+  console.log(region.toString());
 
-    ws.on('message', async (data) => {
-        const [command, value] = data.toString().split(' ');
-        let response = '';
+  duplex.on('data', (data: string) => {
+    const [command, value] = data.toString().split(' ') as [Command, string];
+    const commander = new Commander(command, +value);
+    const response = commander.getResponseMessage();
 
-        switch (command) {
-            case (Command.MOUSE_POSITION): {
-                const { x, y } = await mouse.getPosition();
-                response = `${Command.MOUSE_POSITION} ${x},${y}`;
-                break;
-            }
-            case (Command.MOUSE_UP):
-                await mouse.move(up(+value));
-                response = command;
-                break;
-            case (Command.MOUSE_DOWN):
-                await mouse.move(down(+value));
-                response = command;
-                break;
-            case (Command.MOUSE_LEFT):
-                await mouse.move(left(+value));
-                response = command;
-                break;
-            case (Command.MOUSE_RIGHT):
-                await mouse.move(right(+value));
-                response = command;
-                break;
-            case (Command.DRAW_CIRCLE): {
-                const { x: x0, y } = await mouse.getPosition();
-                const points = [];
-                const y0 = y - +value;
+    duplex.write(response);
+  });
 
-                points.push(new Point(x0, y))
+  // ws.on('message', async (data: any) => {
+  //   const [command, value] = data.toString().split(' ') as [Command, string];
+  //   const commander = new Commander(command, +value);
+  //   const response = commander.getResponseMessage();
 
-                for (let i = Angle.RIGHT; i !== Angle.FULL + Angle.RIGHT; i++) {
-                    const x = x0 + +value * Math.cos(i * RADIAN_PER_DEGREE);
-                    const y = y0 + +value * Math.sin(i * RADIAN_PER_DEGREE);
-                    
-                    points.push(new Point(x, y));
-                }
-                
-                await mouse.drag(points);
-                response = command;
-                break;
-            }
-        }
+  //   ws.send(response);
 
-        ws.send(response);
+  //   console.log('received: %s', data);
+  // });
 
-        console.log('received: %s', data);
-    });
+  duplex.pipe(process.stdout);
+  process.stdin.pipe(duplex);
 });
