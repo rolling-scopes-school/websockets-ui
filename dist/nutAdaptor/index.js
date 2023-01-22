@@ -147,10 +147,10 @@ class NutAdaptor {
                 const screenWidth = yield nut_js_1.screen.width();
                 const screenHeight = yield nut_js_1.screen.height();
                 const coords = yield nut_js_1.mouse.getPosition();
-                coords.x = Math.max(coords.x - screenShotWidth / 2, screenShotWidth / 2);
-                coords.x = Math.min(coords.x, screenWidth - screenShotWidth / 2);
-                coords.y = Math.max(coords.y - screenShotHeight / 2, screenShotHeight / 2);
-                coords.y = Math.min(coords.y, screenHeight - screenShotHeight / 2);
+                coords.x = coords.x - screenShotWidth / 2 < 0 ? screenShotWidth / 2 : coords.x;
+                coords.x = coords.x + screenShotWidth / 2 > screenWidth ? screenWidth - screenShotWidth / 2 : coords.x;
+                coords.y = coords.y - screenShotHeight / 2 < 0 ? screenShotHeight / 2 : coords.y;
+                coords.y = coords.y + screenShotHeight / 2 > screenHeight ? screenHeight - screenShotHeight / 2 : coords.y;
                 const region = new nut_js_1.Region(coords.x - screenShotWidth / 2, coords.y - screenShotHeight / 2, screenShotWidth, screenShotHeight);
                 try {
                     const { data, width, height } = yield (yield nut_js_1.screen.grabRegion(region)).toRGB();

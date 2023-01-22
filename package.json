@@ -1,6 +1,6 @@
 {
   "name": "ws_task",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "WebSocket remote control",
   "main": "src/index.ts",
   "scripts": {

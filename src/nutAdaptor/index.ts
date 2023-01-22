@@ -131,13 +131,10 @@ export class NutAdaptor {
       const screenHeight = await screen.height();
       const coords = await mouse.getPosition();
 
-      coords.x = Math.max(coords.x - screenShotWidth / 2, screenShotWidth / 2);
-      coords.x = Math.min(coords.x, screenWidth - screenShotWidth / 2);
-      coords.y = Math.max(
-        coords.y - screenShotHeight / 2,
-        screenShotHeight / 2
-      );
-      coords.y = Math.min(coords.y, screenHeight - screenShotHeight / 2);
+      coords.x = coords.x - screenShotWidth / 2 < 0 ? screenShotWidth / 2 : coords.x;
+      coords.x = coords.x + screenShotWidth / 2 > screenWidth ? screenWidth - screenShotWidth / 2 : coords.x;
+      coords.y = coords.y - screenShotHeight / 2 < 0 ? screenShotHeight / 2 : coords.y;
+      coords.y = coords.y + screenShotHeight / 2 > screenHeight ? screenHeight - screenShotHeight / 2 : coords.y;
 
       const region = new Region(
         coords.x - screenShotWidth / 2,
