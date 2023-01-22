@@ -32,7 +32,10 @@ httpServer.listen(env.HTTP_PORT);
 const wss = new WebSocketServer({ port: +env.WSS_PORT! });
 
 wss.on('connection', async (ws) => {
-  const duplex = createWebSocketStream(ws, { encoding: 'utf8', decodeStrings: false });
+  const duplex = createWebSocketStream(ws, {
+    encoding: 'utf8',
+    decodeStrings: false
+  });
   const windowRef = await getActiveWindow();
   const [title, region] = await Promise.all([
     windowRef.title,
@@ -42,7 +45,11 @@ wss.on('connection', async (ws) => {
   console.log(region.toString());
 
   duplex.on('data', async (data: string) => {
-    const [command, value, figureLength] = data.toString().split(' ') as [Command, string, string];
+    const [command, value, figureLength] = data.toString().split(' ') as [
+      Command,
+      string,
+      string
+    ];
     const commander = new Commander(command, +value, +figureLength ?? null);
     const response = await commander.getResponseMessage();
 

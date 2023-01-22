@@ -6,7 +6,11 @@ import { MouseControlService } from './services';
 export class Commander {
   private responseMessage = '';
 
-  constructor(private command: Command, private value: number, private figureLength?: number) {
+  constructor(
+    private command: Command,
+    private value: number,
+    private figureLength?: number
+  ) {
     this.handleCommand();
   }
 
@@ -19,7 +23,8 @@ export class Commander {
 
     if (this.command.includes('mouse_')) {
       const mcService = new MouseControlService(this.command, this.value);
-      this.responseMessage = mcService.getResponseMessage() ?? this.responseMessage;
+      this.responseMessage =
+        mcService.getResponseMessage() ?? this.responseMessage;
     } else if (this.command.includes('draw_')) {
       DrawService.draw(this.command, this.value, this.figureLength);
     }

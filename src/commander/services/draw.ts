@@ -1,53 +1,51 @@
-import { mouse, Point } from "@nut-tree/nut-js";
-import { RADIAN_PER_DEGREE } from "../../const";
-import { Command, Angle } from "../../enums";
+import { mouse, Point } from '@nut-tree/nut-js';
+import { Command, Angle } from '../../enums';
+import { getCirclePointCoords } from '../../helpers';
 
 export class DrawService {
-    static async draw(command: Command, value: number, figureLength?: number): Promise<void> {
-        const { x, y } = await mouse.getPosition();
-        const startPoint = new Point(x, y);
-        let points: Point[] = [];
+  static async draw(
+    command: Command,
+    value: number,
+    figureLength?: number
+  ): Promise<void> {
+    const { x, y } = await mouse.getPosition();
+    const startPoint = new Point(x, y);
+    let points: Point[] = [startPoint];
 
-        switch (command) {
-            case Command.DRAW_CIRCLE: {
-              const x0 = x;
-              const y0 = y - value;
-      
-              points.push(startPoint);
-      
-              for (let i = Angle.RIGHT; i !== Angle.FULL + Angle.RIGHT; i++) {
-                const x = x0 + value * Math.cos(i * RADIAN_PER_DEGREE);
-                const y = y0 + value * Math.sin(i * RADIAN_PER_DEGREE);
-      
-                points.push(new Point(x, y));
-              }
+    switch (command) {
+      case Command.DRAW_CIRCLE: {
+        const x0 = x;
+        const y0 = y - value;
 
-              break;
-            }
-            case Command.DRAW_RECT: {
-              points = [
-                startPoint,
-                new Point(x + value, y),
-                new Point(x + value, y + figureLength!),
-                new Point(x, y + figureLength!),
-                startPoint
-              ];
-      
-              break;
-            }
-            case Command.DRAW_SQUARE: {
-              points = [
-                startPoint,
-                new Point(x + value, y),
-                new Point(x + value, y + value),
-                new Point(x, y + value),
-                startPoint
-              ];
-              
-              break;
-            }
-          }
+        for (let i = Angle.RIGHT; i !== Angle.FULL + Angle.RIGHT; i++) {
+          const [x, y] = getCirclePointCoords(x0, y0, value, i);
+          points.push(new Point(x, y));
+        }
 
-          await mouse.drag(points);
+        break;
+      }
+      case Command.DRAW_RECT: {
+        points = [
+          new Point(x + value, y),
+          new Point(x + value, y + figureLength!),
+          new Point(x, y + figureLength!),
+          startPoint
+        ];
+
+        break;
+      }
+      case Command.DRAW_SQUARE: {
+        points = [
+          new Point(x + value, y),
+          new Point(x + value, y + value),
+          new Point(x, y + value),
+          startPoint
+        ];
+
+        break;
+      }
     }
+
+    await mouse.drag(points);
+  }
 }
