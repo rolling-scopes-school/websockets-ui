@@ -1,6 +1,6 @@
 import { mouse, down, left, right, up } from "@nut-tree/nut-js";
+
 import { Operation, operations } from "../constants";
-import { easingFunction } from "../helpers/index";
 
 const getDirection = {
   [operations.mouseUp]: up,
@@ -9,15 +9,18 @@ const getDirection = {
   [operations.mouseRight]: right,
 };
 
-const mouseMove: Operation = async (name: string, args: string[]): Promise<string> => {
-  // const distanceInPx = parseInt(args[0]!, 10);
+export const mouseMove: Operation = async (name: string, args: string[]): Promise<string> => {
   const distance = +args[0];
 
   const direction = getDirection[name];
 
-  await mouse.move(direction(distance), easingFunction);
+  await mouse.move(direction(distance));
 
   return `Mouse offset ${direction.name} by ${distance} px`;
 };
 
-export { mouseMove };
+export const getMousePosition: Operation = async (): Promise<string> => {
+  const position = await mouse.getPosition();
+
+  return `Mouse position is ${position.x},${position.y}`;
+};

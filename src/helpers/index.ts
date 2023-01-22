@@ -4,6 +4,4 @@ const parseIncomingData = (data: string) => {
   return { operation, args };
 };
 
-const easingFunction = () => -0.6;
-
-export { easingFunction, parseIncomingData };
+export { parseIncomingData };

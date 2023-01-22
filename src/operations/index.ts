@@ -1,27 +1,27 @@
-import { mouseMove } from "./mouseMove";
+import { getMousePosition, mouseMove } from "./mouseMove";
 
-const operations = {
-  mouseUp: "mouse_up",
-  mouseDown: "mouse_down",
-  mouseLeft: "mouse_left",
-  mouseRight: "mouse_right",
-};
+import { operations } from "../constants";
 
-const { mouseUp, mouseDown, mouseLeft, mouseRight } = operations;
+const { mouseUp, mouseDown, mouseLeft, mouseRight, mousePosition } = operations;
 
-export const chooseOperation = (operation, args) => {
+export const chooseOperation = async (operation, args, webSocketStream) => {
   switch (operation) {
     case mouseUp:
-      mouseMove(operation, args);
+      mouseMove(operation, args, webSocketStream);
       break;
     case mouseDown:
-      mouseMove(operation, args);
+      mouseMove(operation, args, webSocketStream);
       break;
     case mouseLeft:
-      mouseMove(operation, args);
+      mouseMove(operation, args, webSocketStream);
       break;
     case mouseRight:
-      mouseMove(operation, args);
+      mouseMove(operation, args, webSocketStream);
+      break;
+    case mousePosition:
+      const result = await getMousePosition(operation, args, webSocketStream);
+      console.log(result);
+      webSocketStream._write(result);
       break;
   }
 };

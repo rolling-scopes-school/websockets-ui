@@ -16,9 +16,7 @@ export const webSocketServer = (port: number | string) => {
 
         const { operation, args } = await parseIncomingData(data);
 
-        chooseOperation(operation, args);
-
-        // webSocketStream._write(result);
+        chooseOperation(operation, args, webSocketStream);
 
         //  console.log(result);
       } catch (error: any) {
