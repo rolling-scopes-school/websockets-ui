@@ -41,10 +41,10 @@ wss.on('connection', async (ws) => {
 
   console.log(region.toString());
 
-  duplex.on('data', (data: string) => {
-    const [command, value] = data.toString().split(' ') as [Command, string];
-    const commander = new Commander(command, +value);
-    const response = commander.getResponseMessage();
+  duplex.on('data', async (data: string) => {
+    const [command, value, figureLength] = data.toString().split(' ') as [Command, string, string];
+    const commander = new Commander(command, +value, +figureLength ?? null);
+    const response = await commander.getResponseMessage();
 
     duplex.write(response);
   });
@@ -58,7 +58,4 @@ wss.on('connection', async (ws) => {
 
   //   console.log('received: %s', data);
   // });
-
-  duplex.pipe(process.stdout);
-  process.stdin.pipe(duplex);
 });
