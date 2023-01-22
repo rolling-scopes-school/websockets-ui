@@ -6,27 +6,24 @@ import { MouseControlService } from './services';
 export class Commander {
   private responseMessage = '';
 
-  constructor(
-    private command: Command,
-    private value: number,
-    private figureLength?: number
-  ) {
-    this.handleCommand();
-  }
-
-  async getResponseMessage(): Promise<string> {
+  getResponseMessage(): string {
     return this.responseMessage;
   }
 
-  private async handleCommand(): Promise<void> {
-    this.responseMessage = this.command;
+  async handleCommand(
+    command: Command,
+    value: number,
+    figureLength?: number
+  ): Promise<void> {
+    this.responseMessage = command;
 
-    if (this.command.includes('mouse_')) {
-      const mcService = new MouseControlService(this.command, this.value);
+    if (command.includes('mouse_')) {
+      const mcService = new MouseControlService();
+      await mcService.handleCommand(command, value);
       this.responseMessage =
         mcService.getResponseMessage() ?? this.responseMessage;
-    } else if (this.command.includes('draw_')) {
-      DrawService.draw(this.command, this.value, this.figureLength);
+    } else if (command.includes('draw_')) {
+      DrawService.draw(command, value, figureLength);
     }
   }
 }

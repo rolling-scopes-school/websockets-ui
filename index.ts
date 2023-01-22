@@ -50,9 +50,9 @@ wss.on('connection', async (ws) => {
       string,
       string
     ];
-    const commander = new Commander(command, +value, +figureLength ?? null);
-    const response = await commander.getResponseMessage();
-
+    const commander = new Commander();
+    await commander.handleCommand(command, +value, +figureLength ?? null);
+    const response = commander.getResponseMessage();
     duplex.write(response);
   });
 
