@@ -1,6 +1,7 @@
 # Websocket Remote Control App
 
 Sample remote control based on nutjs.dev, WebSocket and Jimp.
+
 Includes frontend part ([remote-control](https://github.com/rolling-scopes-school/remote-control) rewritten to TypeScript)
 
 ## Installation
@@ -14,7 +15,7 @@ Includes frontend part ([remote-control](https://github.com/rolling-scopes-schoo
 1. Development with nodemon - `npm run start:dev`
 
 - Frontend served by defaults @ `http://localhost:8181` with nodemon
-- Backend served by defaults @ `http://localhost:8080`
+- Backend served by defaults @ `ws://localhost:8080`
 
 2. Build - `npm run build`
 
