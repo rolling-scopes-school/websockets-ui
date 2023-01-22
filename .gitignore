@@ -1,6 +1,12 @@
 # dependencies
 /node_modules
 
+# testing
+/coverage
+
+# production
+/dist
+
 # System Files
 .DS_Store
 Thumbs.db
