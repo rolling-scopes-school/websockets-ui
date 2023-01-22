@@ -6,8 +6,11 @@ import {
   right,
   Point,
   straightTo,
+  screen,
+  Region,
 } from "@nut-tree/nut-js";
 import { Duplex } from "stream";
+import Jimp from "jimp";
 
 export class NutAdaptor {
   async mousePosition(): Promise<void> {
@@ -78,6 +81,7 @@ export class NutAdaptor {
       await mouse.releaseButton(0);
       const answer = `draw_rectangle ${width},${height}`;
       console.log(`-> ${answer}`);
+      webSocket.write(answer);
     }
   }
 
@@ -94,6 +98,7 @@ export class NutAdaptor {
       await mouse.releaseButton(0);
       const answer = `draw_square ${width}`;
       console.log(`-> ${answer}`);
+      webSocket.write(answer);
     }
   }
 
@@ -112,6 +117,51 @@ export class NutAdaptor {
 
       const answer = `draw_circle ${radius}`;
       console.log(`-> ${answer}`);
+      webSocket.write(answer);
+    }
+  }
+
+  async printScreen(): Promise<void> {
+    const webSocket: Duplex = arguments[0];
+    const screenShotWidth = 200;
+    const screenShotHeight = 200;
+
+    if (webSocket) {
+      const screenWidth = await screen.width();
+      const screenHeight = await screen.height();
+      const coords = await mouse.getPosition();
+
+      coords.x = Math.max(coords.x - screenShotWidth / 2, screenShotWidth / 2);
+      coords.x = Math.min(coords.x, screenWidth - screenShotWidth / 2);
+      coords.y = Math.max(
+        coords.y - screenShotHeight / 2,
+        screenShotHeight / 2
+      );
+      coords.y = Math.min(coords.y, screenHeight - screenShotHeight / 2);
+
+      const region = new Region(
+        coords.x - screenShotWidth / 2,
+        coords.y - screenShotHeight / 2,
+        screenShotWidth,
+        screenShotHeight
+      );
+
+      try {
+        const { data, width, height } = await (
+          await screen.grabRegion(region)
+        ).toRGB();
+
+        const image = new Jimp({ data, width, height });
+        const imageBase64 = (
+          await image.getBufferAsync(Jimp.MIME_PNG)
+        ).toString("base64");
+
+        const answer = `prnt_scrn ${imageBase64}`;
+        console.log(`-> ${answer}`);
+        webSocket.write(answer);
+      } catch (error: any) {
+        console.log(`:: Got error: ${error.message}`);
+      }
     }
   }
 }

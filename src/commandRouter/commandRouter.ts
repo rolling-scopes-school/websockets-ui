@@ -15,6 +15,7 @@ export class CommandRouter {
     this.register("draw_rectangle", this.adaptor.drawRectangle);
     this.register("draw_square", this.adaptor.drawSquare);
     this.register("draw_circle", this.adaptor.drawCircle);
+    this.register("prnt_scrn", this.adaptor.printScreen);
   }
 
   private register(name: string, cmd: any): void {
