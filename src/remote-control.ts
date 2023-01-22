@@ -1,6 +1,6 @@
 import { mouse, left, right, down, up, Button, straightTo, Point, screen, Region } from "@nut-tree/nut-js";
 import { checkCoordinates } from "./helpers/position-handler";
-import Jimp from "jimp/*";
+import Jimp from "jimp";
 import { getScreenShot } from "./helpers/prinst-screen";
 
 export class RemoteControl {
