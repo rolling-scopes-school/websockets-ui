@@ -25,6 +25,7 @@
     },
     "dependencies": {
         "@nut-tree/nut-js": "^2.3.0",
+        "dotenv": "^16.0.3",
         "ws": "^8.8.0"
     },
     "nodemonConfig": {
