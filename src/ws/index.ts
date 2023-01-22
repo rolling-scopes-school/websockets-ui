@@ -18,12 +18,19 @@ export const startWebSocket = () => {
   }
   
   wsserver.on('connection', (ws) => {
-    console.log('connection!');
+    console.log('Connection established');
     ws.on('message', async (data) => {
-      console.log('received: %s', data);
+      console.log('--> %s', data);
       try {
 
-        await handleCommand(data.toString());
+        const result = await handleCommand(data.toString());
+        
+        if (result) {
+          console.log(`<-- ${result}`);
+          ws.send(result);
+        } else {
+          ws.send(`${data}`);
+        }
       } catch(e) {
         console.log(`Error ${(e as Error).message} in command ${data} `);
       }
@@ -31,7 +38,7 @@ export const startWebSocket = () => {
 
     });
   
-    ws.send('something');
+    
   });
 }
 

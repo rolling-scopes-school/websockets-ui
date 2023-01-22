@@ -1,4 +1,4 @@
-import { DIRECTIONS, moveMouse } from "./remote-exec";
+import { DIRECTIONS, drawCircle, drawRect, getMousePosition, moveMouse, POSITION } from "./remote-exec";
 
 enum COMMANDS {
   mouse = "mouse",
@@ -6,23 +6,31 @@ enum COMMANDS {
   prnt = "prnt",
 }
 
-export const handleCommand = async (commandInput: string) => {
-  const command = commandInput.split("_");
-  console.log(command);
-  if (command.length < 2) throw new Error("Wrong command");
+enum SHAPES {
+  rect = 'rectangle',
+  circle = 'circle',
+  square = 'square'
+}
 
-  const param = command[1].split(" ").filter((item) => !!item.trim());
-  console.log(COMMANDS.mouse, command[0]);
+const respPosition = 'mouse_position';
+
+export const handleCommand = async (commandInput: string) => {
+  let result: string = '';
+  
+  const [command, param, ...rest] = commandInput.split("_");
+  
+  if (rest.length) throw new Error("Wrong command");
+
   try {
-    switch (command[0]) {
+    switch (command) {
       case COMMANDS.mouse:
-        handleMouse(param);
+        result = await handleMouse(param);
         break;
       case COMMANDS.draw:
-        handleDraw(param);
+        await handleDraw(param);
         break;
       case COMMANDS.prnt:
-        handlePrnt(param);
+        await handlePrnt(param);
         break;
       default:
         throw new Error("Wrong command");
@@ -30,12 +38,47 @@ export const handleCommand = async (commandInput: string) => {
   } catch (error) {
     throw new Error((error as Error).message);
   }
+  return result;
 };
 
-const handleMouse = async (params: string[]) => {
-  if (params.length !== 2) throw new Error("Invalid params");
-  await moveMouse(params[0], params[1]);
+const handleMouse = async (paramsInput: string) => {
+  let result: string = '';
+  const [direction, distance, ...rest] = paramsInput.split(" ").filter((item) => !!item.trim());
+  if (rest.length) throw new Error("Invalid args");
+  
+  if (Object.keys(DIRECTIONS).includes(direction.trim()) 
+    && distance !== undefined) {
+
+    console.log(`move mouse to ${direction} for ${distance}px`);
+    await moveMouse(direction, distance);
+
+  }else if (direction === POSITION &&  distance === undefined){
+
+      result = `${respPosition} ${await getMousePosition()}`;
+    
+   } else {
+
+    throw new Error("Invalid args");
+
+  }
+  return result;
+  
 };
 
-const handleDraw = async (param: string[]) => {};
-const handlePrnt = async (param: string[]) => {};
+const handleDraw = async (paramsInput: string) => {
+  const [shape, radius, height] = paramsInput.split(" ").filter((item) => !!item.trim());
+  switch (shape) {
+    case SHAPES.circle:
+      if(radius) await drawCircle(radius);
+      break;
+    case SHAPES.rect:
+      if(radius && height) await drawRect(radius, height);
+      break;
+    case SHAPES.square:
+      if(radius) await drawRect(radius, radius);
+      break;
+    default:
+      throw new Error("Invalid args");
+  }
+};
+const handlePrnt = async (param: string) => {};
