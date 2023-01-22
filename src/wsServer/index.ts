@@ -1,6 +1,6 @@
-import { DuplexOptions } from "stream";
+import { DuplexOptions } from "node:stream";
 import { WebSocketServer, createWebSocketStream, WebSocket } from "ws";
-import { CommandRouter } from "../commandRouter/commandRouter";
+import { CommandRouter } from "../commandRouter";
 
 const wsStreamOptions: DuplexOptions = {
   decodeStrings: false,

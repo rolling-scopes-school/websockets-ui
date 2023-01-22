@@ -9,7 +9,7 @@ import {
   screen,
   Region,
 } from "@nut-tree/nut-js";
-import { Duplex } from "stream";
+import { Duplex } from "node:stream";
 import Jimp from "jimp";
 
 export class NutAdaptor {

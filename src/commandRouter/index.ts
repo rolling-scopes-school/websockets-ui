@@ -1,4 +1,4 @@
-import { Duplex } from "stream";
+import { Duplex } from "node:stream";
 import { NutAdaptor } from "../nutAdaptor";
 
 export class CommandRouter {
@@ -26,7 +26,11 @@ export class CommandRouter {
     return this.commands.has(name) ? true : false;
   }
 
-  async execute(name: string, wsStream: Duplex, ...args: string[]) {
-    return await this.commands.get(name)(wsStream, ...args);
+  async execute(
+    name: string,
+    wsStream: Duplex,
+    ...args: string[]
+  ): Promise<void> {
+    await this.commands.get(name)(wsStream, ...args);
   }
 }

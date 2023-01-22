@@ -1,6 +1,6 @@
-import { readFile } from "fs";
-import { resolve, dirname } from "path";
-import { Server, createServer, IncomingMessage, ServerResponse } from "http";
+import { readFile } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { Server, createServer, IncomingMessage, ServerResponse } from "node:http";
 
 export const httpServer: Server = createServer(
   (req: IncomingMessage, res: ServerResponse) => {

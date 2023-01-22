@@ -1,19 +1,22 @@
-import { httpServer } from "./http_server";
-import { mouse } from "@nut-tree/nut-js";
-import { wsServer } from "./ws_server";
+import { httpServer } from "./httpServer";
+import { wsServer } from "./wsServer";
+import { env } from "node:process";
+import { config } from "dotenv";
 
-const HTTP_PORT = 8181;
-const WSS_PORT = 8080;
+config();
 
-console.log(`Start static http server on the ${HTTP_PORT} port!`);
-const webServer = httpServer.listen(HTTP_PORT);
+const httpPort = +(env.HTTP_PORT ?? 8181);
+const wsPort = +(env.WSS_PORT ?? 8080);
 
-console.log(`Start ws server on the ${WSS_PORT} port!`);
-const webSocketServer = wsServer(WSS_PORT);
+console.log(`Start static http server on the ${httpPort} port!`);
+const webServer = httpServer.listen(httpPort);
+
+console.log(`Start ws server on the ${wsPort} port!`);
+const webSocketServer = wsServer(wsPort);
 
 process.on("SIGINT", () => {
+  console.log("Server down");
   webServer.close();
   webSocketServer.close();
-  console.log("Server down");
   process.exit(0);
 });
