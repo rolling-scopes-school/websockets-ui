@@ -3,6 +3,7 @@ import { IWebSocket } from "./types";
 import { IncomingMessage } from "http";
 import { Duplex } from "stream";
 import { RemoteControl } from "./remote-control";
+import { checkCoordinates } from "./helpers/position-handler";
 
 const WSS_PORT: number = +process.env.WSS_PORT || 8080;
 export const wss: WebSocketServer = new WebSocketServer({ port: WSS_PORT });
@@ -25,21 +26,26 @@ const readData = (duplex: Duplex) => {
             try {
                 const [command, ...params] = chunk.split(' ');
                 const [x, y] = params.map(Number);
+                await checkCoordinates(x, y);
 
                 if (remoteControl[command]) {
                     const result: string = await remoteControl[command](command, x, y);
+                    console.log(result);
                     duplex.write(`${result}`);
                 } else {
-                    console.log(command);
+                    console.log('Command not found');
                 }
             } catch (error: any) {
-                console.error(error);
+                console.error('Error:', error.message || error);
             }
         }
     }
 }
 
 wss.on('connection', async (ws: IWebSocket, req: IncomingMessage) => {
+    const info = `${req.socket.remoteAddress}:${req.socket.remotePort}`;
+    console.log(`New ws connection : ${info}`);
+
     const duplex: Duplex = createWebSocketStream(ws, {
         encoding: 'utf-8',
         decodeStrings: false,
