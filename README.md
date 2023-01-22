@@ -1,31 +1,23 @@
-# RSSchool NodeJS websocket task template
-> Static http server and base task packages. 
-> By default WebSocket client tries to connect to the 8080 port.
+# Websocket Remote Control App
+
+Sample remote control based on nutjs.dev, WebSocket and Jimp.
+Includes frontend part ([remote-control](https://github.com/rolling-scopes-school/remote-control) rewritten to TypeScript)
 
 ## Installation
-1. Clone/download repo
-2. `npm install`
 
-## Usage
-**Development**
+1. Clone this repository
+2. Run command `npm i` to install required dependencies.
+3. Rename `.env.example` to `.env` and configure ports in it if need.
 
-`npm run start:dev`
+## Running modes
 
-* App served @ `http://localhost:8181` with nodemon
+1. Development with nodemon - `npm run start:dev`
 
-**Production**
+- Frontend served by defaults @ `http://localhost:8181` with nodemon
+- Backend served by defaults @ `http://localhost:8080`
 
-`npm run start`
+2. Build - `npm run build`
 
-* App served @ `http://localhost:8181` without nodemon
+- Builded app will be placed into `dist` folder
 
----
-
-**All commands**
-
-Command | Description
---- | ---
-`npm run start:dev` | App served @ `http://localhost:8181` with nodemon
-`npm run start` | App served @ `http://localhost:8181` without nodemon
-
-**Note**: replace `npm` with `yarn` in `package.json` if you use yarn.
+3. Build then run from `dist` folder - `npm run start`

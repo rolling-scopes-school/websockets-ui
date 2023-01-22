@@ -1,12 +1,12 @@
 {
   "name": "ws_task",
-  "version": "0.9.0",
-  "description": "WebSocket remote control task",
+  "version": "1.0.0",
+  "description": "WebSocket remote control",
   "main": "src/index.ts",
   "scripts": {
-    "start": "tsc && node ./dist/index.js",
+    "start": "npm run build && node ./dist/index.js",
     "start:dev": "nodemon",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc"
   },
   "author": "Andrei Auchynnikau, Stanislav Kolpakov",
   "keywords": [],

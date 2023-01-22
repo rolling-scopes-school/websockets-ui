@@ -1,17 +1,17 @@
 "use strict";
 var _a, _b;
 Object.defineProperty(exports, "__esModule", { value: true });
-const http_server_1 = require("./http_server");
-const ws_server_1 = require("./ws_server");
+const httpServer_1 = require("./httpServer");
+const wsServer_1 = require("./wsServer");
 const node_process_1 = require("node:process");
 const dotenv_1 = require("dotenv");
 (0, dotenv_1.config)();
 const httpPort = +((_a = node_process_1.env.HTTP_PORT) !== null && _a !== void 0 ? _a : 8181);
 const wsPort = +((_b = node_process_1.env.WSS_PORT) !== null && _b !== void 0 ? _b : 8080);
 console.log(`Start static http server on the ${httpPort} port!`);
-const webServer = http_server_1.httpServer.listen(httpPort);
+const webServer = httpServer_1.httpServer.listen(httpPort);
 console.log(`Start ws server on the ${wsPort} port!`);
-const webSocketServer = (0, ws_server_1.wsServer)(wsPort);
+const webSocketServer = (0, wsServer_1.wsServer)(wsPort);
 process.on("SIGINT", () => {
     console.log("Server down");
     webServer.close();
