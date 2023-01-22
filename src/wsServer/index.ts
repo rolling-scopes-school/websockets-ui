@@ -1,5 +1,5 @@
 import { WebSocketServer, WebSocket, createWebSocketStream } from 'ws';
-import { handleCommand, parseCommand } from './command/commandHandler';
+import { handleCommand } from './command/commandHandler';
 import log from '../shared/logger';
 
 const wsServer = (port: number) => {
@@ -26,7 +26,7 @@ const wsServer = (port: number) => {
         log(data);
 
         const response = await handleCommand(data);
-
+        // console.log(response);
         duplex.write(response);
       } catch (error) {
         const errorMessage =
@@ -38,6 +38,8 @@ const wsServer = (port: number) => {
       }
     });
   });
+
+  return server;
 };
 
 export default wsServer;

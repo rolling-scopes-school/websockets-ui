@@ -4,6 +4,7 @@ import { ARGS_INDEX_FIRST } from '../../../shared/argsIndex';
 import assertNotEmpty from '../../../shared/assert/assertNotEmpty';
 import { CIRCLE_END_POSITION } from './drawingConfig';
 import { CIRCLE_ARGUMENTS_LENGTH } from './argumentsLength';
+import { DRAW_CIRCLE_COMMAND_NAME } from './commandName';
 
 class CircleDrawAction extends AbstractDrawAction {
   protected radius!: number;
@@ -21,7 +22,7 @@ class CircleDrawAction extends AbstractDrawAction {
   }
 
   protected override formatResponse(): string {
-    return `draw_circle ${this.radius}`;
+    return `${DRAW_CIRCLE_COMMAND_NAME} ${this.radius}`;
   }
 
   protected draw = async (): Promise<void> => {
