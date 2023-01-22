@@ -1,6 +1,7 @@
 import { mouse } from "@nut-tree/nut-js";
 import { createWebSocketStream, WebSocketServer } from "ws";
 import { WsActions, WSS_PORT } from "./web-socket.constants";
+import { getChangedPosition } from "./web-socket.utils";
 
 export const wss = new WebSocketServer({ port: WSS_PORT });
 
@@ -9,42 +10,14 @@ wss.on('headers', (_headers, request) => {
 });
 
 wss.on('connection', (ws) => {
-    const wsStrem = createWebSocketStream(ws, { encoding: 'utf-8', decodeStrings: false });
+    const wsStream = createWebSocketStream(ws, { encoding: 'utf-8', decodeStrings: false });
 
-    wsStrem.on('data', async (chunk) => {
+    wsStream.on('data', async (chunk) => {
         const [action, distance]: [WsActions, string] = chunk.split(' ')
 
-        const position = await mouse.getPosition()
+        const changedPosition = await getChangedPosition(action, distance)
 
-        switch (action) {
-            case WsActions.mouseUp:
-                position.y -= +distance
-
-                wsStrem.write(`${action}_${distance}`)
-                break;
-
-            case WsActions.mouseDown:
-                position.y += +distance
-
-                wsStrem.write(`${action}_${distance}`)
-                break;
-
-            case WsActions.mouseLeft:
-                position.x -= +distance
-
-                wsStrem.write(`${action}_${distance}`)
-                break;
-
-            case WsActions.mouseRight:
-                position.x += +distance
-
-                wsStrem.write(`${action}_${distance}`)
-                break;
-
-            default:
-                break;
-        }
-
-        mouse.setPosition(position)
+        wsStream.write(`${action}_${distance}`)
+        mouse.setPosition(changedPosition)
     })
 })
