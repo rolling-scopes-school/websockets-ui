@@ -86,6 +86,16 @@ wss.on('connection', ws => {
         await drawRectangle(value[0], value[1]);
         break;
       }
+      case actionType.MOUSE_POSITION: {
+        const positionPoint = await mouse.getPosition();
+        const { x, y } = positionPoint;
+        ws.send(`mouse_position ${x},${y}`);
+        break;
+      }
+      case actionType.PRINT_SCREEN: {
+        await mouse.move(down(value[0]));
+        break;
+      }
     }
   });
 });
