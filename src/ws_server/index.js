@@ -1,18 +1,7 @@
 import { WebSocketServer } from 'ws';
 import { mouse, left, right, up, down, screen, straightTo, Point, Button, Region } from '@nut-tree/nut-js';
 import Jimp from "jimp";
-
-const navigationCommands = {
-  mouse_up: 'mouse_up',
-  mouse_down: 'mouse_down',
-  mouse_left: 'mouse_left',
-  mouse_right: 'mouse_right',
-  mouse_position: 'mouse_position',
-  draw_circle: 'draw_circle',
-  draw_rectangle: 'draw_rectangle',
-  draw_square: 'draw_square',
-  prnt_scrn: 'prnt_scrn'
-}
+import { circleDrawStep, navigationCommands, screenshotSize } from './utils/const.js';
 
 const drawRectangle = async (startPosition, lenX, lenY) => {
   if (lenY) {
@@ -32,7 +21,7 @@ const drawRectangle = async (startPosition, lenX, lenY) => {
 }
 
 const drawCircle = async (startPosition, radius) => {
-  const step = 0.01;
+  const step = circleDrawStep;
   const positionX = startPosition.x + radius;
   const limit = Math.PI * 2;
 
@@ -64,7 +53,7 @@ const makeScreenshot = async (startPosition, size) => {
 
     const base64String = await image.getBase64Async(Jimp.MIME_PNG);
 
-    return base64String;
+    return base64String.replace("data:image/png;base64,", "");
   } 
   catch {
     return undefined;
@@ -113,7 +102,7 @@ const execCommand = async (inputCommand) => {
       result = arrParams[1];
       break;
     case navigationCommands.prnt_scrn:
-      result = await makeScreenshot(startPosition, 200, 200);
+      result = await makeScreenshot(startPosition, screenshotSize, screenshotSize);
       break;
     default:
       console.log('Command not found');
@@ -131,7 +120,6 @@ wss.on('connection', function connection(ws) {
     const result = await execCommand(inputMessage);
 
     ws.send(`${inputMessage.split(' ')[0]} ${result}`);
-
   });
 
   ws.on('close', () => { console.log('Disconnected!') });
