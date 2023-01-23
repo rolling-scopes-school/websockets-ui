@@ -13,11 +13,11 @@ export class PrntScrnService {
         PRNT_SCRN_SIZE
       )
     );
-    region.toRGB();
+    const { data, width, height } = await region.toRGB();
     const image = new Jimp({
-      data: region.data,
-      width: region.width,
-      height: region.height
+      data,
+      width,
+      height
     });
     const base64 = (await image.getBufferAsync(Jimp.MIME_PNG)).toString(
       'base64'

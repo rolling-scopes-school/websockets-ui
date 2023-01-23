@@ -2,7 +2,7 @@ import { mouse, up, down, left, right, Point } from '@nut-tree/nut-js';
 import { Command } from '../../enums';
 
 export class MouseControlService {
-  private responseMessage = '';
+  private responseMessage: string | null = null;
 
   async handleCommand(command: Command, value: number): Promise<void> {
     switch (command) {
@@ -25,7 +25,7 @@ export class MouseControlService {
     }
   }
 
-  getResponseMessage(): string {
+  getResponseMessage(): string | null {
     return this.responseMessage;
   }
 
