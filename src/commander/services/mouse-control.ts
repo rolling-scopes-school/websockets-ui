@@ -1,4 +1,4 @@
-import { mouse, up, down, left, right } from '@nut-tree/nut-js';
+import { mouse, up, down, left, right, Point } from '@nut-tree/nut-js';
 import { Command } from '../../enums';
 
 export class MouseControlService {
@@ -7,7 +7,7 @@ export class MouseControlService {
   async handleCommand(command: Command, value: number): Promise<void> {
     switch (command) {
       case Command.MOUSE_POSITION:
-        const { x, y } = await mouse.getPosition();
+        const { x, y } = await MouseControlService.getMousePosition();
         this.responseMessage = `${Command.MOUSE_POSITION} ${x},${y}`;
         break;
       case Command.MOUSE_UP:
@@ -27,5 +27,9 @@ export class MouseControlService {
 
   getResponseMessage(): string {
     return this.responseMessage;
+  }
+
+  static getMousePosition(): Promise<Point> {
+    return mouse.getPosition();
   }
 }

@@ -54,6 +54,7 @@ wss.on('connection', async (ws) => {
     await commander.handleCommand(command, +value, +figureLength ?? null);
     const response = commander.getResponseMessage();
     duplex.write(response);
+    console.log(response);
   });
 
   // ws.on('message', async (data: any) => {

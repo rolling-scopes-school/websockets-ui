@@ -6,7 +6,8 @@ export enum Command {
   MOUSE_RIGHT = 'mouse_right',
   DRAW_CIRCLE = 'draw_circle',
   DRAW_RECT = 'draw_rectangle',
-  DRAW_SQUARE = 'draw_square'
+  DRAW_SQUARE = 'draw_square',
+  PRNT_SCRN = 'prnt_scrn'
 }
 
 export enum Angle {

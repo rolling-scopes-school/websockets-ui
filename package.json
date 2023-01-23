@@ -24,6 +24,7 @@
   "dependencies": {
     "@nut-tree/nut-js": "^2.3.0",
     "dotenv": "^16.0.3",
+    "jimp": "^0.16.2",
     "ws": "^8.12.0"
   }
 }
