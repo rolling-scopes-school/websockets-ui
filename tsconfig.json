@@ -1,0 +1,31 @@
+{
+    "compilerOptions": {
+        "alwaysStrict": true,
+        "baseUrl": "./src",
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "lib": [
+            "ESNext"
+        ],
+        "module": "CommonJS",
+        "moduleResolution": "Node",
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "noUnusedLocals": true,
+        "outDir": "./dist",
+        "pretty": true,
+        "resolveJsonModule": true,
+        "sourceMap": true,
+        "strictBindCallApply": true,
+        "target": "ES2022",
+        "types": [
+            "node"
+        ]
+    },
+    "exclude": [
+        "node_modules", "front"
+    ],
+    "include": [
+        "src"
+    ]
+}
