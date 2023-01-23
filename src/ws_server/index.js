@@ -48,8 +48,8 @@ const drawCircle = async (startPosition, radius) => {
 }
 
 const execCommand = async (inputCommand) => {
+  let result = '';
   const arrParams = inputCommand.split(' ');
-
   const { x: currentX, y: currentY } = await mouse.getPosition();
   const startPosition = {
     x: currentX,
@@ -59,44 +59,53 @@ const execCommand = async (inputCommand) => {
   switch (navigationCommands[arrParams[0]]) {
     case navigationCommands.mouse_up:
       await mouse.move(up(+arrParams[1]));
+      result = arrParams[1];
       break;
     case navigationCommands.mouse_right:
       await mouse.move(right(+arrParams[1]));
+      result = arrParams[1];
       break;
     case navigationCommands.mouse_down:
       await mouse.move(down(+arrParams[1]));
+      result = arrParams[1];
       break;
     case navigationCommands.mouse_left:
       await mouse.move(left(+arrParams[1]));
+      result = arrParams[1];
       break;
     case navigationCommands.mouse_position:
-      await mouse.setPosition(startPosition);
+      result = `${startPosition.x}px,${startPosition.y}px`;
       break;
     case navigationCommands.draw_circle:
       await drawCircle(startPosition, +arrParams[1]);
+      result = arrParams[1];
       break;
     case navigationCommands.draw_rectangle:
       await drawRectangle(startPosition, +arrParams[1], +arrParams[2]);
+      result = `${arrParams[1]} ${arrParams[2]}`;
       break;
     case navigationCommands.draw_square:
       await drawRectangle(startPosition, +arrParams[1]);
+      result = arrParams[1];
       break;
     case navigationCommands.prnt_scrn:
-      await makeScreenshot();
+      //await makeScreenshot();
       break;
     default:
       console.log('Command not found');
       break;
   }
+
+  return result;
 }
 
 const wss = new WebSocketServer({ port: 8080 });
 
 wss.on('connection', function connection(ws) {
-  ws.on('message', function message(data) {
+  ws.on('message', async function message(data) {
     const inputMessage = data.toString();
-    execCommand(inputMessage);
-    ws.send(inputMessage);
+    const result = await execCommand(inputMessage);
+    ws.send(`${inputMessage.split(' ')[0]} ${result}`);
   });
 });
 
