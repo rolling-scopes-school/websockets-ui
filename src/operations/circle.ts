@@ -1,23 +1,23 @@
 import { Button, mouse, Point, straightTo } from "@nut-tree/nut-js";
-import { Operation, COUNT_OF_CIRCLE_POINTS } from "../constants";
+import { Operation, CIRCLE_POINTS_COUNTS } from "../constants";
 
-export const getCircle: Operation = async (_name: string, args: string[]): Promise<string> => {
+export const getCircle: Operation = async (operation: string, args: string[]): Promise<string> => {
   const radius = +args[0];
 
   const mousePosition = await mouse.getPosition();
 
-  const centerOfCircle = { x: mousePosition.x, y: mousePosition.y + radius };
+  const center = { x: mousePosition.x, y: mousePosition.y + radius };
 
   await mouse.pressButton(Button.LEFT);
 
-  for (let point = 0; point <= COUNT_OF_CIRCLE_POINTS; point += 1) {
-    const x = centerOfCircle.x + radius * Math.sin((2 * Math.PI * point) / COUNT_OF_CIRCLE_POINTS);
-    const y = centerOfCircle.y - radius * Math.cos((2 * Math.PI * point) / COUNT_OF_CIRCLE_POINTS);
+  for (let point = 0; point <= CIRCLE_POINTS_COUNTS; point += 1) {
+    const x = center.x + radius * Math.sin((2 * Math.PI * point) / CIRCLE_POINTS_COUNTS);
+    const y = center.y - radius * Math.cos((2 * Math.PI * point) / CIRCLE_POINTS_COUNTS);
 
     await mouse.move(straightTo(new Point(x, y)));
   }
 
   await mouse.releaseButton(Button.LEFT);
 
-  return `draw_circle ${radius}px`;
+  return `${operation} ${radius}px`;
 };

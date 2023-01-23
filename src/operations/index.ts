@@ -1,23 +1,29 @@
-import { getMousePosition, mouseMove } from "./mouseMove";
+import { getMousePosition, mouseMove } from "./mouse";
 import { getCircle } from "./circle";
+import { getRectangle } from "./rectangle";
 
 import { operations } from "../constants";
+import { getPrintScreen } from "./printScreen";
 
-const { mouseUp, mouseDown, mouseLeft, mouseRight, mousePosition, drawCircle } = operations;
+const {
+  mouseUp,
+  mouseDown,
+  mouseLeft,
+  mouseRight,
+  mousePosition,
+  drawCircle,
+  drawSquare,
+  drawRectangle,
+  printScreen,
+} = operations;
 
 export const chooseOperation = async (operation, args) => {
   let result;
 
   switch (operation) {
     case mouseUp:
-      result = await mouseMove(operation, args);
-      break;
     case mouseDown:
-      result = await mouseMove(operation, args);
-      break;
     case mouseLeft:
-      result = await mouseMove(operation, args);
-      break;
     case mouseRight:
       result = await mouseMove(operation, args);
       break;
@@ -25,7 +31,17 @@ export const chooseOperation = async (operation, args) => {
       result = await getMousePosition(operation, args);
       break;
     case drawCircle:
-      getCircle(operation, args);
+      result = getCircle(operation, args);
+      break;
+    case drawSquare:
+    case drawRectangle:
+      result = getRectangle(operation, args);
+      break;
+    case printScreen:
+      result = getPrintScreen(operation, args);
+      break;
+    default:
+      throw new Error("unknown operation");
   }
 
   return result;

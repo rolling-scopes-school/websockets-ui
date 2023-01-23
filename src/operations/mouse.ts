@@ -9,18 +9,18 @@ const getDirection = {
   [operations.mouseRight]: right,
 };
 
-export const mouseMove: Operation = async (name: string, args: string[]): Promise<string> => {
+export const mouseMove: Operation = async (operation: string, args: string[]): Promise<string> => {
   const distance = +args[0];
 
-  const direction = getDirection[name];
+  const direction = getDirection[operation];
 
   await mouse.move(direction(distance));
 
-  return `${name} ${distance}px`;
+  return `${operation} ${distance}px`;
 };
 
-export const getMousePosition: Operation = async (): Promise<string> => {
+export const getMousePosition: Operation = async (operation: string): Promise<string> => {
   const position = await mouse.getPosition();
 
-  return `mouse_position ${position.x}px,${position.y}px`;
+  return `${operation} ${position.x}px,${position.y}px`;
 };
