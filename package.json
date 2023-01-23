@@ -19,6 +19,7 @@
     },
     "dependencies": {
         "@nut-tree/nut-js": "^3.0.0",
+        "jimp": "^0.16.2",
         "ws": "^8.12.0"
     }
 }
