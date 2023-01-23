@@ -8,7 +8,6 @@ console.log(`Start static http server on the ${HTTP_PORT} port!`);
 httpServer.listen(HTTP_PORT);
 
 const parse = (data) => {
-  
   const strigifyData = data.toString('utf8');
   console.log('strigifyData ->', strigifyData)
   const [command, value] = strigifyData.split(' ');
@@ -38,6 +37,7 @@ const wss = new WebSocketServer({ port: 8080 });
 wss.on('connection', function connection(ws) {
   ws.send('connected_to_wss');
   ws.on('message', async (data) => {
+    console.log(data);
     const parsedData = parse(data);
     const { command, value } = parsedData;
     const sendedString = `${command}_${value}`;
