@@ -5,8 +5,7 @@
     "main": "index.js",
     "type": "module",
     "scripts": {
-        "start": "node ./index.js",
-        "start:dev": "npm run start:ws & npm run start:http",
+        "start": "npm run start:ws & npm run start:http",
         "start:http": "nodemon ./index.js",
         "start:ws": "nodemon ./src/ws_server/index.js",
         "test": "echo \"Error: no test specified\" && exit 1"
