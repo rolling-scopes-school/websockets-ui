@@ -2,7 +2,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as http from 'http';
 import { WebSocketServer } from 'ws';
-import { mouse, Point, Button } from "@nut-tree/nut-js";
+// import { mouse, Point, Button } from "@nut-tree/nut-js";
+import { mouse } from "@nut-tree/nut-js";
 
 export const httpServer = http.createServer(function (req, res) {
     const __dirname = path.resolve(path.dirname(''));
@@ -54,24 +55,24 @@ wss.on('connection', async function connection(ws) {
             console.log(`result: current mouse coordinates are ${position}`);
             ws.send(`mouse_position ${position.x},${position.y}`);
         }
-        if (array[0] === 'draw_rectangle') {
-            ws.send(`draw_rectangle`);
-        }
-        if (array[0] === 'draw_circle') {
-            ws.send(`draw_circle`);
-        }
-        if (array[0] === 'draw_square') {
-            await mouse.pressButton(Button.LEFT);
-            await mouse.move([
-                position,
-                new Point(position.x + Number(array[1]), position.y),
-                new Point(position.x + Number(array[1]), position.y + Number(array[1])),
-                new Point(position.x, position.y + Number(array[1])),
-                position,
-            ]);
-            await mouse.releaseButton(Button.LEFT);
-            ws.send(`draw_square`);
-        }
+        // if (array[0] === 'draw_rectangle') {
+        //     ws.send(`draw_rectangle`);
+        // }
+        // if (array[0] === 'draw_circle') {
+        //     ws.send(`draw_circle`);
+        // }
+        // if (array[0] === 'draw_square') {
+        //     await mouse.pressButton(Button.LEFT);
+        //     await mouse.move([
+        //         position,
+        //         new Point(position.x + Number(array[1]), position.y),
+        //         new Point(position.x + Number(array[1]), position.y + Number(array[1])),
+        //         new Point(position.x, position.y + Number(array[1])),
+        //         position,
+        //     ]);
+        //     await mouse.releaseButton(Button.LEFT);
+        //     ws.send(`draw_square`);
+        // }
     });
 
     console.log('established WS connection on port: %s', wss.options.port);
