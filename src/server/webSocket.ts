@@ -12,13 +12,15 @@ export const webSocketServer = (port: number | string) => {
 
     webSocketStream.on("data", async (data: string) => {
       try {
-        console.log(`received command: ${data}`);
+        console.log(`get command: ${data}`);
 
         const { operation, args } = await parseIncomingData(data);
 
-        chooseOperation(operation, args, webSocketStream);
+        const result = await chooseOperation(operation, args);
 
-        //  console.log(result);
+        // webSocketStream._write(result);
+
+        console.log(`result: ${result}`);
       } catch (error: any) {
         console.log(`error: ${error.message}`);
       }

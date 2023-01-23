@@ -16,11 +16,11 @@ export const mouseMove: Operation = async (name: string, args: string[]): Promis
 
   await mouse.move(direction(distance));
 
-  return `Mouse offset ${direction.name} by ${distance} px`;
+  return `${name} ${distance}px`;
 };
 
 export const getMousePosition: Operation = async (): Promise<string> => {
   const position = await mouse.getPosition();
 
-  return `Mouse position is ${position.x},${position.y}`;
+  return `mouse_position ${position.x}px,${position.y}px`;
 };

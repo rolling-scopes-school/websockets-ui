@@ -1,27 +1,32 @@
 import { getMousePosition, mouseMove } from "./mouseMove";
+import { getCircle } from "./circle";
 
 import { operations } from "../constants";
 
-const { mouseUp, mouseDown, mouseLeft, mouseRight, mousePosition } = operations;
+const { mouseUp, mouseDown, mouseLeft, mouseRight, mousePosition, drawCircle } = operations;
 
-export const chooseOperation = async (operation, args, webSocketStream) => {
+export const chooseOperation = async (operation, args) => {
+  let result;
+
   switch (operation) {
     case mouseUp:
-      mouseMove(operation, args, webSocketStream);
+      result = await mouseMove(operation, args);
       break;
     case mouseDown:
-      mouseMove(operation, args, webSocketStream);
+      result = await mouseMove(operation, args);
       break;
     case mouseLeft:
-      mouseMove(operation, args, webSocketStream);
+      result = await mouseMove(operation, args);
       break;
     case mouseRight:
-      mouseMove(operation, args, webSocketStream);
+      result = await mouseMove(operation, args);
       break;
     case mousePosition:
-      const result = await getMousePosition(operation, args, webSocketStream);
-      console.log(result);
-      webSocketStream._write(result);
+      result = await getMousePosition(operation, args);
       break;
+    case drawCircle:
+      getCircle(operation, args);
   }
+
+  return result;
 };
