@@ -5,40 +5,42 @@ import { mouseDown, mouseLeft, mouseRight, mouseUp, drawCircle, drawRectangle, m
 const execCommand = async (inputCommand) => {
   let result = '';
   const arrParams = inputCommand.split(' ');
+  const inputCommandName = arrParams[0];
+  const offsetValue = +arrParams[1];
 
   const startPosition = await getPosition();
 
-  switch (navigationCommands[arrParams[0]]) {
+  switch (navigationCommands[inputCommandName]) {
     case navigationCommands.mouse_up:
-      await mouseUp(+arrParams[1]);
-      result = arrParams[1];
+      await mouseUp(offsetValue);
+      result = offsetValue;
       break;
     case navigationCommands.mouse_right:
-      await mouseRight(+arrParams[1]);
-      result = arrParams[1];
+      await mouseRight(offsetValue);
+      result = offsetValue;
       break;
     case navigationCommands.mouse_down:
-      await mouseDown(+arrParams[1]);
-      result = arrParams[1];
+      await mouseDown(offsetValue);
+      result = offsetValue;
       break;
     case navigationCommands.mouse_left:
-      await mouseLeft(+arrParams[1]);
-      result = arrParams[1];
+      await mouseLeft(offsetValue);
+      result = offsetValue;
       break;
     case navigationCommands.mouse_position:
       result = `${startPosition.x}px,${startPosition.y}px`;
       break;
     case navigationCommands.draw_circle:
-      await drawCircle(startPosition, +arrParams[1]);
-      result = arrParams[1];
+      await drawCircle(startPosition, offsetValue);
+      result = offsetValue;
       break;
     case navigationCommands.draw_rectangle:
-      await drawRectangle(startPosition, +arrParams[1], +arrParams[2]);
-      result = `${arrParams[1]} ${arrParams[2]}`;
+      await drawRectangle(startPosition, offsetValue, +arrParams[2]);
+      result = `${offsetValue} ${arrParams[2]}`;
       break;
     case navigationCommands.draw_square:
-      await drawRectangle(startPosition, +arrParams[1]);
-      result = arrParams[1];
+      await drawRectangle(startPosition, offsetValue);
+      result = offsetValue;
       break;
     case navigationCommands.prnt_scrn:
       result = await makeScreenshot(startPosition, screenshotSize, screenshotSize);
