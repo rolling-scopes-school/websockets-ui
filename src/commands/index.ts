@@ -2,6 +2,7 @@ import {CommandHandler} from "../models/command-handler.type.js";
 import {Command} from "../models/command.type.js";
 import MoveCommands from "./move.commands.js";
 import { sendMousePosition } from "./position.command.js";
+import DrawCommands from "./draw.commands.js";
 
 export const commands: Record<Command, CommandHandler> = {
     mouse_left: MoveCommands.moveMouseLeft,
@@ -11,7 +12,7 @@ export const commands: Record<Command, CommandHandler> = {
     mouse_position: sendMousePosition,
     draw_square: async () => 'draw_square',
     draw_rectangle: async () => 'draw_rectangle',
-    draw_circle: async () => 'draw_circle',
+    draw_circle: DrawCommands.drawCircle,
     prnt_scrn: async () => 'prnt_scrn',
 }
 
