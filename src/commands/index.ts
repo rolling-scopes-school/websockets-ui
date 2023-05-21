@@ -11,7 +11,7 @@ export const commands: Record<Command, CommandHandler> = {
     mouse_up: MoveCommands.moveMouseUp,
     mouse_position: sendMousePosition,
     draw_square: DrawCommands.drawSquare,
-    draw_rectangle: async () => 'draw_rectangle',
+    draw_rectangle: DrawCommands.drawRectangle,
     draw_circle: DrawCommands.drawCircle,
     prnt_scrn: async () => 'prnt_scrn',
 }

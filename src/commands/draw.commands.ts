@@ -48,7 +48,28 @@ export const drawSquare: CommandHandler = async ([sideWidth]) => {
     return `success draw_square ${sideWidth}`;
 }
 
+export const drawRectangle: CommandHandler = async ([width, height]) => {
+    if (!width || !height) {
+        throw new Error(`Incorrect rectangle width or height`);
+    }
+
+    const normalizedWidth = parseInt(width);
+    const normalizedHeight = parseInt(height);
+
+    await mouse.pressButton(Button.LEFT);
+
+    await mouse.move(right(normalizedWidth));
+    await mouse.move(down(normalizedHeight));
+    await mouse.move(left(normalizedWidth));
+    await mouse.move(up(normalizedHeight));
+
+    await mouse.releaseButton(Button.LEFT);
+
+    return `success draw_rectangle ${width} ${height}`;
+}
+
 export default {
     drawCircle,
-    drawSquare
+    drawSquare,
+    drawRectangle
 }
