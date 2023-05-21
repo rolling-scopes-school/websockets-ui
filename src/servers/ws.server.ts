@@ -1,5 +1,6 @@
 import WebSocket, {createWebSocketStream, WebSocketServer} from "ws";
 import {getCommandHandler} from "../commands/index.js";
+import {Duplex} from "stream";
 
 const handleConnection = (ws: WebSocket) => {
     console.log('New WebSocket client has been connected to WebSocket Server.');
@@ -9,12 +10,12 @@ const handleConnection = (ws: WebSocket) => {
         encoding: 'utf8',
     });
 
-    wsStream.on('data', handleMessage);
+    wsStream.on('data', (message: string) => handleMessage(message, wsStream));
 
     ws.on('close', handleClose);
 };
 
-const handleMessage = async (message: string): Promise<void> => {
+const handleMessage = async (message: string, wsStream: Duplex): Promise<void> => {
     console.log(`Received message: ${message}`);
 
     try {
@@ -28,7 +29,7 @@ const handleMessage = async (message: string): Promise<void> => {
 
         const commandHandler = getCommandHandler(commandName);
 
-        const result = await commandHandler(...args);
+        const result = await commandHandler(args, wsStream);
 
         console.log(`Command result: ${result}`);
     } catch (error: unknown) {
