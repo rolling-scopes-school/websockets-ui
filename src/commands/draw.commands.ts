@@ -1,5 +1,5 @@
 import {CommandHandler} from "../models/command-handler.type.js";
-import {Button, mouse, Point, straightTo} from "@nut-tree/nut-js";
+import {Button, down, left, mouse, Point, right, straightTo, up} from "@nut-tree/nut-js";
 
 const CIRCLE_DRAW_STEP = 0.05;
 
@@ -29,6 +29,26 @@ const drawCircle: CommandHandler = async ([radius]) => {
     return `success draw_circle ${radius}`;
 };
 
+export const drawSquare: CommandHandler = async ([sideWidth]) => {
+    if (!sideWidth) {
+        throw new Error(`Incorrect square side width`);
+    }
+
+    const normalizedSideWidth = parseInt(sideWidth);
+
+    await mouse.pressButton(Button.LEFT);
+
+    await mouse.move(right(normalizedSideWidth));
+    await mouse.move(down(normalizedSideWidth));
+    await mouse.move(left(normalizedSideWidth));
+    await mouse.move(up(normalizedSideWidth));
+
+    await mouse.releaseButton(Button.LEFT);
+
+    return `success draw_square ${sideWidth}`;
+}
+
 export default {
-    drawCircle
+    drawCircle,
+    drawSquare
 }
