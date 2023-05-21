@@ -3,10 +3,10 @@ import {Command} from "../models/command.type.js";
 import MoveCommands from "./move.commands.js";
 
 export const commands: Record<Command, CommandHandler> = {
-    mouse_left: async (offset: string) => MoveCommands.moveMouseLeft(offset),
-    mouse_right: async () => 'mouse_right',
-    mouse_down: async () => 'mouse_down',
-    mouse_up: async () => 'mouse_up',
+    mouse_left: MoveCommands.moveMouseLeft,
+    mouse_right: MoveCommands.moveMouseRight,
+    mouse_down: MoveCommands.moveMouseDown,
+    mouse_up: MoveCommands.moveMouseUp,
     mouse_position: async () => 'mouse_position',
     draw_square: async () => 'draw_square',
     draw_rectangle: async () => 'draw_rectangle',
