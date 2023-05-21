@@ -1,8 +1,9 @@
 import {CommandHandler} from "../models/command-handler.type.js";
 import {Command} from "../models/command.type.js";
+import MoveCommands from "./move.commands.js";
 
 export const commands: Record<Command, CommandHandler> = {
-    mouse_left: async () => 'mouse_left',
+    mouse_left: async (offset: string) => MoveCommands.moveMouseLeft(offset),
     mouse_right: async () => 'mouse_right',
     mouse_down: async () => 'mouse_down',
     mouse_up: async () => 'mouse_up',

@@ -21,8 +21,7 @@ const handleMessage = async (message: string): Promise<void> => {
         const [commandName, ...args] = message.split(' ');
 
         if (!commandName) {
-            console.log('Command name is incorrect');
-            return;
+            throw new Error('Command name is incorrect');
         }
 
         console.log(commandName, args);
