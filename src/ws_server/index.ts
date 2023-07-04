@@ -1,4 +1,6 @@
 import WebSocket from "ws";
+import { FrontR, FrontRegData, ServerRegData } from "./types";
+import { COMMANDS } from "./types/enum";
 
 
 interface Room {
@@ -17,12 +19,51 @@ export const start_WSS = () => {
 
     wss.on("connection", (wsClient) =>
         wsClient.on('message', async (message) => {
-            console.log(JSON.parse(message.toString()))
-            wsClient.send(JSON.stringify(message))
+            const frontRes: FrontR = JSON.parse(message.toString());
+            switch (frontRes.type) {
+                case COMMANDS.reg:
+                    const dataFront: FrontRegData = JSON.parse(frontRes.data);
+                    const dataServer: ServerRegData = {} as ServerRegData;
+                    dataServer.name = dataFront.name;
+                    dataServer.index = 1321561;
+                    const exp = { type: "reg", data: JSON.stringify(dataServer), id: 0 }
+                    wsClient.send(JSON.stringify(exp))
+                    break;
 
-            const examp = {
-                type: "reg"
+                case COMMANDS.createRoom:
+                    wsClient.send(JSON.stringify({
+                        type: "create_game",
+                        data:
+                        JSON.stringify({
+                                idGame: 46456,
+                                idPlayer: 456,
+                            }),
+                        id: 0,
+                    }))
+
+                   
+
+
+                default:
+                    break;
             }
+
+
+            // const examp = {
+            //     type: "reg",
+            //     data:
+            //     {
+            //         name: 'fffff',
+            //         index: 12345,
+            //         error: true,
+            //         errorText: 'fsdf',
+            //     },
+            //     id: 0,
+            // }
+
+            // const str = JSON.stringify(examp);
+
+
 
             // console.log(JSON.stringify(examp))
 
