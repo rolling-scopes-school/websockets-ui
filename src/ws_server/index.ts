@@ -58,27 +58,26 @@ export const start_WSS = () => {
                         id: 0
                     }
 
-                    const updateRoom = {
+                    const updateRoom = JSON.stringify({
                         type: "update_room",
-                        data:
-                        {
+                        data: 
                             [
-                                {
+                                JSON.stringify({
                                     roomId: 1,
                                     roomUsers:
                                         [
-                                            {
+                                            JSON.stringify({
                                                 name: 'Alex',
-                                                index: 321323141234,
-                                            }
+                                                index: 321323141234
+                                            })
                                         ],
-                                },
-                                ]
-                            },
-                        id: 0,
-                    }
+                                })
+                            ]
+                            
+                    })
+                    console.log(updateRoom)
                     wsClient.send(JSON.stringify(serverAnswer));
-                    wsClient.send(JSON.stringify(serverAnswer));
+                    wsClient.send(JSON.stringify(updateRoom));
                     break;
 
                 case COMMANDS.createRoom:
