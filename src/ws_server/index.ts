@@ -1,12 +1,11 @@
 import WebSocket from "ws";
-import { FrontR, FrontRegData } from "./types";
+import { FrontR, FrontRegData, FrontRoomData, FrontShipAdd, Ship } from "./types";
 import { COMMANDS } from "./types/enum";
 
 
 interface Room {
-    id: number,
     playerOne: ExtWebSocket,
-    PlayerTwo: ExtWebSocket,
+    playerTwo: ExtWebSocket,
     isEmpty: boolean,
 }
 
@@ -15,10 +14,15 @@ interface ExtWebSocket extends WebSocket {
     userName: string,
     password: string,
     isGame: boolean,
+    ships: Ship[]
 }
 
 const activePlayers: ExtWebSocket[] = [];
 
+interface Games {
+    [index: number]: Room
+
+}
 
 const games: Room[] = [];
 
@@ -27,7 +31,7 @@ export const start_WSS = () => {
 
     const WSS_PORT = 3000;
     let idGame: number = 0;
-
+   
     const wss = new WebSocket.Server({ port: WSS_PORT }, () => console.log('вебсокет'));
 
     wss.on("connection", (wsClient: ExtWebSocket) => {
@@ -35,7 +39,7 @@ export const start_WSS = () => {
         wsClient.index = Math.floor(Math.random() * Date.now());
 
         wsClient.on('message', async (message) => {
-            wsClient.index = Math.floor(Math.random() * Date.now());
+            
             const frontRes: FrontR = JSON.parse(message.toString());
 
             switch (frontRes.type) {
@@ -43,6 +47,7 @@ export const start_WSS = () => {
                     const dataFront: FrontRegData = JSON.parse(frontRes.data);
                     wsClient.userName = dataFront.name;
                     wsClient.password = dataFront.password;
+                    wsClient.index = Math.floor(Math.random() * Date.now());
                     let serverAnswer = {};
 
                     if (!activePlayers.find(player => player.userName === dataFront.name)) {
@@ -78,64 +83,64 @@ export const start_WSS = () => {
 
                 case COMMANDS.createRoom:
                     idGame += 1;
-                    games.push({ id: idGame, playerOne: wsClient, PlayerTwo: {} as ExtWebSocket, isEmpty: false });
+                    games[idGame] = {
+                        playerOne: wsClient,
+                        playerTwo: {} as ExtWebSocket,
+                        isEmpty: false
+                    };
                     updateRoom();
                     break;
 
                 case COMMANDS.addPlayer:
-
-                    const frontAdd: FrontR = JSON.parse(message.toString());
-console.log(frontAdd.data)
-                    wsClient.send(JSON.stringify({
-                        type: "create_game",
-                        data:
-                            JSON.stringify({
-                                idGame: 1,
-                                idPlayer: wsClient.index,
-                            }),
-                        id: 0,
-                    }))
+                    const dataRoom: FrontRoomData = JSON.parse(frontRes.data);
+                    if (games[dataRoom.indexRoom].playerOne.index !== wsClient.index) {
+                        games[dataRoom.indexRoom].playerTwo = wsClient;
+                        console.log(games[dataRoom.indexRoom].playerOne.index, 'playerOne')
+                        console.log(games[dataRoom.indexRoom].playerTwo.index, 'playerTwo')
+                        openRoom(games[dataRoom.indexRoom].playerOne, dataRoom.indexRoom);
+                        openRoom(games[dataRoom.indexRoom].playerTwo, dataRoom.indexRoom);
+                    }
                     break;
 
                 case COMMANDS.addShip:
 
-                    
-                // wsClient.send(JSON.stringify({
-                //     type: "create_game",
-                //     data:
-                //         JSON.stringify({
-                //             idGame: idGame,
-                //             idPlayer: player.index,
-                //         }),
-                //     id: 0,
-                // }))
+                    const dataShip: FrontShipAdd = JSON.parse(frontRes.data);
+                    wsClient.ships = dataShip.ships;
+                    console.log(games[dataShip.gameId].playerOne.index, 'playerOne')
+                    console.log(games[dataShip.gameId].playerTwo.index, 'playerTwo')
+                    checkStartGame(dataShip.gameId);
+                    break;
+
+                case COMMANDS.attack:
+                    console.log(frontRes);
 
 
+                    wsClient.send(
+                        JSON.stringify({
+                            type: "attack",
+                            data: JSON.stringify(
+                                {
+                                    position:
+                                    {
+                                        x: 1,
+                                        y: 1,
+                                    },
+                                    currentPlayer: games[1].playerOne.index,
+                                    status: "miss",
+                                }),
+                            id: 0,
+                        })
+                    )
+
+
+                    break;
 
                 default:
                     break;
             }
 
 
-            // const examp = {
-            //     type: "reg",
-            //     data:
-            //     {
-            //         name: 'fffff',
-            //         index: 12345,
-            //         error: true,
-            //         errorText: 'fsdf',
-            //     },
-            //     id: 0,
-            // }
 
-            // const str = JSON.stringify(examp);
-
-
-
-            // console.log(JSON.stringify(examp))
-
-            // wsClient.send(JSON.stringify(examp))
         }
         )
     })
@@ -170,14 +175,15 @@ const updateRoom = () => {
         type: "update_room",
         data:
             JSON.stringify(
-                games.map(game => {
+                Object.keys(games).map((gameId) => {
+                    const idNumber = Number(gameId);
                     return {
-                        roomId: game.id,
+                        roomId: idNumber,
                         roomUsers:
                             [
                                 {
-                                    name: game.playerOne.userName,
-                                    index: game.playerOne.index
+                                    name: games[idNumber].playerOne.userName,
+                                    index: games[idNumber].playerOne.index
                                 }
                             ]
 
@@ -186,6 +192,56 @@ const updateRoom = () => {
             )
     }
     activePlayers.map((player) => (!player.isGame) ? player.send(JSON.stringify(updateRoom)) : '');
+}
+
+
+function checkStartGame(gameId: number): void {
+    if (games[gameId].playerOne.ships && games[gameId].playerTwo.ships) {
+        startGame(games[gameId].playerOne);
+        startGame(games[gameId].playerTwo);
+        turnPlayer(games[gameId].playerOne, games[gameId].playerTwo);
+        turnPlayer(games[gameId].playerTwo, games[gameId].playerTwo);
+    }
+}
+
+
+
+function openRoom(player: ExtWebSocket, idRoom: number) {
+    player.send(JSON.stringify({
+        type: "create_game",
+        data:
+            JSON.stringify({
+                idGame: idRoom,
+                idPlayer: player.index,
+            }),
+        id: 0,
+    }))
+}
+
+function startGame(player: ExtWebSocket): void {
+    player.send(JSON.stringify({
+        type: "start_game",
+        data: JSON.stringify(
+            {
+                ships: player.ships,
+                currentPlayerIndex: player.index
+            }),
+        id: 0,
+    }))
+}
+
+
+function turnPlayer(player: ExtWebSocket, playerTurn: ExtWebSocket) {
+    console.log(player.index)
+    player.send(JSON.stringify({
+        type: COMMANDS.turn,
+        data: JSON.stringify(
+            {
+                currentPlayer: playerTurn.index,
+            }),
+        id: 0,
+    }
+    ))
 }
 
 
