@@ -1,26 +1,26 @@
 import WebSocket from "ws";
-import { FrontR, FrontRegData, ServerRegData } from "./types";
+import { FrontR, FrontRegData } from "./types";
 import { COMMANDS } from "./types/enum";
 
 
 interface Room {
-    ws1: WebSocket,
-    ws2: WebSocket
+    id: number,
+    playerOne: ExtWebSocket,
+    PlayerTwo: ExtWebSocket,
+    isEmpty: boolean,
 }
 
-interface Player {
+interface ExtWebSocket extends WebSocket {
     index: number,
-    // userName: string,
-    wsClient: WebSocket
+    userName: string,
+    password: string,
+    isGame: boolean,
 }
 
-type idGame = number;
+const activePlayers: ExtWebSocket[] = [];
 
-interface Games {
-    [key: number]: Player[]
-}
 
-const games: Games = {};
+const games: Room[] = [];
 
 
 export const start_WSS = () => {
@@ -30,71 +30,76 @@ export const start_WSS = () => {
 
     const wss = new WebSocket.Server({ port: WSS_PORT }, () => console.log('вебсокет'));
 
-    wss.on("connection", (wsClient: WebSocket) => {
+    wss.on("connection", (wsClient: ExtWebSocket) => {
+
+        wsClient.index = Math.floor(Math.random() * Date.now());
 
         wsClient.on('message', async (message) => {
-            const player: Player = {
-                index: Math.floor(Math.random() * Date.now()),
-                wsClient: wsClient,
-
-            }
+            wsClient.index = Math.floor(Math.random() * Date.now());
             const frontRes: FrontR = JSON.parse(message.toString());
-            console.log(frontRes)
 
             switch (frontRes.type) {
                 case COMMANDS.reg:
                     const dataFront: FrontRegData = JSON.parse(frontRes.data);
+                    wsClient.userName = dataFront.name;
+                    wsClient.password = dataFront.password;
+                    let serverAnswer = {};
 
-                    const serverAnswer = {
+                    if (!activePlayers.find(player => player.userName === dataFront.name)) {
+                        activePlayers.push(wsClient);
+                        serverAnswer = {
+                            type: "reg",
+                            data: JSON.stringify(
+                                {
+                                    name: wsClient.userName,
+                                    index: wsClient.index,
+                                    error: false,
+                                    message: ''
+                                }),
+                            id: 0
+                        }
+                    } else
+                        serverAnswer = {
 
-                        type: "reg",
-                        data: JSON.stringify(
-                            {
-                                name: dataFront.name,
-                                index: player.index,
-                                error: false,
-                                message: ''
-                            }),
-                        id: 0
-                    }
+                            type: "reg",
+                            data: JSON.stringify(
+                                {
+                                    name: '',
+                                    index: '',
+                                    error: true,
+                                    message: 'The user exists'
+                                }),
+                            id: 0
+                        }
 
-                    const updateRoom = JSON.stringify({
-                        type: "update_room",
-                        data: 
-                            [
-                                JSON.stringify({
-                                    roomId: 1,
-                                    roomUsers:
-                                        [
-                                            JSON.stringify({
-                                                name: 'Alex',
-                                                index: 321323141234
-                                            })
-                                        ],
-                                })
-                            ]
-                            
-                    })
-                    console.log(updateRoom)
                     wsClient.send(JSON.stringify(serverAnswer));
-                    wsClient.send(JSON.stringify(updateRoom));
+                    updateRoom();
                     break;
 
                 case COMMANDS.createRoom:
                     idGame += 1;
-                    initGame(player, idGame);
+                    games.push({ id: idGame, playerOne: wsClient, PlayerTwo: {} as ExtWebSocket, isEmpty: false });
+                    updateRoom();
+                    break;
+
+                case COMMANDS.addPlayer:
+
+                    const frontAdd: FrontR = JSON.parse(message.toString());
+console.log(frontAdd.data)
                     wsClient.send(JSON.stringify({
                         type: "create_game",
                         data:
                             JSON.stringify({
-                                idGame: idGame,
-                                idPlayer: player.index,
+                                idGame: 1,
+                                idPlayer: wsClient.index,
                             }),
                         id: 0,
                     }))
+                    break;
+
                 case COMMANDS.addShip:
 
-                    console.log(frontRes.data)
+                    
                 // wsClient.send(JSON.stringify({
                 //     type: "create_game",
                 //     data:
@@ -137,25 +142,57 @@ export const start_WSS = () => {
 }
 
 
-const initGame = (player: Player, gameId: number) => {
+// const initGame = (player: Player, gameId: number) => {
 
-    if (!games[gameId]) {
-        games[gameId] = [player];
-        console.log(games, 'new');
-        return;
+//     if (!games[gameId]) {
+//         games[gameId] = [player];
+//         console.log(games, 'new');
+//         return;
+//     }
+
+//     if (games[gameId] && games[gameId]?.length < 2) {
+//         console.log('12')
+//         games[gameId] = [...games[gameId], player];
+//         return;
+//     }
+
+//     if (games[gameId] && games[gameId]?.length === 2) {
+//         games[gameId] = games[gameId].filter(playerNew => playerNew.index !== player.index);
+//         games[gameId] = [...games[gameId], player];
+//         console.log(games, 'return')
+//         return;
+//     }
+
+// }
+
+const updateRoom = () => {
+    const updateRoom = {
+        type: "update_room",
+        data:
+            JSON.stringify(
+                games.map(game => {
+                    return {
+                        roomId: game.id,
+                        roomUsers:
+                            [
+                                {
+                                    name: game.playerOne.userName,
+                                    index: game.playerOne.index
+                                }
+                            ]
+
+                    }
+                })
+            )
     }
-
-    if (games[gameId] && games[gameId]?.length < 2) {
-        console.log('12')
-        games[gameId] = [...games[gameId], player];
-        return;
-    }
-
-    if (games[gameId] && games[gameId]?.length === 2) {
-        games[gameId] = games[gameId].filter(playerNew => playerNew.index !== player.index);
-        games[gameId] = [...games[gameId], player];
-        console.log(games, 'return')
-        return;
-    }
-
+    activePlayers.map((player) => (!player.isGame) ? player.send(JSON.stringify(updateRoom)) : '');
 }
+
+
+// const refreshUser = (name: string): Player => {
+//     let resultPlayer: Player = {} as Player;
+
+//     Object.keys(games).map((game: string) => games[Number(game)].map((player: Player) => player.userName === name ? resultPlayer = player : {}))
+
+//     return resultPlayer;
+// }
