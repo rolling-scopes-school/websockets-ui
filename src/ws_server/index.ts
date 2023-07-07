@@ -1,37 +1,18 @@
 import WebSocket from "ws";
-import { FrontR, FrontRegData, FrontRoomData, FrontShipAdd, Ship } from "./types";
+import { ExtWebSocket, FrontR, FrontRegData, FrontRoomData, FrontShipAdd, Games, Room } from "./types";
 import { COMMANDS } from "./types/enum";
+import { Game } from "./src/game";
 
-
-interface Room {
-    playerOne: ExtWebSocket,
-    playerTwo: ExtWebSocket,
-    isEmpty: boolean,
-}
-
-interface ExtWebSocket extends WebSocket {
-    index: number,
-    userName: string,
-    password: string,
-    isGame: boolean,
-    ships: Ship[]
-}
 
 const activePlayers: ExtWebSocket[] = [];
 
-interface Games {
-    [index: number]: Room
-
-}
-
-const games: Room[] = [];
-
+const games: Games = {};
 
 export const start_WSS = () => {
 
     const WSS_PORT = 3000;
     let idGame: number = 0;
-   
+
     const wss = new WebSocket.Server({ port: WSS_PORT }, () => console.log('вебсокет'));
 
     wss.on("connection", (wsClient: ExtWebSocket) => {
@@ -39,7 +20,7 @@ export const start_WSS = () => {
         wsClient.index = Math.floor(Math.random() * Date.now());
 
         wsClient.on('message', async (message) => {
-            
+
             const frontRes: FrontR = JSON.parse(message.toString());
 
             switch (frontRes.type) {
@@ -83,38 +64,22 @@ export const start_WSS = () => {
 
                 case COMMANDS.createRoom:
                     idGame += 1;
-                    games[idGame] = {
-                        playerOne: wsClient,
-                        playerTwo: {} as ExtWebSocket,
-                        isEmpty: false
-                    };
+                    games[idGame] = new Game(wsClient, {} as ExtWebSocket, idGame);
                     updateRoom();
                     break;
 
                 case COMMANDS.addPlayer:
                     const dataRoom: FrontRoomData = JSON.parse(frontRes.data);
-                    if (games[dataRoom.indexRoom].playerOne.index !== wsClient.index) {
-                        games[dataRoom.indexRoom].playerTwo = wsClient;
-                        console.log(games[dataRoom.indexRoom].playerOne.index, 'playerOne')
-                        console.log(games[dataRoom.indexRoom].playerTwo.index, 'playerTwo')
-                        openRoom(games[dataRoom.indexRoom].playerOne, dataRoom.indexRoom);
-                        openRoom(games[dataRoom.indexRoom].playerTwo, dataRoom.indexRoom);
-                    }
+                    games[dataRoom.indexRoom].addPLayer(wsClient);
                     break;
 
                 case COMMANDS.addShip:
-
                     const dataShip: FrontShipAdd = JSON.parse(frontRes.data);
-                    wsClient.ships = dataShip.ships;
-                    console.log(games[dataShip.gameId].playerOne.index, 'playerOne')
-                    console.log(games[dataShip.gameId].playerTwo.index, 'playerTwo')
-                    checkStartGame(dataShip.gameId);
+                    games[dataShip.gameId].addShip(dataShip.ships, dataShip.indexPlayer);
                     break;
 
                 case COMMANDS.attack:
                     console.log(frontRes);
-
-
                     wsClient.send(
                         JSON.stringify({
                             type: "attack",
@@ -131,9 +96,10 @@ export const start_WSS = () => {
                             id: 0,
                         })
                     )
-
-
                     break;
+
+                case COMMANDS.randomAttack:
+                    console.log(frontRes);
 
                 default:
                     break;
@@ -145,30 +111,6 @@ export const start_WSS = () => {
         )
     })
 }
-
-
-// const initGame = (player: Player, gameId: number) => {
-
-//     if (!games[gameId]) {
-//         games[gameId] = [player];
-//         console.log(games, 'new');
-//         return;
-//     }
-
-//     if (games[gameId] && games[gameId]?.length < 2) {
-//         console.log('12')
-//         games[gameId] = [...games[gameId], player];
-//         return;
-//     }
-
-//     if (games[gameId] && games[gameId]?.length === 2) {
-//         games[gameId] = games[gameId].filter(playerNew => playerNew.index !== player.index);
-//         games[gameId] = [...games[gameId], player];
-//         console.log(games, 'return')
-//         return;
-//     }
-
-// }
 
 const updateRoom = () => {
     const updateRoom = {
@@ -193,62 +135,3 @@ const updateRoom = () => {
     }
     activePlayers.map((player) => (!player.isGame) ? player.send(JSON.stringify(updateRoom)) : '');
 }
-
-
-function checkStartGame(gameId: number): void {
-    if (games[gameId].playerOne.ships && games[gameId].playerTwo.ships) {
-        startGame(games[gameId].playerOne);
-        startGame(games[gameId].playerTwo);
-        turnPlayer(games[gameId].playerOne, games[gameId].playerTwo);
-        turnPlayer(games[gameId].playerTwo, games[gameId].playerTwo);
-    }
-}
-
-
-
-function openRoom(player: ExtWebSocket, idRoom: number) {
-    player.send(JSON.stringify({
-        type: "create_game",
-        data:
-            JSON.stringify({
-                idGame: idRoom,
-                idPlayer: player.index,
-            }),
-        id: 0,
-    }))
-}
-
-function startGame(player: ExtWebSocket): void {
-    player.send(JSON.stringify({
-        type: "start_game",
-        data: JSON.stringify(
-            {
-                ships: player.ships,
-                currentPlayerIndex: player.index
-            }),
-        id: 0,
-    }))
-}
-
-
-function turnPlayer(player: ExtWebSocket, playerTurn: ExtWebSocket) {
-    console.log(player.index)
-    player.send(JSON.stringify({
-        type: COMMANDS.turn,
-        data: JSON.stringify(
-            {
-                currentPlayer: playerTurn.index,
-            }),
-        id: 0,
-    }
-    ))
-}
-
-
-// const refreshUser = (name: string): Player => {
-//     let resultPlayer: Player = {} as Player;
-
-//     Object.keys(games).map((game: string) => games[Number(game)].map((player: Player) => player.userName === name ? resultPlayer = player : {}))
-
-//     return resultPlayer;
-// }

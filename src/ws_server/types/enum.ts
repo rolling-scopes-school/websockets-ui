@@ -5,5 +5,6 @@ export enum COMMANDS {
     updateRoom = "update_room",
     addPlayer = "add_user_to_room",
     attack = 'attack',
-    turn = "turn"
+    turn = "turn",
+    randomAttack = "randomAttack",
 }

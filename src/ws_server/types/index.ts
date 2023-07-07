@@ -1,3 +1,4 @@
+import WebSocket from "ws";
 import { COMMANDS } from "./enum";
 
 export interface FrontR {
@@ -37,4 +38,38 @@ export interface ServerRegData {
     index: number,
     error: boolean,
     message: string,
+}
+
+export interface ExtWebSocket extends WebSocket {
+    index: number,
+    userName: string,
+    password: string,
+    isGame: boolean,
+    ships: Ship[]
+}
+
+export interface Room {
+    playerOne: ExtWebSocket,
+    playerTwo: ExtWebSocket,
+}
+
+export interface Games {
+    [index: number]: Game;
+}
+
+export interface AttackData {
+    gameID: number,
+    x: number,
+    y: number,
+    indexPlayer: number,
+}
+
+export interface Game {
+    playerOne: ExtWebSocket;
+    playerTwo: ExtWebSocket;
+    shotPlayer: ExtWebSocket;
+    idRoom: number;
+    addPLayer(wsClient: ExtWebSocket): void;
+    addShip(ships: Ship[], indexPLayer: number): void
+
 }
