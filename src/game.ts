@@ -1,10 +1,27 @@
-import { AttackedShip, Commands, ExtendedWebSocket, Game, Position, PositionStatus, Room, RoomModified, Ship, ShipOption, Status, User } from "./types";
+import {
+    AttackedShip,
+    Commands,
+    ExtendedWebSocket,
+    Game,
+    Position,
+    PositionStatus,
+    Room,
+    RoomModified,
+    Rooms,
+    Ship,
+    ShipOption,
+    Status,
+    User,
+    Winners,
+    WinnersArr
+} from "./types";
 
 let userIndex: number = 1;
 const users: User[] = [];
-const rooms: Map<number, Room> = new Map();
+const rooms: Rooms = new Map();
 let roomId: number = 1;
 let gameId: number = 1;
+const winners: Winners = new Map();
 
 export const createUser = (name: string, password: string, socket: ExtendedWebSocket): void => {
     const index: number = userIndex++;
@@ -26,6 +43,7 @@ export const createUser = (name: string, password: string, socket: ExtendedWebSo
     }));
 
     updateRooms();
+    updateWinners();
 }
 
 export const updateRooms = (): void => {
@@ -195,9 +213,14 @@ export const attack = (x: number, y: number, gameId: number, indexPlayer: number
     }
 
     if (game.isFinished) {
-        sendFinishGame(game, game.currentPlayer);
+        sendFinishGame(game);
         removeRoom(gameId);
+
+        const player = game.currentPlayer === 0 ? game.firstUser : game.secondUser;
+        
+        addWin(player.name || 'anonymous');
         updateRooms();
+        updateWinners();
     } else {
         changeTurn(game, attackedShip.status === Status.Miss);
     }
@@ -245,11 +268,11 @@ const sendMissMessagesAfterKill = (game: Game, ship: Ship, indexPlayer: number):
     });
 }
 
-const sendFinishGame = (game: Game, winPlayer: number): void => {
+const sendFinishGame = (game: Game): void => {
     [game.firstUser, game.secondUser].forEach((user: ExtendedWebSocket) => user.send(JSON.stringify({
         type: Commands.Finish,
         data: JSON.stringify({
-            winPlayer,
+            winPlayer: game.currentPlayer,
         }),
         id: 0,
     })))
@@ -377,4 +400,36 @@ const checkRandomPosition = (game: Game, point: Position): boolean => {
     const shots: Position[] = game.currentPlayer === 0 ? game.firstShots : game.secondShots;
     
     return !shots.some((shot: Position) => shot.x === point.x && shot.y === point.y); 
+}
+
+const addWin = (name: string): void => {
+    let wins: number = 1;
+
+    if (winners.get(name)) {
+        wins = winners.get(name)! + 1;
+    }
+    
+    winners.set(name, wins);
+}
+
+const updateWinners = (): void => {
+    users.filter((user: User) => !user.inGame).forEach((user: User) => user.socket.send(
+        JSON.stringify({
+        type: Commands.UpdateWinners,
+        data: JSON.stringify(getWinners()),
+        id: 0,
+    })));
+}
+
+const getWinners = (): WinnersArr[] => {
+    const winnersArr: WinnersArr[] = [];
+
+    for (const entry of winners.entries()) {
+        winnersArr.push({
+            name: entry[0],
+            wins: entry[1]
+        })
+    }
+
+    return winnersArr;
 }

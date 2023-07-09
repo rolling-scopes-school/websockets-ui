@@ -12,6 +12,7 @@ export enum Commands {
     Turn = "turn",
     RandomAttack = "randomAttack",
     Finish = "finish",
+    UpdateWinners = "update_winners",
 }
 
 export enum Status {
@@ -38,6 +39,8 @@ export type User = {
     socket: ExtendedWebSocket,
     inGame: boolean,
 }
+
+export type Rooms = Map<number, Room>
 
 export type Room = {
     id: number,
@@ -90,4 +93,11 @@ export type ShipOption = {
 export type AttackedShip = {
     status: Status,
     killedShip: Ship,
+}
+
+export type Winners = Map<string, number>
+
+export type WinnersArr = {
+    name: string,
+    wins: number,
 }
