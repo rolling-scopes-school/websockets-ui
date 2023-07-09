@@ -1,6 +1,8 @@
 import { RawData, Server } from "ws";
 
-import { addShips, addUser, attack, createRoom, createUser, randomAttack } from "../game";
+import { addShips, createUser, randomAttack } from "../game/users";
+import { createRoom } from "../game/rooms";
+import { addUser, attack } from "../game/game";
 
 import { ExtendedWebSocket, Response, Commands } from "../types";
 
