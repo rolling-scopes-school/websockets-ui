@@ -23,14 +23,19 @@ export interface FrontShipAdd {
     indexPlayer: number,
 }
 
+export type typeShip = "small" | "medium" | "large" | "huge"
+
 export interface Ship {
-    position: {
-        x: number,
-        y: number,
-    },
+    position: ShipPosition,
     direction: boolean,
     length: number,
-    type: "small" | "medium" | "large" | "huge",
+    type: typeShip,
+    rest: number;
+}
+
+export type ShipPosition = {
+    x: number,
+    y: number,
 }
 
 export interface ServerRegData {
@@ -45,7 +50,17 @@ export interface ExtWebSocket extends WebSocket {
     userName: string,
     password: string,
     isGame: boolean,
-    ships: Ship[]
+    ships: Ship[],
+    attackCell: ShipPosition[]
+}
+
+export interface Player {
+    index: number,
+    userName: string,
+    password: string,
+    ships: Ship[],
+    attackCell: ShipPosition[],
+    socket?: WebSocket
 }
 
 export interface Room {
@@ -58,18 +73,31 @@ export interface Games {
 }
 
 export interface AttackData {
-    gameID: number,
+    gameId: number,
     x: number,
     y: number,
     indexPlayer: number,
 }
 
 export interface Game {
-    playerOne: ExtWebSocket;
-    playerTwo: ExtWebSocket;
-    shotPlayer: ExtWebSocket;
+    playerOne: Player;
+    playerTwo: Player;
+    shotPlayer: Player;
     idRoom: number;
-    addPLayer(wsClient: ExtWebSocket): void;
-    addShip(ships: Ship[], indexPLayer: number): void
+    addPLayer(wsClient: Player): void;
+    addShip(ships: Ship[], indexPLayer: number): void;
+    randomAttack(indexPLayer: number): void;
+    attack(attackData: AttackData): void
 
+}
+
+export interface RandomAttackData {
+    gameId: number,
+    indexPlayer: number
+}
+export type resultAttack = "miss" | "killed" | "shot";
+
+export interface cellShip {
+    xCoor: number[];
+    yCoor: number[];
 }

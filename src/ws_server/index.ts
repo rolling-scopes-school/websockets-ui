@@ -1,11 +1,11 @@
 import WebSocket from "ws";
-import { ExtWebSocket, FrontR, FrontRegData, FrontRoomData, FrontShipAdd, Games, Room } from "./types";
+import { AttackData, ExtWebSocket, FrontR, FrontRegData, FrontRoomData, FrontShipAdd, Games, Player, RandomAttackData } from "./types";
 import { COMMANDS } from "./types/enum";
 import { Game } from "./src/game";
 
 
-const activePlayers: ExtWebSocket[] = [];
-
+const activePlayers: string[] = [];
+const sockets: WebSocket[] = [];
 const games: Games = {};
 
 export const start_WSS = () => {
@@ -16,29 +16,37 @@ export const start_WSS = () => {
     const wss = new WebSocket.Server({ port: WSS_PORT }, () => console.log('вебсокет'));
 
     wss.on("connection", (wsClient: ExtWebSocket) => {
-
+        sockets.push(wsClient);
         wsClient.index = Math.floor(Math.random() * Date.now());
 
         wsClient.on('message', async (message) => {
 
             const frontRes: FrontR = JSON.parse(message.toString());
+            const player: Player = {
+                index: Math.floor(Math.random() * Date.now()),
+                userName: '',
+                password: '',
+                ships: [],
+                attackCell: [],
+                socket: wsClient
+            }
 
             switch (frontRes.type) {
                 case COMMANDS.reg:
+
                     const dataFront: FrontRegData = JSON.parse(frontRes.data);
-                    wsClient.userName = dataFront.name;
-                    wsClient.password = dataFront.password;
-                    wsClient.index = Math.floor(Math.random() * Date.now());
+                    player.userName = dataFront.name;
+                    player.userName = dataFront.password;
                     let serverAnswer = {};
 
-                    if (!activePlayers.find(player => player.userName === dataFront.name)) {
-                        activePlayers.push(wsClient);
+                    if (!activePlayers.find(player => player === dataFront.name)) {
+                        activePlayers.push(dataFront.name);
                         serverAnswer = {
-                            type: "reg",
+                            type: COMMANDS.reg,
                             data: JSON.stringify(
                                 {
-                                    name: wsClient.userName,
-                                    index: wsClient.index,
+                                    name: player.userName,
+                                    index: player.index,
                                     error: false,
                                     message: ''
                                 }),
@@ -46,8 +54,7 @@ export const start_WSS = () => {
                         }
                     } else
                         serverAnswer = {
-
-                            type: "reg",
+                            type: COMMANDS.reg,
                             data: JSON.stringify(
                                 {
                                     name: '',
@@ -64,13 +71,13 @@ export const start_WSS = () => {
 
                 case COMMANDS.createRoom:
                     idGame += 1;
-                    games[idGame] = new Game(wsClient, {} as ExtWebSocket, idGame);
+                    games[idGame] = new Game(player, {} as Player, idGame, false);
                     updateRoom();
                     break;
 
                 case COMMANDS.addPlayer:
                     const dataRoom: FrontRoomData = JSON.parse(frontRes.data);
-                    games[dataRoom.indexRoom].addPLayer(wsClient);
+                    games[dataRoom.indexRoom].addPLayer(player);
                     break;
 
                 case COMMANDS.addShip:
@@ -79,34 +86,22 @@ export const start_WSS = () => {
                     break;
 
                 case COMMANDS.attack:
-                    console.log(frontRes);
-                    wsClient.send(
-                        JSON.stringify({
-                            type: "attack",
-                            data: JSON.stringify(
-                                {
-                                    position:
-                                    {
-                                        x: 1,
-                                        y: 1,
-                                    },
-                                    currentPlayer: games[1].playerOne.index,
-                                    status: "miss",
-                                }),
-                            id: 0,
-                        })
-                    )
+                    const dataAttack: AttackData = JSON.parse(frontRes.data);
+                    games[dataAttack.gameId].attack(dataAttack);
                     break;
 
                 case COMMANDS.randomAttack:
-                    console.log(frontRes);
+                    const dataRandom: RandomAttackData = JSON.parse(frontRes.data);
+                    games[dataRandom.gameId].randomAttack(dataRandom.indexPlayer);
+                    break;
+                case COMMANDS.single:
+                    idGame += 1;
+                    games[idGame] = new Game(player, {} as Player, idGame, true);
+
 
                 default:
                     break;
             }
-
-
-
         }
         )
     })
@@ -133,5 +128,5 @@ const updateRoom = () => {
                 })
             )
     }
-    activePlayers.map((player) => (!player.isGame) ? player.send(JSON.stringify(updateRoom)) : '');
+    sockets.map(socket => socket.send(JSON.stringify(updateRoom)));
 }
