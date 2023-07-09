@@ -1,6 +1,6 @@
 import { RawData, Server } from "ws";
 
-import { createUser } from "../game";
+import { createRoom, createUser } from "../game";
 
 import { ExtendedWebSocket, Response, Commands } from "../types";
 
@@ -16,6 +16,11 @@ export const wsServer = (port: number): void => {
                     const { name, password } = JSON.parse(response.data);
                     
                     createUser(name, password, socket);
+
+                    break;
+                }
+                case Commands.CreateRoom: {
+                    createRoom(socket);
 
                     break;
                 }

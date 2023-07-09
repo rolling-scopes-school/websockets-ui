@@ -3,6 +3,7 @@ import { Commands, ExtendedWebSocket, Room, RoomModified, User } from "./types";
 let userIndex: number = 1;
 const users: User[] = [];
 const rooms: Map<number, Room> = new Map();
+let roomId: number = 1;
 
 export const createUser = (name: string, password: string, socket: ExtendedWebSocket): void => {
     const index: number = userIndex++;
@@ -55,4 +56,18 @@ const getAllFreeRoms = (): RoomModified[] => {
     });
 
     return roomsArr;
+}
+
+export const createRoom = (firstPlayer: ExtendedWebSocket): void => {
+    const id: number = roomId++;
+    const room: Room = {
+        id,
+        firstPlayer,
+        secondPlayer: null,
+        game: null,
+    };
+
+    rooms.set(id, room);
+
+    updateRooms();
 }
