@@ -1,6 +1,6 @@
 import { RawData, Server } from "ws";
 
-import { addShips, addUser, attack, createRoom, createUser } from "../game";
+import { addShips, addUser, attack, createRoom, createUser, randomAttack } from "../game";
 
 import { ExtendedWebSocket, Response, Commands } from "../types";
 
@@ -43,6 +43,13 @@ export const wsServer = (port: number): void => {
 
                     attack(x, y, gameId, indexPlayer);
 
+                    break;
+                }
+                case Commands.RandomAttack: {
+                    const { gameId, indexPlayer } = JSON.parse(response.data);
+                    
+                    randomAttack(gameId, indexPlayer);
+                    
                     break;
                 }
                 default:

@@ -353,3 +353,28 @@ const getSidesPositions = (x: number, y: number): Position[] => {
 }
 
 const checkPosition = (x: number, y: number): boolean => !(x < 0 || x > 9  || y < 0 || y > 9);
+
+export const randomAttack = (gameId: number, indexPlayer: number): void => {
+    const game: Game = getGame(gameId);
+    
+    let position: Position = getRandomPosition();
+
+    while (!checkRandomPosition(game, position)) {
+        position = getRandomPosition();
+    }
+
+    attack(position.x, position.y, gameId, indexPlayer);
+}
+
+const getRandomPosition = (): Position => {
+    const x: number = Math.ceil(Math.random() * 10) - 1;
+    const y: number = Math.ceil(Math.random() * 10) - 1;
+
+    return { x, y };
+}
+
+const checkRandomPosition = (game: Game, point: Position): boolean => {
+    const shots: Position[] = game.currentPlayer === 0 ? game.firstShots : game.secondShots;
+    
+    return !shots.some((shot: Position) => shot.x === point.x && shot.y === point.y); 
+}
