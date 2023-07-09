@@ -1,4 +1,4 @@
-import { Commands, ExtendedWebSocket, Game, Room, RoomModified, User } from "./types";
+import { Commands, ExtendedWebSocket, Game, Position, PositionStatus, Room, RoomModified, Ship, ShipOption, User } from "./types";
 
 let userIndex: number = 1;
 const users: User[] = [];
@@ -108,3 +108,69 @@ export const addUser = (roomId: number, secondPlayer: ExtendedWebSocket): void =
 
 const getRoom = (id: number): Room => rooms.get(id);
 
+export const addShips = (gameId: number, ships: ShipOption[], indexPlayer: number): void => {
+    const game: Game = getGame(gameId);
+
+    if (!game) {
+        return;
+    }
+
+    if (indexPlayer === 0) {
+        game.firstShips = updateShips(ships);
+    } else {
+        game.secondShips = updateShips(ships);
+    }
+
+    if (game.firstShips && game.secondShips) {
+        [game.firstUser, game.secondUser].forEach((user: ExtendedWebSocket) => user.send(JSON.stringify({
+            type: Commands.StartGame,
+            data: JSON.stringify({
+                ships: user === game.firstUser ? game.firstShips : game.secondShips,
+                currentPlayerIndex: game.currentPlayer,
+            }),
+            id: 0,
+        })));
+
+        changeTurn(game, false);
+    }
+}
+
+const getGame = (gameId: number): Game => {
+    for (const room of rooms.values()) {
+        if (room.game?.id === gameId) {
+            return room.game;
+        }
+    }
+}
+
+const updateShips = (ships: ShipOption[]): Ship[] => {
+    return ships.map((ship: ShipOption) => {
+        const start: Position = ship.position;
+        const points: PositionStatus[] = [];
+
+        for (let i = 0; i < ship.length; i++) {
+            ship.direction
+                ? points.push({ x: start.x, y: start.y + i, status: true })
+                : points.push({ x: start.x + i, y: start.y, status: true });
+        }
+
+        return {
+            isKilled: false,
+            points
+        };
+    });
+}
+
+const changeTurn = (game: Game, turn: boolean): void => {
+    if (turn) {
+        game.currentPlayer = game.currentPlayer === 0 ? 1 : 0;
+    }
+
+    [game.firstUser, game.secondUser].forEach((user: ExtendedWebSocket) => user.send(JSON.stringify({
+        type: Commands.Turn,
+        data: JSON.stringify({
+            currentPlayer: game.currentPlayer,
+        }),
+        id: 0,
+    })));
+}

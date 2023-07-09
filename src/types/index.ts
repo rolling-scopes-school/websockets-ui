@@ -74,3 +74,9 @@ export type Position = {
 export interface PositionStatus extends Position {
     status: boolean,
 }
+export type ShipOption = {
+    position: Position,
+    direction: boolean,
+    length: number,
+    type: "small" | "medium" | "large" | "huge",
+}
