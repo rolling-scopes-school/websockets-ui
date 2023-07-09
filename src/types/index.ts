@@ -14,6 +14,12 @@ export enum Commands {
     Finish = "finish",
 }
 
+export enum Status {
+    Miss = "miss",
+    Shot = "shot",
+    Killed = "killed",
+}
+
 export type Response = {
     id: number,
     type: Commands,
@@ -79,4 +85,9 @@ export type ShipOption = {
     direction: boolean,
     length: number,
     type: "small" | "medium" | "large" | "huge",
+}
+
+export type AttackedShip = {
+    status: Status,
+    killedShip: Ship,
 }
