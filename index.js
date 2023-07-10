@@ -1,12 +1,37 @@
-import { WebSocket } from "ws";
+import WebSocket, { WebSocketServer } from "ws";
 import { httpServer } from "./src/http_server/index.js";
+import { commandRouter } from "./src/commands_hub/commandRouter.js";
 const HTTP_PORT = 8181;
+
+let DB = {
+    players: {
+        
+    },
+};
 
 console.log(`Start static http server on the ${HTTP_PORT} port!`);
 httpServer.listen(HTTP_PORT);
 
-const ws = new WebSocket;
-let socket = new ws.Server ('ws://localhost:3000');
+const wss = new WebSocketServer ({port : 3000});
 
-socket.onmessage = event => console.log(event.data);
-socket.onerror = error => console.log(error);
+wss.on('connection', (ws) => {
+    ws.on('error', error => console.error);
+    ws.on('message', (event) => {
+        const [commandResponse, isForEach] = commandRouter(JSON.parse(event));
+        if (commandResponse !== undefined && !isForEach) {
+            ws.send(commandResponse);
+        } else if (commandResponse !== undefined && isForEach) {
+            wss.clients.forEach( (client) => {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(commandResponse);
+                }
+            })
+        }
+    });
+})
+
+export const updateDB = (dbInstance = DB) => {
+    DB = dbInstance;
+    console.log(DB);
+    return DB;
+}
