@@ -47,11 +47,6 @@ export interface ServerRegData {
 
 export interface ExtWebSocket extends WebSocket {
     index: number,
-    userName: string,
-    password: string,
-    isGame: boolean,
-    ships: Ship[],
-    attackCell: ShipPosition[]
 }
 
 export interface Player {
@@ -61,11 +56,6 @@ export interface Player {
     ships: Ship[],
     attackCell: ShipPosition[],
     socket?: WebSocket
-}
-
-export interface Room {
-    playerOne: ExtWebSocket,
-    playerTwo: ExtWebSocket,
 }
 
 export interface Games {
@@ -100,4 +90,9 @@ export type resultAttack = "miss" | "killed" | "shot";
 export interface cellShip {
     xCoor: number[];
     yCoor: number[];
+}
+
+export interface Winner {
+    name: string,
+    wins: number,
 }

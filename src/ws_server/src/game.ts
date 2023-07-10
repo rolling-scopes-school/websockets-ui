@@ -1,5 +1,7 @@
-import { AttackData, ExtWebSocket, Player, Room, Ship, cellShip, resultAttack } from "../types";
+import { AttackData, Player, Ship, cellShip, resultAttack } from "../types";
 import { COMMANDS } from "../types/enum";
+import { shipsBot } from "./shipsBot";
+import { Winners } from "./winners";
 
 export class Game implements Game {
     playerOne: Player;
@@ -27,6 +29,7 @@ export class Game implements Game {
     }
 
     addShip(ships: Ship[], indexPLayer: number): void {
+        console.log(ships);
         [this.playerOne, this.playerTwo].map((player) => {
             if (player.index === indexPLayer) {
                 player.ships = ships;
@@ -72,13 +75,13 @@ export class Game implements Game {
 
     private generateRandomCoor = () => {
         return {
-            x: Math.ceil(Math.random() * 9),
-            y: Math.ceil(Math.random() * 9)
+            x: Math.round(Math.random() * 10),
+            y: Math.round(Math.random() * 10)
         }
     }
 
     randomAttack(): void {
-        let coor = this.generateRandomCoor();
+        const coor = this.generateRandomCoor();
         if (this.checkRepeatShot(coor.x, coor.y, this.shotPlayer)) {
             this.attack(
                 {
@@ -166,7 +169,7 @@ export class Game implements Game {
             this.turnPlayer();
             attacked.ships[isHit].rest -= 1;
             if (attacked.ships[isHit].rest === 0) {
-                this.checkKilled(attacked.ships[isHit], attacked);
+                this.checkKilled(attacked.ships[isHit]);
             } else {
                 this.sendAttackAnswer(x, y, 'shot');
             }
@@ -177,31 +180,39 @@ export class Game implements Game {
             this.shotPlayer = attacked;
             this.turnPlayer();
         }
+        this.isBot ? this.attackBot() : '';
 
     }
 
     private sendAttackAnswer(x: number, y: number, status: resultAttack) {
-        if (this.shotPlayer.socket) {
-            this.shotPlayer.socket.send(
-                JSON.stringify({
-                    type: COMMANDS.attack,
-                    data: JSON.stringify(
-                        {
-                            position:
+        [this.playerOne, this.playerTwo].map((player) => {
+            if (player.socket) {
+                player.socket.send(
+                    JSON.stringify({
+                        type: COMMANDS.attack,
+                        data: JSON.stringify(
                             {
-                                x,
-                                y,
-                            },
-                            currentPlayer: this.shotPlayer.index,
-                            status,
-                        }),
-                    id: 0,
-                })
-            )
-        }
+                                position:
+                                {
+                                    x,
+                                    y,
+                                },
+                                currentPlayer: this.shotPlayer.index,
+                                status,
+                            }),
+                        id: 0,
+                    })
+                )
+            }
+        })
     }
 
     private sendWinner() {
+        Winners.push(
+            {
+                name: this.shotPlayer.userName,
+                wins: 1
+            });
         [this.playerOne, this.playerTwo].map((player) => {
             if (player.socket) {
                 player.socket.send(
@@ -225,7 +236,7 @@ export class Game implements Game {
         return result;
     }
 
-    private checkKilled(ship: Ship, attacked: Player) {
+    private checkKilled(ship: Ship) {
         let allCellMiss: cellShip = {
             xCoor: [],
             yCoor: []
@@ -266,8 +277,14 @@ export class Game implements Game {
         }
     }
 
-    checkSingleGame(){
+    private checkSingleGame() {
         this.isBot ? this.addPLayer(this.createBot()) : '';
+    }
+
+    private attackBot() {
+        if (this.shotPlayer.index === this.playerTwo.index) {
+            this.randomAttack();
+        }
     }
 
     private createBot(): Player {
@@ -275,78 +292,7 @@ export class Game implements Game {
             index: Math.floor(Math.random() * Date.now()),
             userName: 'bot',
             password: 'bot',
-            ships: [
-                {
-                    position: { x: 3, y: 2 },
-                    direction: true,
-                    type: 'huge',
-                    length: 4,
-                    rest: 4
-                },
-                {
-                    position: { x: 5, y: 1 },
-                    direction: false,
-                    type: 'large',
-                    length: 3,
-                    rest: 3
-                },
-                {
-                    position: { x: 5, y: 9 },
-                    direction: false,
-                    type: 'large',
-                    length: 3,
-                    rest: 3
-                },
-                {
-                    position: { x: 0, y: 0 },
-                    direction: false,
-                    type: 'medium',
-                    length: 2,
-                    rest: 2
-                },
-                {
-                    position: { x: 7, y: 3 },
-                    direction: true,
-                    type: 'medium',
-                    length: 2,
-                    rest: 2
-                },
-                {
-                    position: { x: 1, y: 8 },
-                    direction: false,
-                    type: 'medium',
-                    length: 2,
-                    rest: 2
-                },
-                {
-                    position: { x: 5, y: 4 },
-                    direction: true,
-                    type: 'small',
-                    length: 1,
-                    rest: 1
-                },
-                {
-                    position: { x: 0, y: 2 },
-                    direction: false,
-                    type: 'small',
-                    length: 1,
-                    rest: 1
-                },
-                {
-                    position: { x: 7, y: 6 },
-                    direction: true,
-                    type: 'small',
-                    length: 1,
-                    rest: 1
-                },
-                {
-                    position: { x: 0, y: 5 },
-                    direction: false,
-                    type: 'small',
-                    length: 1,
-                    rest: 1
-                }
-            ],
+            ships: shipsBot[Math.round(Math.random() * 3)],
             attackCell: [],
         }
     }

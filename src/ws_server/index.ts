@@ -3,7 +3,6 @@ import { AttackData, ExtWebSocket, FrontR, FrontRegData, FrontRoomData, FrontShi
 import { COMMANDS } from "./types/enum";
 import { Game } from "./src/game";
 
-
 const activePlayers: string[] = [];
 const sockets: WebSocket[] = [];
 const games: Games = {};
@@ -13,7 +12,7 @@ export const start_WSS = () => {
     const WSS_PORT = 3000;
     let idGame: number = 0;
 
-    const wss = new WebSocket.Server({ port: WSS_PORT }, () => console.log('вебсокет'));
+    const wss = new WebSocket.Server({ port: WSS_PORT }, () => console.log('Start Web Sjcket server on the 3000 port!'));
 
     wss.on("connection", (wsClient: ExtWebSocket) => {
         sockets.push(wsClient);
@@ -23,7 +22,7 @@ export const start_WSS = () => {
 
             const frontRes: FrontR = JSON.parse(message.toString());
             const player: Player = {
-                index: Math.floor(Math.random() * Date.now()),
+                index: wsClient.index,
                 userName: '',
                 password: '',
                 ships: [],
@@ -94,10 +93,11 @@ export const start_WSS = () => {
                     const dataRandom: RandomAttackData = JSON.parse(frontRes.data);
                     games[dataRandom.gameId].randomAttack(dataRandom.indexPlayer);
                     break;
+                    
                 case COMMANDS.single:
                     idGame += 1;
                     games[idGame] = new Game(player, {} as Player, idGame, true);
-
+                    break;
 
                 default:
                     break;
