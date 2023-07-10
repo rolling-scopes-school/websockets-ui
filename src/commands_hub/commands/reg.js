@@ -24,7 +24,7 @@ export const registration = (data, id) => {
             id: 0,        
         }
         return [JSON.stringify(regRes), false];
-    } else if (playersDB[userName] === userPassword) {
+    } else if (playersDB[userName].userPassword === userPassword) {
         const regRes = {
             type: 'reg',
             data: JSON.stringify(

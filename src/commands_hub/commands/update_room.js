@@ -2,20 +2,18 @@ export const updateRoom = () => {
     const updRoomRes = {
         type: "update_room",
         data: JSON.stringify(
-            {
-                rooms : [
-                    {
-                        roomId: 0,
-                        roomUsers:
-                            [
-                                {
-                                    name: '123123',
-                                    index: 123,
-                                }
-                            ],
-                    },
-                ]
-            },
+            [
+                {
+                    roomId: 0,
+                    roomUsers:
+                        [
+                            {
+                                name: '123123',
+                                index: 0    ,
+                            }
+                        ],
+                },
+            ]
         ),
         id: 0,
     };
