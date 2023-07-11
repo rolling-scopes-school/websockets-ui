@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "tsc && node ./build/index.js",
-    "start:dev": "nodemon ./index.ts"
+    "start:dev": "nodemon ./src/index.ts"
   },
   "author": "Andrei Auchynnikau",
   "keywords": [],

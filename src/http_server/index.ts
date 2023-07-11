@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as http from 'http';
 
 export const httpServer = http.createServer((req, res) => {
+  console.log(req.url);
   const __dirname = path.resolve(path.dirname(''));
   const filePath = path.join(__dirname, (req.url === '/' ? '/front/index.html' : `/front${req.url}`));
   fs.readFile(filePath, (err, data) => {
