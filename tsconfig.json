@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "outDir": "./build",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "target": "esnext",
+    "module": "ESNext",
+    "esModuleInterop": true
+  },
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  },
+  "include": [ "./src/**/*" ]
+}
