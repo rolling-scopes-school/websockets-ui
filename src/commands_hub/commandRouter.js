@@ -2,7 +2,7 @@ import { registration } from "./commands/reg.js";
 import { createGame } from "./commands/create_game.js";
 import { updateRoom } from "./commands/update_room.js";
 
-export const commandRouter = (command) => {
+export const commandRouter = (command, ws) => {
     const type = command.type;
     console.log('input command:', command);
     let data = '';
@@ -26,9 +26,8 @@ export const commandRouter = (command) => {
         case 'create_room':
             return updateRoom();
             
-        case 'add_player_to_room':
-            console.log(data);
-            break;  
+        case 'add_user_to_room':
+            return addUserToRoom();  
 
         default:
             break;

@@ -14,12 +14,12 @@ httpServer.listen(HTTP_PORT);
 
 const wss = new WebSocketServer ({port : 3000});
 
-wss.on('connection', (ws) => {
-    ws.on('error', error => console.error);
-    ws.on('message', (event) => {
-        const [commandResponse, isForEach] = commandRouter(JSON.parse(event));
+wss.on('connection', (wsClient) => {
+    wsClient.on('error', error => console.error(error));
+    wsClient.on('message', (event) => {
+        const [commandResponse, isForEach] = commandRouter(JSON.parse(event), wsClient);
         if (commandResponse !== undefined && !isForEach) {
-            ws.send(commandResponse);
+            wsClient.send(commandResponse);
         } else if (commandResponse !== undefined && isForEach) {
             wss.clients.forEach( (client) => {
                 if (client.readyState === WebSocket.OPEN) {
