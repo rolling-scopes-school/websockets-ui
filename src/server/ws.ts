@@ -1,10 +1,16 @@
+import { UserData } from "../db.js";
 import { messageHandler } from "./handler.js";
 
-const wsHandler = (ws) => {
+const wsHandler = (wss, ws) => {
+  const userData: UserData = {
+    name: "",
+    index: -1,
+    roomIndex: -1
+  }
   console.log('Handshake complete :)');
   ws.on('message', (rawData) => {
     try {
-      messageHandler(ws, rawData.toString());
+      messageHandler(wss, ws, rawData.toString(), userData);
     } catch (err) {
       console.log('We got a error:', err);
     }

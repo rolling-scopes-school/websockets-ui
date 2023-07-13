@@ -8,6 +8,8 @@ const WS_PORT = 3000;
 console.log(`Start static http server on the ${HTTP_PORT} port!`);
 httpServer.listen(HTTP_PORT);
 
-const wsServer = new WebSocketServer({ port: WS_PORT });
+const wss = new WebSocketServer({ port: WS_PORT });
 
-wsServer.on('connection', wsHandler)
+wss.on('connection', (ws) => {
+  wsHandler(wss, ws);
+})
