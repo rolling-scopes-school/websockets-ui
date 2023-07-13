@@ -186,6 +186,167 @@ class Game {
       user.ws.send(JSON.stringify(table));
     })
   }
+
+  attack(dataAttack) {
+    if (dataAttack.indexPlayer !== this.currentPlayer)
+      return;
+    const x = dataAttack.x;
+    const y = dataAttack.y;
+    const field = this.field[1 - dataAttack.indexPlayer];
+    const data = {
+      position: {
+        x: x,
+        y: y
+      },
+      currentPlayer: dataAttack.indexPlayer,
+      status: 'miss'
+    }
+    if (field[x][y] !== 'ship') {
+      this.currentPlayer = 1 - this.currentPlayer;
+      data.status = 'miss';
+      if (field[x][y] === 'wreck')
+        data.status = 'shot';
+      else if (field[x][y] === 'killed')
+        data.status = 'killed';
+      const table = {
+        type: "attack",
+        data: JSON.stringify(data),
+        id: 0,
+      };
+      this.users.forEach(user => { user.ws.send(JSON.stringify(table)) });
+      this.turn();
+      return;
+    }
+
+    data.status = 'killed';
+    field[x][y] = 'wreck';
+    for (let X = x; X >= 0; X--) {
+      if (field[X][y] === 'water')
+        break;
+      if (field[X][y] === 'ship')
+        data.status = 'shot';
+    }
+    for (let X = x; X < 10; X++) {
+      if (field[X][y] === 'water')
+        break;
+      if (field[X][y] === 'ship')
+        data.status = 'shot';
+    }
+    for (let Y = y; Y >= 0; Y--) {
+      if (field[x][Y] === 'water')
+        break;
+      if (field[x][Y] === 'ship')
+        data.status = 'shot';
+    }
+    for (let Y = y; Y < 10; Y++) {
+      if (field[x][Y] === 'water')
+        break;
+      if (field[x][Y] === 'ship')
+        data.status = 'shot';
+    }
+
+    if (data.status === 'killed') {
+      const table = {
+        type: "attack",
+        data: JSON.stringify(data),
+        id: 0,
+      };
+      for (let X = x; X >= 0; X--) {
+        if (field[X][y] === 'water')
+          break;
+        this.sendAttack(X, y, field, data, table);
+      }
+      for (let X = x; X < 10; X++) {
+        if (field[X][y] === 'water')
+          break;
+        this.sendAttack(X, y, field, data, table);
+      }
+      for (let Y = y; Y >= 0; Y--) {
+        if (field[x][Y] === 'water')
+          break;
+        this.sendAttack(x, Y, field, data, table);
+      }
+      for (let Y = y; Y < 10; Y++) {
+        if (field[x][Y] === 'water')
+          break;
+        this.sendAttack(x, Y, field, data, table);
+      }
+    } else {
+      const table = {
+        type: "attack",
+        data: JSON.stringify(data),
+        id: 0,
+      };
+      this.users.forEach(user => { user.ws.send(JSON.stringify(table)) });
+    }
+    this.turn();
+  }
+
+  sendAttack(x: number, y: number, field, data, table) {
+    console.log(x, y);
+    field[x][y] = 'killed';
+    data.position.x = x;
+    data.position.y = y;
+    data.status = 'killed';
+    table.data = JSON.stringify(data);
+    this.users.forEach(user => { user.ws.send(JSON.stringify(table)) });
+    if (x - 1 >= 0 && y - 1 >= 0 && field[x - 1][y - 1] === 'water') {
+      data.position.x = x - 1;
+      data.position.y = y - 1;
+      data.status = 'miss';
+      table.data = JSON.stringify(data);
+      this.users.forEach(user => { user.ws.send(JSON.stringify(table)) });
+    }
+    if (x - 1 >= 0 && y >= 0 && field[x - 1][y] === 'water') {
+      data.position.x = x - 1;
+      data.position.y = y;
+      data.status = 'miss';
+      table.data = JSON.stringify(data);
+      this.users.forEach(user => { user.ws.send(JSON.stringify(table)) });
+    }
+    if (x - 1 >= 0 && y + 1 < 10 && field[x - 1][y + 1] === 'water') {
+      data.position.x = x - 1;
+      data.position.y = y + 1;
+      data.status = 'miss';
+      table.data = JSON.stringify(data);
+      this.users.forEach(user => { user.ws.send(JSON.stringify(table)) });
+    }
+    if (x >= 0 && y + 1 < 10 && field[x][y + 1] === 'water') {
+      data.position.x = x;
+      data.position.y = y + 1;
+      data.status = 'miss';
+      table.data = JSON.stringify(data);
+      this.users.forEach(user => { user.ws.send(JSON.stringify(table)) });
+    }
+    if (x >= 0 && y - 1 >= 0 && field[x][y - 1] === 'water') {
+      data.position.x = x;
+      data.position.y = y - 1;
+      data.status = 'miss';
+      table.data = JSON.stringify(data);
+      this.users.forEach(user => { user.ws.send(JSON.stringify(table)) });
+    }
+    if (x + 1 < 10 && y - 1 >= 0 && field[x + 1][y - 1] === 'water') {
+      data.position.x = x + 1;
+      data.position.y = y - 1;
+      data.status = 'miss';
+      table.data = JSON.stringify(data);
+      this.users.forEach(user => { user.ws.send(JSON.stringify(table)) });
+    }
+    if (x + 1 < 10 && y >= 0 && field[x + 1][y] === 'water') {
+      data.position.x = x + 1;
+      data.position.y = y;
+      data.status = 'miss';
+      table.data = JSON.stringify(data);
+      this.users.forEach(user => { user.ws.send(JSON.stringify(table)) });
+    }
+    if (x + 1 < 10 && y + 1 < 10 && field[x + 1][y + 1] === 'water') {
+      data.position.x = x + 1;
+      data.position.y = y + 1;
+      data.status = 'miss';
+      table.data = JSON.stringify(data);
+      this.users.forEach(user => { user.ws.send(JSON.stringify(table)) });
+    }
+  }
 }
 
 const userDB = new UserDB();

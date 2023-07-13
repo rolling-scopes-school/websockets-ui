@@ -29,6 +29,10 @@ const addShips = (data, userData: UserData) => {
   games[userData.gameIndex].addShips(data.data);
 }
 
+const attack = (data, userData: UserData) => {
+  games[userData.gameIndex].attack(data.data);
+}
+
 const messageHandler = (wss, ws, rawData, userData) => {
   console.log(rawData);
   const data = JSON.parse(rawData);
@@ -46,6 +50,9 @@ const messageHandler = (wss, ws, rawData, userData) => {
       break;
     case 'add_ships':
       addShips(data, userData);
+      break;
+    case 'attack':
+      attack(data, userData);
       break;
   }
 }
