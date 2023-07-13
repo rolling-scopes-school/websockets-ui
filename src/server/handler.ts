@@ -1,4 +1,4 @@
-import { roomDB, userDB } from "../db.js";
+import { games, roomDB, UserData, userDB } from "../db.js";
 import { updateRooms, updateWinners } from "./broadcast.js";
 import { sendHandler } from "./sender.js";
 
@@ -14,16 +14,19 @@ const regPlayer = (wss, ws, data, userData) => {
   updateWinners(wss);
 }
 
-const createRoom = (wss, ws, data, userData) => {
-  console.log('want to create room');
+const createRoom = (wss, userData) => {
   const id = roomDB.createRoom();
   roomDB.addUserToRoom(id, userData);
   updateRooms(wss);
 }
 
-const addUserToRoom = (wss, ws, data, userData) => {
+const addUserToRoom = (wss, data, userData) => {
   roomDB.addUserToRoom(data.data.indexRoom, userData);
   updateRooms(wss);
+}
+
+const addShips = (data, userData: UserData) => {
+  games[userData.gameIndex].addShips(data.data);
 }
 
 const messageHandler = (wss, ws, rawData, userData) => {
@@ -36,10 +39,13 @@ const messageHandler = (wss, ws, rawData, userData) => {
       regPlayer(wss, ws, data, userData);
       break;
     case 'create_room':
-      createRoom(wss, ws, data, userData);
+      createRoom(wss, userData);
       break;
     case 'add_user_to_room':
-      addUserToRoom(wss, ws, data, userData);
+      addUserToRoom(wss, data, userData);
+      break;
+    case 'add_ships':
+      addShips(data, userData);
       break;
   }
 }

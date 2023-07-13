@@ -2,14 +2,12 @@ import { WebSocketServer } from "ws";
 import { roomDB, userDB } from "../db.js"
 
 const updateRooms = (wss) => {
-  console.log('broadcast: room');
   const rooms = roomDB.getDB();
   const data = [];
   rooms.forEach(room => {
     if (room.roomUsers.length === 1)
       data.push(room);
   })
-  console.log(rooms, data);
   const table = {
     type: "update_room",
     data: JSON.stringify(data),
