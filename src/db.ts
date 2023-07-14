@@ -1,3 +1,6 @@
+import { WebSocketServer } from "ws";
+import { updateWinners } from "./server/broadcast";
+
 export interface User {
   name: string,
   password: string,
@@ -10,6 +13,7 @@ export interface UserData {
   roomIndex: number,
   gameIndex: number,
   ws: WebSocket,
+  wss: WebSocketServer
 }
 
 export class UserDB{
@@ -24,7 +28,6 @@ export class UserDB{
     }
     if (this.db.find(user => user.name === name)) {
       data.error = true;
-      console.log(JSON.stringify(this.db.find(user => user.name === name)));
       data.errorText = "Already have user with same name";
       return data;
     }
@@ -34,7 +37,6 @@ export class UserDB{
       wins: 0
     }
     this.db.push(user);
-    console.log(this.db);
     return data;
   }
 
@@ -69,11 +71,14 @@ export class RoomDB {
       this.db[userData.roomIndex].roomUsers = this.db[userData.roomIndex].roomUsers.filter(user => user.name !== userData.name);
     
     userData.roomIndex = indexRoom;
-    console.log('JOIN', indexRoom, userData);
     this.db[indexRoom].roomUsers.push(userData);
     if (this.db[indexRoom].roomUsers.length === 2) {
       games.push(new Game(this.db[indexRoom].roomUsers, games.length));
     }
+  }
+
+  deleteFromRoom(userData: UserData) {
+    this.db[userData.roomIndex].roomUsers = this.db[userData.roomIndex].roomUsers.filter(user => user.name !== userData.name);
   }
 
   getDB(): Array<Room> {
@@ -99,6 +104,7 @@ class Game {
   field: Array<Array<Array<string>>> = [[], []]
   shipsGot = 0
   ships: Array<Array<Ship>> = [[], []]
+  shipsDestroyed = [0, 0]
 
   constructor(users: Array<UserData>, id : number) {
     this.users = users;
@@ -155,7 +161,6 @@ class Game {
 
   startGame() {
     this.state = 'game';
-    console.log('start Game!');
     const data = {
       ships: [],
       currentPlayerIndex: 0
@@ -174,6 +179,41 @@ class Game {
   }
 
   turn() {
+    if (this.shipsDestroyed[0] === 20) {
+      const data = {
+        winPlayer: 0
+      }
+      const table = {
+        type: "finish",
+        data: JSON.stringify(data),
+        id: 0,
+      };
+      this.users.forEach((user, id) => {
+        user.ws.send(JSON.stringify(table));
+      })
+      userDB.addWin(this.users[0].index);
+      updateWinners(this.users[0].wss);
+      roomDB.deleteFromRoom(this.users[0]);
+      roomDB.deleteFromRoom(this.users[1]);
+      return;
+    } else if (this.shipsDestroyed[1] === 20) {
+      const data = {
+        winPlayer: 1
+      }
+      const table = {
+        type: "finish",
+        data: JSON.stringify(data),
+        id: 0,
+      };
+      this.users.forEach((user, id) => {
+        user.ws.send(JSON.stringify(table));
+      })
+      userDB.addWin(this.users[1].index);
+      updateWinners(this.users[0].wss);
+      roomDB.deleteFromRoom(this.users[0]);
+      roomDB.deleteFromRoom(this.users[1]);
+      return;
+    }
     const data = {
       currentPlayer: this.currentPlayer
     }
@@ -185,6 +225,17 @@ class Game {
     this.users.forEach((user, id) => {
       user.ws.send(JSON.stringify(table));
     })
+  }
+
+  randomAttack(dataAttack) {
+    if (dataAttack.indexPlayer !== this.currentPlayer)
+      return;
+    const data = {
+      x: Math.floor(Math.random() * 10),
+      y: Math.floor(Math.random() * 10),
+      indexPlayer: dataAttack.indexPlayer
+    }
+    this.attack(data);
   }
 
   attack(dataAttack) {
@@ -217,6 +268,8 @@ class Game {
       this.turn();
       return;
     }
+
+    this.shipsDestroyed[dataAttack.indexPlayer]++;
 
     data.status = 'killed';
     field[x][y] = 'wreck';
@@ -283,7 +336,6 @@ class Game {
   }
 
   sendAttack(x: number, y: number, field, data, table) {
-    console.log(x, y);
     field[x][y] = 'killed';
     data.position.x = x;
     data.position.y = y;

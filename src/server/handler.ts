@@ -33,8 +33,11 @@ const attack = (data, userData: UserData) => {
   games[userData.gameIndex].attack(data.data);
 }
 
+const randomAttack = (data, userData: UserData) => {
+  games[userData.gameIndex].randomAttack(data.data);
+}
+
 const messageHandler = (wss, ws, rawData, userData) => {
-  console.log(rawData);
   const data = JSON.parse(rawData);
   if (typeof data.data === 'string' && data.data !== '')
     data.data = JSON.parse(data.data);
@@ -53,6 +56,9 @@ const messageHandler = (wss, ws, rawData, userData) => {
       break;
     case 'attack':
       attack(data, userData);
+      break;
+    case 'randomAttack':
+      randomAttack(data, userData);
       break;
   }
 }

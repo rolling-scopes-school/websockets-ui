@@ -7,7 +7,8 @@ const wsHandler = (wss, ws) => {
     index: -1,
     roomIndex: -1,
     gameIndex: -1,
-    ws: ws
+    ws: ws,
+    wss: wss
   }
   console.log('Handshake complete :)');
   ws.on('message', (rawData) => {
