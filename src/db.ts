@@ -12,8 +12,8 @@ export interface UserData {
   index: number,
   roomIndex: number,
   gameIndex: number,
-  ws: WebSocket,
-  wss: WebSocketServer
+  ws?: WebSocket,
+  wss?: WebSocketServer
 }
 
 export class UserDB{
@@ -41,6 +41,8 @@ export class UserDB{
   }
 
   addWin(index: number) {
+    if (index === -1)
+      return;
     this.db[index].wins ++;
   }
 
@@ -73,12 +75,23 @@ export class RoomDB {
     userData.roomIndex = indexRoom;
     this.db[indexRoom].roomUsers.push(userData);
     if (this.db[indexRoom].roomUsers.length === 2) {
-      games.push(new Game(this.db[indexRoom].roomUsers, games.length));
+      games.push(new Game(this.db[indexRoom].roomUsers, games.length, userData.index === -1));
     }
   }
 
   deleteFromRoom(userData: UserData) {
-    this.db[userData.roomIndex].roomUsers = this.db[userData.roomIndex].roomUsers.filter(user => user.name !== userData.name);
+    this.db[userData.roomIndex].roomUsers = [];
+  }
+
+  singleRoom(indexRoom: number, userData: UserData) {
+    this.addUserToRoom(indexRoom, userData);
+    const bot: UserData = {
+      name: 'bot',
+      index: -1,
+      roomIndex: indexRoom,
+      gameIndex: -1,
+    }
+    this.addUserToRoom(indexRoom, bot);
   }
 
   getDB(): Array<Room> {
@@ -105,8 +118,9 @@ class Game {
   shipsGot = 0
   ships: Array<Array<Ship>> = [[], []]
   shipsDestroyed = [0, 0]
+  isSingle = false
 
-  constructor(users: Array<UserData>, id : number) {
+  constructor(users: Array<UserData>, id: number, isSingle: boolean) {
     this.users = users;
     this.id = id;
     this.users.forEach(user => {
@@ -121,6 +135,61 @@ class Game {
         }
       }
     })
+    this.isSingle = isSingle;
+    if (this.isSingle) {
+      this.shipsGot++;
+      this.generateShips();
+    }
+  }
+
+  canPlaceShip (x, y, dir, len): boolean {
+    for (let step = 0; step < len; step++) {
+      if (x < 0 || y < 0 || x >= 10 || y >= 10)
+        return false;
+      if (this.field[1][x][y] !== 'water')
+        return false;
+      if (x - 1 >= 0 && y - 1 >= 0 && this.field[1][x - 1][y - 1] !== 'water')
+        return false;
+      if (x - 1 >= 0 && this.field[1][x - 1][y] !== 'water')
+        return false;
+      if (x - 1 >= 0 && y + 1 < 10 && this.field[1][x - 1][y + 1] !== 'water')
+        return false;
+      if (y - 1 >= 0 && this.field[1][x][y - 1] !== 'water')
+        return false;
+      if (y + 1 < 10 && this.field[1][x][y + 1] !== 'water')
+        return false;
+      if (x + 1 < 10 && y - 1 >= 0 && this.field[1][x + 1][y - 1] !== 'water')
+        return false;
+      if (x + 1 < 10 && this.field[1][x + 1][y] !== 'water')
+        return false;
+      if (x + 1 < 10 && y + 1 < 10 && this.field[1][x + 1][y + 1] !== 'water')
+        return false;
+      if (dir)
+        y++;
+      else
+        x++;
+    }
+    return true;
+  }
+
+  generateShips() {
+    for (let length = 4; length >= 1; length--) {
+      for (let step = 0; step <= 4 - length; step++) {
+        let x, y, direction = false;
+        do {
+          x = Math.floor(Math.random() * 10);
+          y = Math.floor(Math.random() * 10);
+          direction = Math.random() < 0.5;
+        } while (!this.canPlaceShip(x, y, direction, length))
+        for (let step2 = 0; step2 < length; step2++) {
+          this.field[1][x][y] = 'ship';
+          if (direction)
+            y++;
+          else
+            x++;
+        }
+      }
+    }
   }
 
   createGame() {
@@ -130,6 +199,8 @@ class Game {
       idPlayer: 0
     }
     this.users.forEach((user, id) => {
+      if (user.index === -1)
+        return;
       data.idPlayer = id;
       const table = {
         type: "create_game",
@@ -166,6 +237,8 @@ class Game {
       currentPlayerIndex: 0
     }
     this.users.forEach((user, id) => {
+      if (user.index === -1)
+        return;
       data.ships = this.ships[id];
       data.currentPlayerIndex = id;
       const table = {
@@ -189,6 +262,8 @@ class Game {
         id: 0,
       };
       this.users.forEach((user, id) => {
+        if (user.index === -1)
+          return;
         user.ws.send(JSON.stringify(table));
       })
       userDB.addWin(this.users[0].index);
@@ -206,6 +281,8 @@ class Game {
         id: 0,
       };
       this.users.forEach((user, id) => {
+        if (user.index === -1)
+          return;
         user.ws.send(JSON.stringify(table));
       })
       userDB.addWin(this.users[1].index);
@@ -223,16 +300,50 @@ class Game {
       id: 0,
     };
     this.users.forEach((user, id) => {
+      if (user.index === -1)
+        return;
       user.ws.send(JSON.stringify(table));
     })
+    if (this.currentPlayer === 1 && this.isSingle) {
+      const data = {
+        gameId: this.id,
+        indexPlayer: 1
+      }
+      this.randomAttack(data);
+    }
   }
 
   randomAttack(dataAttack) {
-    if (dataAttack.indexPlayer !== this.currentPlayer)
-      return;
+    const isShootGood = (field, x, y): boolean => {
+
+      if (field[x][y] === 'killed' || field[x][y] == 'wreck')
+        return false;
+      if (x - 1 >= 0 && y - 1 >= 0 && field[x - 1][y - 1] === 'killed')
+        return false;
+      if (x - 1 >= 0 && field[x - 1][y] === 'killed')
+        return false;
+      if (x - 1 >= 0 && y + 1 < 10 && field[x - 1][y + 1] === 'killed')
+        return false;
+      if (y - 1 >= 0 && field[x][y - 1] === 'killed')
+        return false;
+      if (y + 1 < 10 && field[x][y + 1] === 'killed')
+        return false;
+      if (x + 1 < 10 && y - 1 >= 0 && field[x + 1][y - 1] === 'killed')
+        return false;
+      if (x + 1 < 10 && field[x + 1][y] === 'killed')
+        return false;
+      if (x + 1 < 10 && y + 1 < 10 && field[x + 1][y + 1] === 'killed')
+        return false;
+      return true;
+    }
+    let x = 0, y = 0;
+    do {
+      x = Math.floor(Math.random() * 10);
+      y = Math.floor(Math.random() * 10);
+    } while (!isShootGood(this.field[1 - dataAttack.indexPlayer], x, y));
     const data = {
-      x: Math.floor(Math.random() * 10),
-      y: Math.floor(Math.random() * 10),
+      x: x,
+      y: y,
       indexPlayer: dataAttack.indexPlayer
     }
     this.attack(data);
@@ -264,7 +375,11 @@ class Game {
         data: JSON.stringify(data),
         id: 0,
       };
-      this.users.forEach(user => { user.ws.send(JSON.stringify(table)) });
+      this.users.forEach(user => {
+        if (user.index === -1)
+          return;
+        user.ws.send(JSON.stringify(table));
+      });
       this.turn();
       return;
     }
@@ -330,7 +445,11 @@ class Game {
         data: JSON.stringify(data),
         id: 0,
       };
-      this.users.forEach(user => { user.ws.send(JSON.stringify(table)) });
+      this.users.forEach(user => {
+        if (user.index === -1)
+          return;
+        user.ws.send(JSON.stringify(table));
+      });
     }
     this.turn();
   }
@@ -341,62 +460,62 @@ class Game {
     data.position.y = y;
     data.status = 'killed';
     table.data = JSON.stringify(data);
-    this.users.forEach(user => { user.ws.send(JSON.stringify(table)) });
+    this.users.forEach(user => { if (user.index !== -1) user.ws.send(JSON.stringify(table)) });
     if (x - 1 >= 0 && y - 1 >= 0 && field[x - 1][y - 1] === 'water') {
       data.position.x = x - 1;
       data.position.y = y - 1;
       data.status = 'miss';
       table.data = JSON.stringify(data);
-      this.users.forEach(user => { user.ws.send(JSON.stringify(table)) });
+      this.users.forEach(user => { if (user.index !== -1) user.ws.send(JSON.stringify(table)) });
     }
     if (x - 1 >= 0 && y >= 0 && field[x - 1][y] === 'water') {
       data.position.x = x - 1;
       data.position.y = y;
       data.status = 'miss';
       table.data = JSON.stringify(data);
-      this.users.forEach(user => { user.ws.send(JSON.stringify(table)) });
+      this.users.forEach(user => { if (user.index !== -1) user.ws.send(JSON.stringify(table)) });
     }
     if (x - 1 >= 0 && y + 1 < 10 && field[x - 1][y + 1] === 'water') {
       data.position.x = x - 1;
       data.position.y = y + 1;
       data.status = 'miss';
       table.data = JSON.stringify(data);
-      this.users.forEach(user => { user.ws.send(JSON.stringify(table)) });
+      this.users.forEach(user => { if (user.index !== -1) user.ws.send(JSON.stringify(table)) });
     }
     if (x >= 0 && y + 1 < 10 && field[x][y + 1] === 'water') {
       data.position.x = x;
       data.position.y = y + 1;
       data.status = 'miss';
       table.data = JSON.stringify(data);
-      this.users.forEach(user => { user.ws.send(JSON.stringify(table)) });
+      this.users.forEach(user => { if (user.index !== -1) user.ws.send(JSON.stringify(table)) });
     }
     if (x >= 0 && y - 1 >= 0 && field[x][y - 1] === 'water') {
       data.position.x = x;
       data.position.y = y - 1;
       data.status = 'miss';
       table.data = JSON.stringify(data);
-      this.users.forEach(user => { user.ws.send(JSON.stringify(table)) });
+      this.users.forEach(user => { if (user.index !== -1) user.ws.send(JSON.stringify(table)) });
     }
     if (x + 1 < 10 && y - 1 >= 0 && field[x + 1][y - 1] === 'water') {
       data.position.x = x + 1;
       data.position.y = y - 1;
       data.status = 'miss';
       table.data = JSON.stringify(data);
-      this.users.forEach(user => { user.ws.send(JSON.stringify(table)) });
+      this.users.forEach(user => { if (user.index !== -1) user.ws.send(JSON.stringify(table)) });
     }
     if (x + 1 < 10 && y >= 0 && field[x + 1][y] === 'water') {
       data.position.x = x + 1;
       data.position.y = y;
       data.status = 'miss';
       table.data = JSON.stringify(data);
-      this.users.forEach(user => { user.ws.send(JSON.stringify(table)) });
+      this.users.forEach(user => { if (user.index !== -1) user.ws.send(JSON.stringify(table)) });
     }
     if (x + 1 < 10 && y + 1 < 10 && field[x + 1][y + 1] === 'water') {
       data.position.x = x + 1;
       data.position.y = y + 1;
       data.status = 'miss';
       table.data = JSON.stringify(data);
-      this.users.forEach(user => { user.ws.send(JSON.stringify(table)) });
+      this.users.forEach(user => { if (user.index !== -1) user.ws.send(JSON.stringify(table)) });
     }
   }
 }

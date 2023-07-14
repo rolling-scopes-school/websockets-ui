@@ -37,6 +37,12 @@ const randomAttack = (data, userData: UserData) => {
   games[userData.gameIndex].randomAttack(data.data);
 }
 
+const singlePlay = (wss, userData: UserData) => {
+  const id = roomDB.createRoom();
+  roomDB.singleRoom(id, userData);
+  updateRooms(wss);
+}
+
 const messageHandler = (wss, ws, rawData, userData) => {
   const data = JSON.parse(rawData);
   if (typeof data.data === 'string' && data.data !== '')
@@ -59,6 +65,9 @@ const messageHandler = (wss, ws, rawData, userData) => {
       break;
     case 'randomAttack':
       randomAttack(data, userData);
+      break;
+    case 'single_play':
+      singlePlay(wss, userData);
       break;
   }
 }
