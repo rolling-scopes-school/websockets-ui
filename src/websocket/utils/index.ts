@@ -1,5 +1,5 @@
 import { players, rooms } from "../db/db";
-import { PlayerType } from "../types";
+import { PlayerType, RoomType } from "../types";
 
 const findPlayer = (userId: number) => players.find(({ playerId }) => playerId === userId);
 
@@ -9,7 +9,12 @@ const findPlayerInRoom = (userId: number) => {
         result = players.find(({ playerId }) => playerId === userId)
     })
     return result
-}
+};
+
+const findRoom = (roomId: number) => rooms.find(({ id }) => id === roomId)
+
+const findPlayerInCurrentRoom = (room: RoomType, userId: number) => room?.players?.find((player) => player.playerId === userId)
 
 
-export { findPlayer, findPlayerInRoom };
+
+export { findPlayer, findPlayerInRoom, findRoom, findPlayerInCurrentRoom };

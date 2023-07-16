@@ -4,6 +4,7 @@ import { registerPlayer } from './register';
 import { createRoom } from './createRoom';
 import { players } from './db/db';
 import { updateRooms } from './updateRooms';
+import { addUser } from './addUser';
 
 
 function webSocketServer(wsPort: number | string) {
@@ -31,9 +32,13 @@ function webSocketServer(wsPort: number | string) {
                         updateRooms()
                         break;
                     case 'create_room':
-                        console.log('Received message:', messageType);
                         createRoom(ws, data, playerId)
                         updateRooms()
+                        break;
+                    case 'add_user_to_room':
+                        addUser(ws, data, playerId)
+                        updateRooms()
+                        // console.log(message)
                         break;
                     case 'single_play':
                         console.log('Received message:', messageType);
