@@ -1,4 +1,4 @@
-import { Ship } from "../types";
+import { Ship } from "../../types";
 
 export const shipsBot: Ship[][] = [
     [{

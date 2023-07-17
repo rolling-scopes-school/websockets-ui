@@ -1,6 +1,6 @@
 import { AttackData, Player, Ship, cellShip, resultAttack } from "../types";
 import { COMMANDS } from "../types/enum";
-import { shipsBot } from "./shipsBot";
+import { createBot } from "./botGame/createBot";
 import { Winners } from "./winners";
 
 export class Game implements Game {
@@ -28,8 +28,17 @@ export class Game implements Game {
         }
     }
 
+    closeSocket(indexPlayer: number): void {
+        if (this.playerOne.index === indexPlayer) {
+            this.playerOne.ships.map((ship) => ship.rest = 0);
+            this.checkWinner(this.playerOne);
+        } else if (this.playerTwo.index === indexPlayer) {
+            this.playerTwo.ships.map((ship) => ship.rest = 0);
+            this.checkWinner(this.playerTwo);
+        }
+    }
+
     addShip(ships: Ship[], indexPLayer: number): void {
-        console.log(ships);
         [this.playerOne, this.playerTwo].map((player) => {
             if (player.index === indexPLayer) {
                 player.ships = ships;
@@ -278,7 +287,7 @@ export class Game implements Game {
     }
 
     private checkSingleGame() {
-        this.isBot ? this.addPLayer(this.createBot()) : '';
+        this.isBot ? this.addPLayer(createBot()) : '';
     }
 
     private attackBot() {
@@ -286,15 +295,4 @@ export class Game implements Game {
             this.randomAttack();
         }
     }
-
-    private createBot(): Player {
-        return {
-            index: Math.floor(Math.random() * Date.now()),
-            userName: 'bot',
-            password: 'bot',
-            ships: shipsBot[Math.round(Math.random() * 3)],
-            attackCell: [],
-        }
-    }
-
 }

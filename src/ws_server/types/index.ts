@@ -77,8 +77,8 @@ export interface Game {
     addPLayer(wsClient: Player): void;
     addShip(ships: Ship[], indexPLayer: number): void;
     randomAttack(indexPLayer: number): void;
-    attack(attackData: AttackData): void
-
+    attack(attackData: AttackData): void;
+    closeSocket(indexPlayer: number): void;
 }
 
 export interface RandomAttackData {
