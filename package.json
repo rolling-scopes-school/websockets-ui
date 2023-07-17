@@ -9,7 +9,6 @@
     "start:dev": "nodemon ./index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "format": "prettier --write \"src/**/*.ts\"",
-
     "start:prod": "npm run build && node dist",
     "build": "webpack"
   },
