@@ -1,10 +1,11 @@
 import { registration } from "./commands/reg.js";
 import { createGame } from "./commands/create_game.js";
 import { updateRoom } from "./commands/update_room.js";
+import { addUserToRoom } from "./commands/add_user.js";
+import { addShipsToBoard } from "./commands/add_ships.js"
 
-export const commandRouter = (command, ws) => {
+export const commandRouter = (command, wss, ws) => {
     const type = command.type;
-    console.log('input command:', command);
     let data = '';
     if (command.data !== '') {
         data = JSON.parse(command.data);
@@ -14,7 +15,7 @@ export const commandRouter = (command, ws) => {
     switch (type) {
         // PLAYER COMMANDS //
         case 'reg': {
-            return registration(data, id);
+            return registration(data, id, ws);
             
         }
 
@@ -24,11 +25,14 @@ export const commandRouter = (command, ws) => {
 
         // ROOM COMMANDS //
         case 'create_room':
-            return updateRoom();
+            return updateRoom(ws);
             
         case 'add_user_to_room':
-            return addUserToRoom();  
+            return addUserToRoom(data, ws, wss);  
 
+        // SHIPS COMMANDS //
+        case 'add_ships':
+            return addShipsToBoard(data)
         default:
             break;
     }

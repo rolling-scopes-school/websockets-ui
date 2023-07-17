@@ -1,7 +1,6 @@
 export const dbWorker = () => {
     const db = {
-        players : {Me123: 123},
+        players : {},
     }
-    console.log(db.players);
     return db;
 };

@@ -1,16 +1,15 @@
 import { dbWorker } from "../inMemoryDB.js";
 import { updateDB } from "../../../index.js";
-import { randomUUID } from "crypto";
 
-export const registration = (data, id) => {
+export const registration = (data, id, ws) => {
     const userName = data.name;
     const userPassword = data.password;
-    //const playersDB =  dbWorker().players;
     const DB = updateDB();
     const playersDB = DB.players;
     if(playersDB[userName] === undefined) {
-        const UUID = randomUUID();
-        playersDB[userName] = {userPassword, UUID};
+        const userID = ws.id;
+        ws.name = userName;
+        playersDB[userName] = {userPassword, userID, ws};
         updateDB(DB);
         const regRes = {
             type: 'reg',
