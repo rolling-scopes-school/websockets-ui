@@ -13,6 +13,7 @@
     "keywords": [],
     "license": "ISC",
     "devDependencies": {
+        "@types/ws": "^8.5.10",
         "nodemon": "^2.0.16"
     },
     "dependencies": {
