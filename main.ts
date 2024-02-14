@@ -6,8 +6,7 @@ dotenv.config();
 const HTTP_PORT = 8181;
 const WS_PORT = +process.env.WS_PORT || 3000;
 
-const wsServer = new WsServer();
+const wsServer = new WsServer(WS_PORT);
 
 console.log(`Start static http server on the ${HTTP_PORT} port!`);
 httpServer.listen(HTTP_PORT);
-wsServer.start(WS_PORT);
