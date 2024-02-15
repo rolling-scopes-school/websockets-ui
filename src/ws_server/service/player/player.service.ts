@@ -10,6 +10,7 @@ export class PlayerService {
   logIn(data: User) {
     const { name, password } = data;
     const checkUser = this.storage.getUser({ name });
+
     if (checkUser.index) {
       return checkUser.password == password
         ? {
@@ -19,7 +20,7 @@ export class PlayerService {
           }
         : { error: true, errorText: "Invalid password" };
     }
-    const newPlayer = this.storage.addPlayer({ name, password });
+    const newPlayer = this.storage.addUser({ name, password });
     return { name, index: newPlayer.index, error: false };
   }
 }

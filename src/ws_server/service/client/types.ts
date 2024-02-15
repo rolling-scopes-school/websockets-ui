@@ -12,6 +12,7 @@ export interface MessageType<T> {
 export interface User {
   name: string;
   password: string;
+  room?: number;
 }
 
 export type RegResponse<T> = T extends "error"
@@ -24,3 +25,8 @@ export type RegResponse<T> = T extends "error"
       error: boolean;
       errorText: string;
     };
+
+export type RoomData = {
+  roomId: number;
+  roomUsers: { name: string; index: number }[];
+};
