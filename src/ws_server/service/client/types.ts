@@ -9,10 +9,10 @@ export interface MessageType<T> {
   id: number;
 }
 
-export type User = {
+export interface User {
   name: string;
   password: string;
-};
+}
 
 export type RegResponse<T> = T extends "error"
   ? {

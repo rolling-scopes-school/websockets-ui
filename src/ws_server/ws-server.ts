@@ -1,10 +1,13 @@
 import WebSocket from "ws";
-import { ClientService } from "./service/client-service/client-service";
+import { ClientService } from "./service/client/client.service";
+import { Storage } from "./DB/index";
 
 export class WsServer {
   private server: WebSocket.Server;
   private clientMessagesService: ClientService;
+  private storage: Storage;
   constructor(port: number) {
+    this.storage = new Storage();
     this.server = new WebSocket.Server({ port });
     console.log(`WS server started at url ws://localhost:${port}/!`);
     this.setupListeners();
@@ -19,7 +22,8 @@ export class WsServer {
   }
 
   private connectionListener(ws: WebSocket) {
-    new ClientService(ws);
+    const id = this.storage.addClient(ws);
+    const client = new ClientService(ws, id, this.storage);
   }
 
   private closeAllConnections() {
