@@ -16,6 +16,12 @@
         "nodemon": "^2.0.16"
     },
     "dependencies": {
-        "ws": "^8.8.0"
+        "cross-env": "^7.0.3",
+        "dotenv": "^16.4.4",
+        "ts-node": "^10.9.2",
+        "ts-node-dev": "^2.0.0",
+        "typescript": "^5.3.3",
+        "webpack": "^5.90.1",
+        "ws": "^8.16.0"
     }
 }
