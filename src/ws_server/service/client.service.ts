@@ -1,38 +1,32 @@
-import { RawData } from "ws";
-import { MessageType, User } from "./types";
-import WebSocket from "ws";
-import { Storage } from "src/ws_server/DB";
-import { PlayerService } from "../player/player.service";
-import { RoomService } from "../room/room.service";
+import WebSocket, { RawData } from "ws";
+import { DB } from "../db/storage";
+import { UserService } from "./user.service";
+import { GameService } from "./game.service";
+
 export class ClientService {
-  private client: WebSocket;
-  private id: number;
+  client: WebSocket;
   private userIndex: number;
-  private storage: Storage;
-  private playerService: PlayerService;
-  private roomService: RoomService;
-  constructor(client: WebSocket, id: number, storage: Storage) {
+  private storage: DB;
+  private playerService: UserService;
+  private gameService: GameService;
+  constructor(client: WebSocket, storage: DB) {
     this.storage = storage;
-    this.id = id;
     this.client = client;
-    this.playerService = new PlayerService(this.storage);
-    this.roomService = new RoomService(this.storage);
+    this.playerService = new UserService(this.storage);
+    this.gameService = new GameService(this.storage);
     this.clientListener();
   }
 
   private clientListener() {
-    this.client.on("message", (message) =>
-      this.handleMessage(message, this.id)
-    );
+    this.client.on("message", (message) => this.handleMessage(message));
     this.client.on("close", () => this.close());
   }
 
   private close() {
-    this.storage.removeClient(this.id);
-    console.log(`Client ${this.id} connection closed`);
+    console.log(`Client ${this.userIndex} connection closed`);
   }
 
-  private handleMessage(message: RawData, id: number) {
+  private handleMessage(message: RawData) {
     const parsedMessage = this.getParseMessage(message);
     const { type, data } = parsedMessage;
     console.log(`Command: ${JSON.stringify(parsedMessage)}`);
@@ -49,7 +43,7 @@ export class ClientService {
         this.client.send(result);
         break;
       case "reg":
-        responseData = this.playerService.logIn(data);
+        responseData = this.playerService.logIn(data, this.client);
         this.userIndex = responseData.error ? null : responseData.index;
         result = JSON.stringify({
           type,
@@ -59,14 +53,17 @@ export class ClientService {
         this.client.send(result);
         break;
       case "create_room":
-        result = this.roomService.createRoom(this.userIndex);
+        result = this.gameService.createGame(this.userIndex);
+        break;
+      case "add_user_to_room":
+        result = this.gameService.start(this.userIndex, data.indexRoom);
         break;
     }
 
     console.log(`Result: ${result}`);
   }
 
-  private getParseMessage(message: RawData): MessageType<any> {
+  private getParseMessage(message: RawData) {
     try {
       const parsedMessage = JSON.parse(message.toString());
       if (parsedMessage.data === "") {
