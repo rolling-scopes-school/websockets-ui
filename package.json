@@ -3,24 +3,25 @@
     "version": "1.0.0",
     "description": "Template for the WebSocket remote control task",
     "main": "index.js",
-    "type": "module",
+    "type": "commonjs",
     "scripts": {
-        "start": "node ./index.js",
-        "start:dev": "nodemon ./index.js",
+        "start": "ts-node ./index.ts",
+        "start:back": "ts-node ./dist/websocket/websocket-server.js",
+        "start:dev": "nodemon ./index.ts",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "Andrei Auchynnikau",
     "keywords": [],
     "license": "ISC",
     "devDependencies": {
-        "nodemon": "^2.0.16"
+        "nodemon": "^2.0.16",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.3.3"
     },
     "dependencies": {
         "cross-env": "^7.0.3",
         "dotenv": "^16.4.4",
-        "ts-node": "^10.9.2",
         "ts-node-dev": "^2.0.0",
-        "typescript": "^5.3.3",
         "webpack": "^5.90.1",
         "ws": "^8.16.0"
     }
