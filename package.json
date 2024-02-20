@@ -5,8 +5,9 @@
     "main": "index.ts",
     "type": "module",
     "scripts": {
-        "start": "npx tsx ./index.ts",
-        "start:dev": "npx nodemon ./index.ts",
+        "start": "tsx ./index.ts",
+        "start:dev": "nodemon ./index.ts",
+        "start:websocket:dev": "nodemon ./src/web_socket_server/index.ts",
         "test": "echo \"Error: no test specified\" && exit 1",
         "lint": "eslint src/**/*.ts --fix"
     },
