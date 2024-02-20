@@ -2,18 +2,21 @@ import WebSocket, { RawData } from "ws";
 import { DB } from "../db/storage";
 import { UserService } from "./user.service";
 import { GameService } from "./game.service";
+import { BattleService } from "./battle.service";
 
 export class ClientService {
   client: WebSocket;
   private userIndex: number;
   private storage: DB;
-  private playerService: UserService;
+  private userService: UserService;
   private gameService: GameService;
+  private battleService: BattleService;
   constructor(client: WebSocket, storage: DB) {
     this.storage = storage;
     this.client = client;
-    this.playerService = new UserService(this.storage);
+    this.userService = new UserService(this.storage);
     this.gameService = new GameService(this.storage);
+    this.battleService = new BattleService(this.storage);
     this.clientListener();
   }
 
@@ -43,7 +46,7 @@ export class ClientService {
         this.client.send(result);
         break;
       case "reg":
-        responseData = this.playerService.logIn(data, this.client);
+        responseData = this.userService.logIn(data, this.client);
         this.userIndex = responseData.error ? null : responseData.index;
         result = JSON.stringify({
           type,
@@ -51,6 +54,7 @@ export class ClientService {
           id: 0,
         });
         this.client.send(result);
+        this.gameService.updateRooms();
         break;
       case "create_room":
         result = this.gameService.createGame(this.userIndex);
@@ -58,9 +62,17 @@ export class ClientService {
       case "add_user_to_room":
         result = this.gameService.start(this.userIndex, data.indexRoom);
         break;
+      case "add_ships":
+        result = this.battleService.addShips(data);
+        break;
     }
 
-    console.log(`Result: ${result}`);
+    if (typeof result === "string") {
+      console.log(`Result: ${result}`);
+    } else {
+      console.log("Result:");
+      console.table(result);
+    }
   }
 
   private getParseMessage(message: RawData) {

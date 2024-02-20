@@ -3,8 +3,6 @@ import { Game } from "../db/models";
 import { DB } from "../db/storage";
 import WebSocket from "ws";
 
-
-
 export class GameService {
   storage: DB;
   constructor(storage: DB) {
@@ -20,7 +18,7 @@ export class GameService {
     const game = new Game({ index: gameIndex, user });
     this.storage.games.set(gameIndex, game);
     this.updateRooms();
-    return "Room created successfully";
+    return `Room ${gameIndex} created successfully`;
   }
 
   updateRooms() {
@@ -53,12 +51,15 @@ export class GameService {
   start(userIndex: number, indexRoom: number) {
     const newUser = this.storage.users.get(userIndex);
     const game = this.storage.games.get(indexRoom);
+    if (game.users.some((user) => user.index === userIndex)) {
+      return "User already join to this room";
+    }
     game.users.push(newUser);
     game.users.forEach((user) => {
       user.ws.send(
         JSON.stringify({
           type: "create_game",
-          data: JSON.stringify({ idGame: indexRoom, idPlayer: userIndex }),
+          data: JSON.stringify({ idGame: indexRoom, idPlayer: user.index }),
           id: 0,
         })
       );
