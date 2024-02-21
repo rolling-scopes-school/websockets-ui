@@ -19,7 +19,7 @@ export class User {
     this.index = index;
     this.ws = ws;
   }
-  pastAttacks = new Set<{ x: number; y: number }>();
+  pastAttacks = new Set<string>();
   shipsKill = 0;
 }
 

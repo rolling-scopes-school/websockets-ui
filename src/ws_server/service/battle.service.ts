@@ -1,6 +1,5 @@
 import { DB } from "../db/storage";
 import { AddShipsData, AttackData } from "../types";
-import { getIndex } from "../db/helpers";
 
 export class BattleService {
   storage: DB;
@@ -63,48 +62,139 @@ export class BattleService {
     }
     const user = game.users.find((user) => user.index === indexPlayer);
     const opponent = game.users.find((user) => user.index !== indexPlayer);
-    if (user.pastAttacks.has({ x, y })) {
-      return `User already shat to x: ${x} y ${y}`;
+    if (user.pastAttacks.has(`${x}${y}`)) {
+      return `User: ${indexPlayer} already shat to x: ${x} y ${y}`;
     }
-    user.pastAttacks.add({ x, y });
+    user.pastAttacks.add(`${x}${y}`);
     const ships = opponent.ships;
     const target = ships[y][x];
+    let status = "";
+    let ship: { x: number; y: number }[];
     if (target == 0) {
-      return "miss";
+      status = "miss";
     }
     if (target == 1) {
+      ship = this.getShip(ships, x, y);
       ships[y][x] = 2;
-      if (this.isShipAlive(ships, x, y)) {
-        return "попал";
+      if (this.isShipAlive(ships, ship)) {
+        status = "shot";
+      } else {
+        status = "killed";
       }
-      return "ГОТОВ";
     }
+
+    if (status === "killed") {
+      user.shipsKill += 1;
+      const surroundingCells = this.getSurroundingCells({ ship, x, y });
+      surroundingCells.forEach((cell) => {
+        user.ws.send(
+          JSON.stringify({
+            type: "attack",
+            data: JSON.stringify({
+              position: {
+                x: cell.x,
+                y: cell.y,
+              },
+              currentPlayer: indexPlayer,
+              status: "miss",
+            }),
+            id: 0,
+          })
+        );
+      });
+    }
+
+    if (status === "miss") {
+      game.next = opponent.index;
+      game.users.forEach((user) => {
+        user.ws.send(
+          JSON.stringify({
+            type: "turn",
+            data: JSON.stringify({
+              currentPlayer: opponent.index,
+            }),
+            id: 0,
+          })
+        );
+      });
+    }
+
+    user.ws.send(
+      JSON.stringify({
+        type: "attack",
+        data: JSON.stringify({
+          position: {
+            x,
+            y,
+          },
+          currentPlayer: indexPlayer,
+          status,
+        }),
+        id: 0,
+      })
+    );
+
+    if (user.shipsKill === 10) console.log("Win");
+
+    return `User: ${indexPlayer} shat to x: ${x} y ${y} - ${status}!`;
   }
 
-  isShipAlive(ships: number[][], x: number, y: number): boolean {
-    const maxY = ships.length;
-    const maxX = ships[0].length;
+  isShipAlive(ships: number[][], ship: { x: number; y: number }[]): boolean {
+    for (const { x, y } of ship) {
+      if (ships[y][x] === 1) {
+        return true;
+      }
+    }
+    return false;
+  }
 
-    // Проверяем соседнюю ячейку сверху
-    if (y > 0 && ships[y - 1][x] === 1) {
-      return true; // Найдена живая часть корабля
+  getShip(ships: number[][], x: number, y: number): { x: number; y: number }[] {
+    const shipCoordinates: { x: number; y: number }[] = [];
+
+    for (let i = y; i >= 0 && ships[i][x] !== 0; i--) {
+      shipCoordinates.push({ x, y: i });
     }
 
-    // Проверяем соседнюю ячейку снизу
-    if (y < maxY - 1 && ships[y + 1][x] === 1) {
-      return true; // Найдена живая часть корабля
+    for (let i = y + 1; i < 10 && ships[i][x] !== 0; i++) {
+      shipCoordinates.push({ x, y: i });
     }
 
-    // Проверяем соседнюю ячейку слева
-    if (x > 0 && ships[y][x - 1] === 1) {
-      return true; // Найдена живая часть корабля
+    for (let j = x; j >= 0 && ships[y][j] !== 0; j--) {
+      shipCoordinates.push({ x: j, y });
     }
 
-    // Проверяем соседнюю ячейку справа
-    if (x < maxX - 1 && ships[y][x + 1] === 1) {
-      return true; // Найдена живая часть корабля
+    for (let j = x + 1; j < 10 && ships[y][j] !== 0; j++) {
+      shipCoordinates.push({ x: j, y });
     }
 
-    return false; // Корабль убит
+    return shipCoordinates;
+  }
+
+  getSurroundingCells(args: {
+    ship: {
+      x: number;
+      y: number;
+    }[];
+    x: number;
+    y: number;
+  }): { x: number; y: number }[] {
+    const { ship, x, y } = args;
+    const surroundingCells: { x: number; y: number }[] = [];
+    ship.forEach(({ x, y }) => {
+      for (let i = Math.max(0, y - 1); i <= Math.min(9, y + 1); i++) {
+        for (let j = Math.max(0, x - 1); j <= Math.min(9, x + 1); j++) {
+          if (i !== y || j !== x) {
+            const isShipDeck = ship.some(
+              (coordinate) => coordinate.x === j && coordinate.y === i
+            );
+            if (!isShipDeck) {
+              surroundingCells.push({ x: j, y: i });
+            }
+          }
+        }
+      }
+    });
+
+    return surroundingCells;
   }
 }

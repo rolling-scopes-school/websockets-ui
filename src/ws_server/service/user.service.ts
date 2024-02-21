@@ -34,6 +34,6 @@ export class UserService {
     user.gameIndex = undefined;
     user.ships = undefined;
     user.shipsKill = 0;
-    user.pastAttacks = new Set<{ x: number; y: number }>();
+    user.pastAttacks = new Set<string>();
   }
 }
