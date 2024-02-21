@@ -56,6 +56,13 @@ export class ClientService {
           id: 0,
         });
         this.client.send(result);
+        this.client.send(
+          JSON.stringify({
+            type: "update_winners",
+            data: JSON.stringify(Array.from(this.storage.winners.values())),
+            id: 0,
+          })
+        );
         this.gameService.updateRooms();
         break;
       case "create_room":
@@ -69,6 +76,9 @@ export class ClientService {
         break;
       case "attack":
         result = this.battleService.attack(data);
+        break;
+      case "randomAttack":
+        result = this.battleService.randomAttack(data);
         break;
     }
 

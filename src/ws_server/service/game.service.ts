@@ -55,6 +55,10 @@ export class GameService {
     if (game.users.some((user) => user.index === userIndex)) {
       return "User already join to this room";
     }
+    if (newUser.gameIndex) {
+      this.storage.games.delete(newUser.gameIndex);
+      newUser.gameIndex = indexRoom;
+    }
     game.users.push(newUser);
     game.users.forEach((user) => {
       user.ws.send(

@@ -1,3 +1,4 @@
+import { User } from "../db/models";
 import { DB } from "../db/storage";
 import { AddShipsData, AttackData } from "../types";
 
@@ -29,8 +30,6 @@ export class BattleService {
     const user = this.storage.users.get(indexPlayer);
     user.ships = userShips;
     const game = this.storage.games.get(gameId);
-    console.log(game.index);
-    console.log(game.users);
     const gameUsers = game.users;
     console.log(`Game: ${gameId} - User ${indexPlayer} add ships`);
     if (
@@ -87,20 +86,25 @@ export class BattleService {
       user.shipsKill += 1;
       const surroundingCells = this.getSurroundingCells({ ship, x, y });
       surroundingCells.forEach((cell) => {
-        user.ws.send(
-          JSON.stringify({
-            type: "attack",
-            data: JSON.stringify({
-              position: {
-                x: cell.x,
-                y: cell.y,
-              },
-              currentPlayer: indexPlayer,
-              status: "miss",
-            }),
-            id: 0,
-          })
-        );
+        game.users.forEach((user) => {
+          if (user.index === indexPlayer) {
+            user.pastAttacks.add(`${cell.x}${cell.y}`);
+          }
+          user.ws.send(
+            JSON.stringify({
+              type: "attack",
+              data: JSON.stringify({
+                position: {
+                  x: cell.x,
+                  y: cell.y,
+                },
+                currentPlayer: indexPlayer,
+                status: "miss",
+              }),
+              id: 0,
+            })
+          );
+        });
       });
     }
 
@@ -118,23 +122,53 @@ export class BattleService {
         );
       });
     }
+    game.users.forEach((u) => {
+      u.ws.send(
+        JSON.stringify({
+          type: "attack",
+          data: JSON.stringify({
+            position: {
+              x,
+              y,
+            },
+            currentPlayer: indexPlayer,
+            status,
+          }),
+          id: 0,
+        })
+      );
+    });
 
-    user.ws.send(
-      JSON.stringify({
-        type: "attack",
-        data: JSON.stringify({
-          position: {
-            x,
-            y,
-          },
-          currentPlayer: indexPlayer,
-          status,
-        }),
-        id: 0,
-      })
-    );
-
-    if (user.shipsKill === 10) console.log("Win");
+    if (user.shipsKill === 10) {
+      game.users.forEach((user) => {
+        user.ws.send(
+          JSON.stringify({
+            type: "finish",
+            data: JSON.stringify({
+              winPlayer: indexPlayer,
+            }),
+            id: 0,
+          })
+        );
+        user.gameIndex = undefined;
+      });
+      if (this.storage.winners.get(indexPlayer)) {
+        const record = this.storage.winners.get(indexPlayer);
+        record.wins += 1;
+      } else {
+        this.storage.winners.set(indexPlayer, { name: user.name, wins: 1 });
+      }
+      this.storage.users.forEach((u) =>
+        u.ws.send(
+          JSON.stringify({
+            type: "update_winners",
+            data: JSON.stringify(Array.from(this.storage.winners.values())),
+            id: 0,
+          })
+        )
+      );
+      this.storage.games.delete(gameId);
+    }
 
     return `User: ${indexPlayer} shat to x: ${x} y ${y} - ${status}!`;
   }
@@ -196,5 +230,24 @@ export class BattleService {
     });
 
     return surroundingCells;
+  }
+
+  randomAttack(args: { gameId: number; indexPlayer: number }) {
+    const user = this.storage.users.get(args.indexPlayer);
+    const coordinate = this.generateRandomCoordinates(user);
+    let result = this.attack({ ...coordinate, ...args });
+    if (result.endsWith("killed!") || result.endsWith("shot!")) {
+      result += `\nNext attack:${this.randomAttack(args)}`;
+    }
+    return result;
+  }
+
+  generateRandomCoordinates(user: User): { x: number; y: number } {
+    const x = Math.floor(Math.random() * 10);
+    const y = Math.floor(Math.random() * 10);
+    if (user.pastAttacks.has(`${x}${y}`)) {
+      return this.generateRandomCoordinates(user);
+    }
+    return { x, y };
   }
 }

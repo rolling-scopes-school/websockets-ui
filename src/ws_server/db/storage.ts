@@ -4,7 +4,7 @@ export class DB {
   users: Map<number, User>;
   usersNames: Map<string, number>;
   games = new Map<number, Game>();
-  winners: Map<string, number>;
+  winners = new Map<number, { name: string; wins: number }>();
   constructor() {
     this.users = new Map<number, User>();
     this.usersNames = new Map<string, number>();
