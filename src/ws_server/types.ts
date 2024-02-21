@@ -17,3 +17,11 @@ export interface AddShipsData {
   ships: Ship[];
   indexPlayer: number;
 }
+
+
+export type AttackData = {
+  gameId: number;
+  x: number;
+  y: number;
+  indexPlayer: number; 
+};

@@ -19,6 +19,8 @@ export class User {
     this.index = index;
     this.ws = ws;
   }
+  pastAttacks = new Set<{ x: number; y: number }>();
+  shipsKill = 0;
 }
 
 export class Game {

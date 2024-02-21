@@ -26,6 +26,8 @@ export class ClientService {
   }
 
   private close() {
+    this.userService.logOut(this.userIndex);
+    this.gameService.updateRooms();
     console.log(`Client ${this.userIndex} connection closed`);
   }
 
@@ -65,13 +67,17 @@ export class ClientService {
       case "add_ships":
         result = this.battleService.addShips(data);
         break;
+      case "attack":
+        result = this.battleService.attack(data);
+        break;
     }
 
     if (typeof result === "string") {
-      console.log(`Result: ${result}`);
+      console.log(`Result: ${result}\n`);
     } else {
       console.log("Result:");
       console.table(result);
+      console.log("\n");
     }
   }
 

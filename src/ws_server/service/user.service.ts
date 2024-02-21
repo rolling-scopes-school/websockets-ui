@@ -13,6 +13,7 @@ export class UserService {
     const { name, password } = data;
     const user = this.storage.getUser({ name });
     if (user) {
+      user.ws = ws;
       return user.password == password
         ? {
             name,
@@ -25,5 +26,14 @@ export class UserService {
     this.storage.users.set(index, new User({ name, password, index, ws }));
     this.storage.usersNames.set(name, index);
     return { name, index, error: false };
+  }
+
+  logOut(index: number) {
+    const user = this.storage.users.get(index);
+    this.storage.games.delete(user.gameIndex);
+    user.gameIndex = undefined;
+    user.ships = undefined;
+    user.shipsKill = 0;
+    user.pastAttacks = new Set<{ x: number; y: number }>();
   }
 }

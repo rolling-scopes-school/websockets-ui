@@ -18,6 +18,7 @@ export class GameService {
     const game = new Game({ index: gameIndex, user });
     this.storage.games.set(gameIndex, game);
     this.updateRooms();
+    console.log(this.storage.games);
     return `Room ${gameIndex} created successfully`;
   }
 
