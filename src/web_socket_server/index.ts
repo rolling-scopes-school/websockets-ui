@@ -23,7 +23,7 @@ wss.on('connection', function connection(ws: WebSocket) {
             }
 
             case WebsocketTypes.CREATE_ROOM: {
-                createRoom(ws, receivedData);
+                createRoom(ws);
                 break;
             }
 
@@ -38,7 +38,12 @@ wss.on('connection', function connection(ws: WebSocket) {
             }
 
             case WebsocketTypes.ATTACK: {
-                playerAttack(ws, receivedData, currentUser);
+                playerAttack(ws, receivedData);
+                break;
+            }
+
+            case WebsocketTypes.RANDOM_ATTACK: {
+                // randomAttack(ws, receivedData, currentUser);
                 break;
             }
 

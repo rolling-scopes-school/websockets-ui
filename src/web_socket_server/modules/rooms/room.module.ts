@@ -5,14 +5,15 @@ import { WebsocketTypes } from '../../enum/websocket.types';
 import { User } from '../users/user';
 import { localListOfUsersRooms } from '../../local_data_base/local.list.of.users.rooms';
 import { localDataBase } from '../../local_data_base/local.data.base';
+import { ReceivedDataInterface } from '../../interface/received.data.interface';
 
 let roomIdCount = 1;
 const gameId = 1;
 // const listOfRooms = [];
 
-export const createRoom = (ws: WebSocket, receivedData: any) => {
-    console.log('receivedData', receivedData);
-    console.log('ws', ws);
+export const createRoom = (ws: WebSocket) => {
+    // console.log('receivedData', receivedData);
+    // console.log('ws', ws);
 
     const data = [
         {
@@ -34,11 +35,10 @@ export const createRoom = (ws: WebSocket, receivedData: any) => {
 
 export const updateRoom = (
     ws: WebSocket,
-    receivedData: any,
     currentUser: User,
     indexRoom?: number,
 ) => {
-    console.log('receivedData', receivedData);
+    // console.log('receivedData', receivedData);
 
     if (indexRoom) {
         const getCurrentRoomIndex = localListOfUsersRooms.findIndex(
@@ -122,11 +122,11 @@ export const updateRoom = (
 
 export const addUserToRoom = (
     ws: WebSocket,
-    receivedData: any,
+    receivedData: ReceivedDataInterface,
     currentUser: User,
 ) => {
     const { data } = receivedData;
     const { indexRoom } = JSON.parse(data);
 
-    updateRoom(ws, receivedData, currentUser, indexRoom);
+    updateRoom(ws, currentUser, indexRoom);
 };

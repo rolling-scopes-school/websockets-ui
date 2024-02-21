@@ -7,20 +7,21 @@ import { updateRoom } from '../rooms/room.module';
 import { User } from './user';
 import { localDataBase } from '../../local_data_base/local.data.base';
 import { UserInterface } from '../../interface/user.interface';
+import { ReceivedDataInterface } from '../../interface/received.data.interface';
 
 let userIndex = 0;
 
 export const storeUserData = (
     ws: WebSocket,
-    receivedData: any,
+    receivedData: ReceivedDataInterface,
     currentUser: User,
 ) => {
-    console.log('receivedData', receivedData);
+    // console.log('receivedData', receivedData);
     const { data } = receivedData;
     const { name, password } = JSON.parse(data);
 
-    console.log('name', name);
-    console.log('password', password);
+    // console.log('name', name);
+    // console.log('password', password);
 
     if (typeof name === 'string' && typeof password === 'string') {
         // localDataBase.push({ name, password, wins: 0 });
@@ -52,7 +53,7 @@ export const storeUserData = (
 
         userIndex += 1;
 
-        updateRoom(ws, receivedData, currentUser);
+        updateRoom(ws, currentUser);
         updateWinners(ws, receivedData);
     }
 };

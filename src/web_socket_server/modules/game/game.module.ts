@@ -1,30 +1,32 @@
 import { WebsocketTypes } from '../../enum/websocket.types';
 import { WebSocket } from 'ws';
-import { User } from '../users/user';
+// import { User } from '../users/user';
 import { localUserShips } from '../../local_data_base/local.user.ships';
 import { ShipStatuses } from '../../enum/ship.statuses';
 import { localDataBase } from '../../local_data_base/local.data.base';
+import { UserInterface } from '../../interface/user.interface';
+import { ReceivedDataInterface } from '../../interface/received.data.interface';
 
-export const playersTurn = (currentUser: User) => {
-    const user = currentUser.getCurrentPlayer();
+// const hittingShip = () => {};
+
+export const playersTurn = (currentUser: UserInterface) => {
     const data = {
         type: WebsocketTypes.TURN,
         data: JSON.stringify({
-            currentPlayer: user.index,
+            currentPlayer: currentUser.index,
         }),
         id: 0,
     };
-    console.log('TURN');
-    if (!user?.ws) {
+
+    if (!currentUser?.ws) {
         return;
     }
-    user?.ws.send(JSON.stringify(data));
+    currentUser?.ws.send(JSON.stringify(data));
 };
 
 export const playerAttack = (
     ws: WebSocket,
-    receivedData: any,
-    currentUser: User,
+    receivedData: ReceivedDataInterface,
 ) => {
     const { data } = receivedData;
     const { gameId, x, y, indexPlayer } = JSON.parse(data);
@@ -40,29 +42,63 @@ export const playerAttack = (
 
     const enemyId = shipData.indexPlayer;
     const enemyPlayer = localDataBase.find((users) => users.index === enemyId);
-    console.log('enemyPlayer', enemyPlayer);
+    const currentPlayer = localDataBase.find(
+        (users) => users.index === indexPlayer,
+    );
+    // console.log('enemyPlayer', enemyPlayer);
 
     const getShip = shipData.ships.filter(
         (ship) => ship.position.x === x && ship.position.y === y,
     );
-    console.log('ship', getShip);
+    // console.log('ship', getShip);
 
-    if (getShip.length === 0) {
+    if (getShip.length !== 0) {
         console.log('ship', getShip);
     }
 
-    const attackData = {
+    let attackData = {
         type: WebsocketTypes.ATTACK,
-        data: {
+        data: JSON.stringify({
             position: {
                 x,
                 y,
             },
-            currentPlayer: currentUser.getCurrentPlayer().index,
+            currentPlayer: currentPlayer?.index,
             status: ShipStatuses.MISS,
-        },
+        }),
         id: 0,
     };
 
     ws.send(JSON.stringify(attackData));
+
+    if (!enemyPlayer?.ws) {
+        return;
+    }
+
+    attackData = {
+        type: WebsocketTypes.ATTACK,
+        data: JSON.stringify({
+            position: {
+                x,
+                y,
+            },
+            currentPlayer: currentPlayer?.index,
+            status: ShipStatuses.MISS,
+        }),
+        id: 0,
+    };
+
+    enemyPlayer.ws.send(JSON.stringify(attackData));
+
+    playersTurn(enemyPlayer);
 };
+
+// export const randomAttack = (
+//     ws: WebSocket,
+//     receivedData: any,
+//     currentUser: User,
+// ) => {
+//     console.log(ws)
+//     console.log(receivedData)
+//     console.log(currentUser)
+// }

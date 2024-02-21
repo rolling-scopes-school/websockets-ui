@@ -1,12 +1,15 @@
 import { ShipsTypes } from '../enum/ships.types';
 
-interface IPositionInterface {
+export interface IPositionInterface {
     x: number;
     y: number;
 }
 
+export type IFullPositionInterface = IPositionInterface | IPositionInterface[];
+
+
 interface IShipsInterface {
-    position: IPositionInterface;
+    position: IFullPositionInterface;
     direction: boolean;
     length: number;
     type: ShipsTypes;
@@ -17,3 +20,4 @@ export interface IUserShipsInterface {
     ships: IShipsInterface[];
     indexPlayer: number;
 }
+
