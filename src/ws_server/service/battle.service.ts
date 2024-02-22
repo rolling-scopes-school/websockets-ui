@@ -1,5 +1,6 @@
 import { User } from "../db/models";
 import { DB } from "../db/storage";
+import { BotDifficultyLevel } from "../options";
 import { AddShipsData, AttackData } from "../types";
 
 export class BattleService {
@@ -112,7 +113,6 @@ export class BattleService {
           if (user.index === indexPlayer) {
             user.pastAttacks.add(`${cell.x}${cell.y}`);
           }
-          ship.forEach((cell) => {});
           user.ws.send(
             JSON.stringify({
               type: "attack",
@@ -285,10 +285,14 @@ export class BattleService {
 
   randomAttack(args: { gameId: number; indexPlayer: number }) {
     const user = this.storage.users.get(args.indexPlayer);
-    if (!user.gameIndex) {
-      return `if (!user.gameIndex)`;
-    }
-    const coordinate = this.generateRandomCoordinates(user);
+    const opponent = this.storage.games
+      .get(args.gameId)
+      .users.find((u) => u.index != args.indexPlayer);
+
+    const coordinate =
+      user.name == "bot" && Math.random() > BotDifficultyLevel
+        ? this.BotCheat(opponent.ships)
+        : this.generateRandomCoordinates(user);
 
     let result = this.attack({ ...coordinate, ...args });
 
@@ -307,26 +311,19 @@ export class BattleService {
     return { x, y };
   }
 
-  bootChitAttack(args: {
-    user: User;
-    coordinate: { x: number; y: number };
-    gameId: number;
-    indexPlayer: number;
-  }) {
-    const { user, coordinate, gameId, indexPlayer } = args;
-    const { x, y } = coordinate;
-    const ship = this.getShip(user.ships, x, y);
-    let result = "";
-    ship.forEach((cell) => {
-      if (user.ships[cell.y][cell.x] == 1) {
-        console.log(cell);
-        result += this.attack({ gameId, x, y, indexPlayer });
+  BotCheat(matrix: number[][]) {
+    const onesCoordinates: { x: number; y: number }[] = [];
+    for (let y = 0; y < matrix.length; y++) {
+      for (let x = 0; x < matrix[y].length; x++) {
+        if (matrix[y][x] === 1) {
+          onesCoordinates.push({ y, x });
+        }
       }
-    });
-
-    ship.forEach((cell) => {
-      result += `\nNext attack: Bot shat to x: ${cell.x} y ${cell.y}`;
-    });
-    return result;
+    }
+    if (onesCoordinates.length === 0) {
+      return null;
+    }
+    const randomIndex = Math.floor(Math.random() * onesCoordinates.length);
+    return onesCoordinates[randomIndex];
   }
 }
