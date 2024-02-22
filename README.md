@@ -1,6 +1,7 @@
 # RSSchool NodeJS websocket task template
 > Static http server and base task packages. 
 > By default WebSocket client tries to connect to the 3000 port.
+> Implemented difficulty levels for the bot you can change it in src/ws_server/optionsthe levels are already registered, you need to substitute one of the enama values.
 
 ## Installation
 1. Clone/download repo
