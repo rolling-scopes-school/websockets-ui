@@ -2,12 +2,14 @@ import { WebSocket } from 'ws';
 import { User } from '../users/user';
 import { localUserShips } from '../../local_data_base/local.user.ships';
 import {
+    IUserFullShipsInterface,
     IUserShipsInterface,
 } from '../../interface/user.ships.interface';
 import { WebsocketTypes } from '../../enum/websocket.types';
 import { localDataBase } from '../../local_data_base/local.data.base';
 import { playersTurn } from '../game/game.module';
 import { ReceivedDataInterface } from '../../interface/received.data.interface';
+import { DeckStatus } from '../../enum/deck.status';
 
 export const addUserShips = (
     ws: WebSocket,
@@ -17,7 +19,7 @@ export const addUserShips = (
     // console.log(currentUser);
     // console.log(ws);
     const { data } = receivedData;
-    const userDataWithShipsAndGameId = JSON.parse(data);
+    const userDataWithShipsAndGameId: IUserShipsInterface = JSON.parse(data);
     const currentGameId = userDataWithShipsAndGameId.gameId;
     // console.log('currentGameId', currentGameId);
 
@@ -38,7 +40,7 @@ export const startGame = (
     ws: WebSocket,
     receivedData: any,
     currentUser: User,
-    enemyPlayer: IUserShipsInterface,
+    enemyPlayer: IUserFullShipsInterface,
 ) => {
     const { data } = receivedData;
     const userDataWithShipsAndGameId = JSON.parse(data);
@@ -79,7 +81,9 @@ export const startGame = (
     playersTurn(currentUser.getCurrentPlayer());
 };
 
-export const getUserShipsCoordinates = (shipsData: IUserShipsInterface) => {
+export const getUserShipsCoordinates = (
+    shipsData: IUserShipsInterface,
+): IUserFullShipsInterface => {
     const { ships } = shipsData;
     const shipsWithCoordinates = ships.map((ship) => {
         const {
@@ -91,13 +95,21 @@ export const getUserShipsCoordinates = (shipsData: IUserShipsInterface) => {
 
         if (!direction) {
             for (let i = 0; i < length; i++) {
-                arrayWithCoordinates.push({ x: Number(x) + i, y });
+                arrayWithCoordinates.push({
+                    x: Number(x) + i,
+                    y,
+                    status: DeckStatus.DECK_INTACT,
+                });
             }
         }
 
         if (direction) {
             for (let i = 0; i < length; i++) {
-                arrayWithCoordinates.push({ x, y: Number(y) + i });
+                arrayWithCoordinates.push({
+                    x,
+                    y: Number(y) + i,
+                    status: DeckStatus.DECK_INTACT,
+                });
             }
         }
         console.log('arrayWithCoordinates', arrayWithCoordinates);

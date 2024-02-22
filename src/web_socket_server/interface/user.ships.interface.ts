@@ -1,23 +1,37 @@
 import { ShipsTypes } from '../enum/ships.types';
+import { DeckStatus } from '../enum/deck.status';
 
-export interface IPositionInterface {
+interface IPositionInterface {
     x: number;
     y: number;
 }
 
-export type IFullPositionInterface = IPositionInterface | IPositionInterface[];
-
-
 interface IShipsInterface {
-    position: IFullPositionInterface;
     direction: boolean;
     length: number;
     type: ShipsTypes;
 }
 
+interface IShipsShortInterface extends IShipsInterface {
+    position: IPositionInterface;
+}
+
 export interface IUserShipsInterface {
     gameId: number;
-    ships: IShipsInterface[];
+    ships: IShipsShortInterface[];
     indexPlayer: number;
 }
 
+interface IPositionWithStatus extends IPositionInterface {
+    status: DeckStatus;
+}
+
+export interface IShipsFullInterface extends IShipsInterface {
+    position: IPositionWithStatus[];
+}
+
+export interface IUserFullShipsInterface {
+    gameId: number;
+    ships: IShipsFullInterface[];
+    indexPlayer: number;
+}

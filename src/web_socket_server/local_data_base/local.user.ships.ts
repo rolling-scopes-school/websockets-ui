@@ -1,3 +1,3 @@
-import { IUserShipsInterface } from '../interface/user.ships.interface';
+import { IUserFullShipsInterface } from '../interface/user.ships.interface';
 
-export const localUserShips: IUserShipsInterface[] = [];
+export const localUserShips: IUserFullShipsInterface[] = [];
