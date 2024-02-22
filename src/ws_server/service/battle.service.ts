@@ -89,11 +89,30 @@ export class BattleService {
     if (status === "killed") {
       user.shipsKill += 1;
       const surroundingCells = this.getSurroundingCells({ ship, x, y });
+      ship.forEach((cell) => {
+        [user, opponent].forEach((u) =>
+          u.ws.send(
+            JSON.stringify({
+              type: "attack",
+              data: JSON.stringify({
+                position: {
+                  x: cell.x,
+                  y: cell.y,
+                },
+                currentPlayer: indexPlayer,
+                status: "killed",
+              }),
+              id: 0,
+            })
+          )
+        );
+      });
       surroundingCells.forEach((cell) => {
         game.users.forEach((user) => {
           if (user.index === indexPlayer) {
             user.pastAttacks.add(`${cell.x}${cell.y}`);
           }
+          ship.forEach((cell) => {});
           user.ws.send(
             JSON.stringify({
               type: "attack",

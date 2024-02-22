@@ -21,6 +21,7 @@
     "esModuleInterop": true,
   },
   "exclude": [
-    "./front"
+    "./front",
+    "./dist"
   ]
 }
