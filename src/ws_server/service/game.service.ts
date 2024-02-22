@@ -1,7 +1,8 @@
 import { getIndex } from "../db/helpers";
-import { Game } from "../db/models";
+import { Game, User } from "../db/models";
 import { DB } from "../db/storage";
 import WebSocket from "ws";
+import { newBoard } from "./boot.service";
 
 export class GameService {
   storage: DB;
@@ -18,7 +19,6 @@ export class GameService {
     const game = new Game({ index: gameIndex, user });
     this.storage.games.set(gameIndex, game);
     this.updateRooms();
-    console.log(this.storage.games);
     return `Room ${gameIndex} created successfully`;
   }
 
@@ -57,8 +57,8 @@ export class GameService {
     }
     if (newUser.gameIndex) {
       this.storage.games.delete(newUser.gameIndex);
-      newUser.gameIndex = indexRoom;
     }
+    newUser.gameIndex = indexRoom;
     game.users.push(newUser);
     game.users.forEach((user) => {
       user.ws.send(
@@ -71,5 +71,22 @@ export class GameService {
     });
     this.updateRooms();
     return `Game ${indexRoom} started`;
+  }
+
+  startSingPlay(index: number) {
+    const botIndex = new Date().getMilliseconds();
+    const bot = new User({
+      name: "bot",
+      index: botIndex,
+      password: `${Math.random()}`,
+      ws: { send: () => "" } as unknown as WebSocket,
+    });
+    bot.ships = newBoard();
+    this.storage.users.set(botIndex, bot);
+    const gameIndex = getIndex(this.storage.games);
+    const game = new Game({ index: gameIndex, user: bot });
+    this.storage.games.set(gameIndex, game);
+    this.start(index, gameIndex);
+    return `Single play ${gameIndex} created successfully`;
   }
 }

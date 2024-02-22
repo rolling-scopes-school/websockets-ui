@@ -80,6 +80,9 @@ export class ClientService {
       case "randomAttack":
         result = this.battleService.randomAttack(data);
         break;
+      case "single_play":
+        result = this.gameService.startSingPlay(this.userIndex);
+        break;
     }
 
     if (typeof result === "string") {

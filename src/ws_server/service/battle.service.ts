@@ -27,6 +27,7 @@ export class BattleService {
         }
       }
     });
+
     const user = this.storage.users.get(indexPlayer);
     user.ships = userShips;
     const game = this.storage.games.get(gameId);
@@ -56,6 +57,9 @@ export class BattleService {
     const { gameId, x, y, indexPlayer } = data;
 
     const game = this.storage.games.get(gameId);
+    if (!game) {
+      return ``;
+    }
     if (game.next !== indexPlayer) {
       return `Attack failed it's the player's turn ${game.next}`;
     }
@@ -121,7 +125,11 @@ export class BattleService {
           })
         );
       });
+      if (opponent.name == "bot" && opponent.shipsKill < 10) {
+        this.randomAttack({ gameId, indexPlayer: opponent.index });
+      }
     }
+
     game.users.forEach((u) => {
       u.ws.send(
         JSON.stringify({
@@ -151,13 +159,33 @@ export class BattleService {
           })
         );
         user.gameIndex = undefined;
+        user.pastAttacks = new Set<string>();
+        user.shipsKill = 0;
       });
+
       if (this.storage.winners.get(indexPlayer)) {
         const record = this.storage.winners.get(indexPlayer);
         record.wins += 1;
       } else {
-        this.storage.winners.set(indexPlayer, { name: user.name, wins: 1 });
+        if (user.name === "bot") {
+          const botWins = this.storage.winners.get(99999999);
+          if (botWins) {
+            botWins.wins += 1;
+            this.storage.winners.set(99999999, {
+              name: user.name,
+              wins: botWins.wins,
+            });
+          } else {
+            this.storage.winners.set(99999999, {
+              name: user.name,
+              wins: 1,
+            });
+          }
+        } else {
+          this.storage.winners.set(indexPlayer, { name: user.name, wins: 1 });
+        }
       }
+
       this.storage.users.forEach((u) =>
         u.ws.send(
           JSON.stringify({
@@ -168,6 +196,10 @@ export class BattleService {
         )
       );
       this.storage.games.delete(gameId);
+      if (user.name === "bot") {
+        console.log(`Bot is a winner!`);
+      }
+      return `${user.name} is wine!`;
     }
 
     return `User: ${indexPlayer} shat to x: ${x} y ${y} - ${status}!`;
@@ -234,8 +266,13 @@ export class BattleService {
 
   randomAttack(args: { gameId: number; indexPlayer: number }) {
     const user = this.storage.users.get(args.indexPlayer);
+    if (!user.gameIndex) {
+      return `if (!user.gameIndex)`;
+    }
     const coordinate = this.generateRandomCoordinates(user);
+
     let result = this.attack({ ...coordinate, ...args });
+
     if (result.endsWith("killed!") || result.endsWith("shot!")) {
       result += `\nNext attack:${this.randomAttack(args)}`;
     }
@@ -249,5 +286,28 @@ export class BattleService {
       return this.generateRandomCoordinates(user);
     }
     return { x, y };
+  }
+
+  bootChitAttack(args: {
+    user: User;
+    coordinate: { x: number; y: number };
+    gameId: number;
+    indexPlayer: number;
+  }) {
+    const { user, coordinate, gameId, indexPlayer } = args;
+    const { x, y } = coordinate;
+    const ship = this.getShip(user.ships, x, y);
+    let result = "";
+    ship.forEach((cell) => {
+      if (user.ships[cell.y][cell.x] == 1) {
+        console.log(cell);
+        result += this.attack({ gameId, x, y, indexPlayer });
+      }
+    });
+
+    ship.forEach((cell) => {
+      result += `\nNext attack: Bot shat to x: ${cell.x} y ${cell.y}`;
+    });
+    return result;
   }
 }
