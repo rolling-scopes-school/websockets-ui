@@ -1,7 +1,14 @@
-const { WebSocketServer } = require("ws");
+// const { WebSocketServer } = require("ws");
+import { WebSocketServer } from "ws"
+interface IWS_connection {
+    readonly WS_PORT: number
+    readonly sockets: any[]
+    startConnection: () => void
+}
 
-
-class WS_connection {
+export class WS_connection implements IWS_connection {
+    readonly WS_PORT: number
+    readonly sockets: any[]
     constructor(WSS_PORT = 3000) {
         this.WS_PORT = WSS_PORT;
         this.sockets = [];
@@ -16,7 +23,7 @@ class WS_connection {
             console.log("connection", wsClient);
             this.sockets.push(wsClient);
 
-            wsClient.index = Math.floor(Math.random() * Date.now());
+            // wsClient.index = Math.floor(Math.random() * Date.now());
 
             wsClient.on('message', async (message) => {
                 const frontRes = JSON.parse(message.toString());
@@ -31,5 +38,3 @@ class WS_connection {
         });
     }
 }
-
-module.exports = { WS_connection };
