@@ -68,7 +68,7 @@ export class GameService {
           id: 0,
         })
       );
-    });
+    })
     this.updateRooms();
     return `Game ${indexRoom} started`;
   }

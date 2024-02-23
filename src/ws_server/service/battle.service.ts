@@ -43,6 +43,15 @@ export class BattleService {
       gameUsers.forEach((gUser) => {
         gUser.ws.send(
           JSON.stringify({
+            type: "turn",
+            data: JSON.stringify({
+              currentPlayer: user.index,
+            }),
+            id: 0,
+          })
+        );
+        gUser.ws.send(
+          JSON.stringify({
             type: "start_game",
             data: JSON.stringify({ ships, currentPlayerIndex: indexPlayer }),
             id: 0,
@@ -50,7 +59,6 @@ export class BattleService {
         );
       });
     }
-
     return userShips;
   }
 
@@ -91,7 +99,7 @@ export class BattleService {
       user.shipsKill += 1;
       const surroundingCells = this.getSurroundingCells({ ship, x, y });
       ship.forEach((cell) => {
-        [user, opponent].forEach((u) =>
+        [user, opponent].forEach((u) => {
           u.ws.send(
             JSON.stringify({
               type: "attack",
@@ -105,8 +113,8 @@ export class BattleService {
               }),
               id: 0,
             })
-          )
-        );
+          );
+        });
       });
       surroundingCells.forEach((cell) => {
         game.users.forEach((user) => {
@@ -133,21 +141,22 @@ export class BattleService {
 
     if (status === "miss") {
       game.next = opponent.index;
-      game.users.forEach((user) => {
-        user.ws.send(
-          JSON.stringify({
-            type: "turn",
-            data: JSON.stringify({
-              currentPlayer: opponent.index,
-            }),
-            id: 0,
-          })
-        );
-      });
       if (opponent.name == "bot" && opponent.shipsKill < 10) {
         this.randomAttack({ gameId, indexPlayer: opponent.index });
       }
     }
+
+    game.users.forEach((user) => {
+      user.ws.send(
+        JSON.stringify({
+          type: "turn",
+          data: JSON.stringify({
+            currentPlayer: status === "miss" ? opponent.index : user.index,
+          }),
+          id: 0,
+        })
+      );
+    });
 
     game.users.forEach((u) => {
       u.ws.send(
@@ -180,6 +189,7 @@ export class BattleService {
         user.gameIndex = undefined;
         user.pastAttacks = new Set<string>();
         user.shipsKill = 0;
+        user.ships = undefined;
       });
 
       if (this.storage.winners.get(indexPlayer)) {
@@ -296,7 +306,10 @@ export class BattleService {
 
     let result = this.attack({ ...coordinate, ...args });
 
-    if (result.endsWith("killed!") || result.endsWith("shot!")) {
+    if (
+      (result.endsWith("killed!") || result.endsWith("shot!")) &&
+      user.name == "bot"
+    ) {
       result += `\nNext attack:${this.randomAttack(args)}`;
     }
     return result;

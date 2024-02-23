@@ -13,6 +13,7 @@ export class UserService {
     const { name, password } = data;
     const user = this.storage.getUser({ name });
     if (user) {
+      user.ws.CLOSING;
       user.ws = ws;
       return user.password == password
         ? {
