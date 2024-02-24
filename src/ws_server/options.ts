@@ -4,4 +4,4 @@ enum DifficultyLevel {
   капита = 0.55,
   генерал_адмирал = 0.333333333,
 }
-export const BotDifficultyLevel = DifficultyLevel.капита;
+export const BotDifficultyLevel = DifficultyLevel.генерал_адмирал;

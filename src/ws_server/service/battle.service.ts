@@ -83,7 +83,7 @@ export class BattleService {
     let status = "";
     let ship: { x: number; y: number }[];
     if (target == 0) {
-      status = "miss";
+      status = "";
     }
     if (target == 1) {
       ship = this.getShip(ships, x, y);
@@ -93,6 +93,8 @@ export class BattleService {
       } else {
         status = "killed";
       }
+    } else {
+      status = "miss";
     }
 
     if (status === "killed") {
@@ -138,15 +140,8 @@ export class BattleService {
         });
       });
     }
-
-    if (status === "miss") {
-      game.next = opponent.index;
-      if (opponent.name == "bot" && opponent.shipsKill < 10) {
-        this.randomAttack({ gameId, indexPlayer: opponent.index });
-      }
-    }
-
     game.users.forEach((user) => {
+      console.log(status);
       user.ws.send(
         JSON.stringify({
           type: "turn",
@@ -157,6 +152,13 @@ export class BattleService {
         })
       );
     });
+
+    if (status === "miss") {
+      game.next = opponent.index;
+      if (opponent.name == "bot" && opponent.shipsKill < 10) {
+        this.randomAttack({ gameId, indexPlayer: opponent.index });
+      }
+    }
 
     game.users.forEach((u) => {
       u.ws.send(
