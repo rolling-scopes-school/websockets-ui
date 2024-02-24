@@ -1,36 +1,29 @@
 import { WebSocket } from 'ws';
-// import { localListOfUsersRooms } from '../local_data_base/local.list.of.users.rooms';
+
 import { WebsocketTypes } from '../../enum/websocket.types';
-// import { localDataBase } from '../../local_data_base/local.data.base';
 import { User } from '../users/user';
 import { localListOfUsersRooms } from '../../local_data_base/local.list.of.users.rooms';
 import { localDataBase } from '../../local_data_base/local.data.base';
 import { ReceivedDataInterface } from '../../interface/received.data.interface';
+import { getWsSendData } from '../../utils/stringify.data';
 
 let roomIdCount = 1;
 const gameId = 1;
-// const listOfRooms = [];
 
 export const createRoom = (ws: WebSocket) => {
-    // console.log('receivedData', receivedData);
-    // console.log('ws', ws);
-
-    const data = [
-        {
-            roomId: roomIdCount,
-            roomUsers: [],
-        },
-    ];
+    const wsData = getWsSendData(
+        [
+            {
+                roomId: roomIdCount,
+                roomUsers: [],
+            },
+        ],
+        WebsocketTypes.UPDATE_ROOM,
+    );
 
     roomIdCount += 1;
 
-    ws.send(
-        JSON.stringify({
-            type: WebsocketTypes.UPDATE_ROOM,
-            data: JSON.stringify(data),
-            id: 0,
-        }),
-    );
+    ws.send(wsData);
 };
 
 export const updateRoom = (
@@ -38,13 +31,10 @@ export const updateRoom = (
     currentUser: User,
     indexRoom?: number,
 ) => {
-    // console.log('receivedData', receivedData);
-
     if (indexRoom) {
         const getCurrentRoomIndex = localListOfUsersRooms.findIndex(
             (room) => room.roomId === indexRoom,
         );
-        // console.log('getCurrentRoomIndex', getCurrentRoomIndex);
 
         if (getCurrentRoomIndex !== -1) {
             const room = localListOfUsersRooms.splice(getCurrentRoomIndex, 1);
@@ -59,44 +49,28 @@ export const updateRoom = (
                 idPlayer: user.index,
             };
 
-            if (!firstPlayer!.ws) {
-                return;
-            }
-
-            firstPlayer?.ws.send(
-                JSON.stringify({
-                    type: WebsocketTypes.CREATE_GAME,
-                    data: JSON.stringify({
-                        ...data,
-                        idPlayer: firstPlayerId,
-                    }),
-                    id: 0,
-                }),
+            let wsData = getWsSendData(
+                {
+                    ...data,
+                    idPlayer: firstPlayerId,
+                },
+                WebsocketTypes.CREATE_GAME,
             );
 
-            ws.send(
-                JSON.stringify({
-                    type: WebsocketTypes.CREATE_GAME,
-                    data: JSON.stringify(data),
-                    id: 0,
-                }),
+            firstPlayer!.ws?.send(wsData);
+
+            wsData = getWsSendData(data, WebsocketTypes.CREATE_GAME);
+
+            ws.send(wsData);
+
+            const wsUpdateRoomData = getWsSendData(
+                localListOfUsersRooms,
+                WebsocketTypes.UPDATE_ROOM,
             );
 
-            firstPlayer?.ws.send(
-                JSON.stringify({
-                    type: WebsocketTypes.UPDATE_ROOM,
-                    data: JSON.stringify(localListOfUsersRooms),
-                    id: 0,
-                }),
-            );
+            firstPlayer?.ws?.send(wsUpdateRoomData);
 
-            return ws.send(
-                JSON.stringify({
-                    type: WebsocketTypes.UPDATE_ROOM,
-                    data: JSON.stringify(localListOfUsersRooms),
-                    id: 0,
-                }),
-            );
+            return ws.send(wsUpdateRoomData);
         }
 
         const player = currentUser.getCurrentPlayer();

@@ -1,7 +1,7 @@
 import { ShipsTypes } from '../enum/ships.types';
 import { DeckStatus } from '../enum/deck.status';
 
-interface IPositionInterface {
+export interface IPositionInterface {
     x: number;
     y: number;
 }

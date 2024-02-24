@@ -1,4 +1,5 @@
 import { RawData, WebSocket, WebSocketServer } from 'ws';
+
 import { WebsocketTypes } from './enum/websocket.types';
 import { storeUserData } from './modules/users/user.module';
 import { addUserToRoom, createRoom } from './modules/rooms/room.module';
@@ -8,6 +9,12 @@ import { playerAttack } from './modules/game/game.module';
 
 const wss = new WebSocketServer({ port: 3000 });
 const currentUser = new User();
+
+console.log('Start WebSocket server on the 3000 port!');
+
+process.on('uncaughtException', () => {
+    console.log('Internal server error');
+});
 
 wss.on('connection', function connection(ws: WebSocket) {
     ws.on('error', console.error);
@@ -48,21 +55,8 @@ wss.on('connection', function connection(ws: WebSocket) {
             }
 
             default: {
-                console.log('not deploy');
+                console.log('Not implemented');
             }
         }
     });
-
-    // const data = {
-    //     type: 'reg',
-    //     data: {
-    //         name: 'Player',
-    //         password: 'qwerty',
-    //     },
-    //     id: 0,
-    // };
-    //
-    // ws.send(JSON.stringify(data));
 });
-
-console.log('Start WebSocket server on the 3000 port!');

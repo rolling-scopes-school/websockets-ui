@@ -1,6 +1,6 @@
-import { WebsocketTypes } from '../../enum/websocket.types';
 import { WebSocket } from 'ws';
-// import { User } from '../users/user';
+
+import { WebsocketTypes } from '../../enum/websocket.types';
 import { localUserShips } from '../../local_data_base/local.user.ships';
 import { ShipStatuses } from '../../enum/ship.statuses';
 import { localDataBase } from '../../local_data_base/local.data.base';
@@ -9,24 +9,25 @@ import {
     IAttackData,
     ReceivedDataInterface,
 } from '../../interface/received.data.interface';
-import { IShipsFullInterface } from '../../interface/user.ships.interface';
+import {
+    IPositionInterface,
+    IShipsFullInterface,
+} from '../../interface/user.ships.interface';
 import { ShipsTypes } from '../../enum/ships.types';
-
-// const hittingShip = () => {};
+import { DeckStatus } from '../../enum/deck.status';
+import { updateUserShips } from '../ships/ships';
+import { updateWinners } from '../users/user.module';
+import { getWsSendData } from '../../utils/stringify.data';
 
 export const playersTurn = (currentUser: UserInterface) => {
-    const data = {
-        type: WebsocketTypes.TURN,
-        data: JSON.stringify({
+    const wsData = getWsSendData(
+        {
             currentPlayer: currentUser.index,
-        }),
-        id: 0,
-    };
+        },
+        WebsocketTypes.TURN,
+    );
 
-    if (!currentUser?.ws) {
-        return;
-    }
-    currentUser?.ws.send(JSON.stringify(data));
+    currentUser.ws?.send(wsData);
 };
 
 export const playerAttack = (
@@ -42,179 +43,119 @@ export const playerAttack = (
             userShip.gameId === gameId && userShip.indexPlayer !== indexPlayer,
     );
 
-    if (!shipData) {
-        return;
-    }
-
-    const enemyId = shipData.indexPlayer;
+    const enemyId = shipData!.indexPlayer;
     const enemyPlayer = localDataBase.find((users) => users.index === enemyId);
     const currentPlayer = localDataBase.find(
         (users) => users.index === indexPlayer,
     );
-    // console.log('enemyPlayer', enemyPlayer);
 
-    const currentShip = shipData.ships.filter((ship) =>
+    const currentShip = shipData!.ships.filter((ship) =>
         ship.position.find((position) => position.x === x && position.y === y),
     );
-    console.log('ship', currentShip[0]?.position);
 
     if (currentShip.length !== 0) {
-        console.log('-----------------------------')
-        console.log('currentShip', currentShip);
         return getHitData(
             currentShip,
             parsedData,
-            enemyPlayer,
-            currentPlayer
+            enemyPlayer!,
+            currentPlayer!,
         );
     }
 
-    let attackData = {
-        type: WebsocketTypes.ATTACK,
-        data: JSON.stringify({
+    const wsData = getWsSendData(
+        {
             position: {
                 x,
                 y,
             },
             currentPlayer: currentPlayer?.index,
             status: ShipStatuses.MISS,
-        }),
-        id: 0,
-    };
+        },
+        WebsocketTypes.ATTACK,
+    );
 
-    ws.send(JSON.stringify(attackData));
+    ws.send(wsData);
 
-    if (!enemyPlayer?.ws) {
-        return;
-    }
+    enemyPlayer!.ws?.send(wsData);
 
-    attackData = {
-        type: WebsocketTypes.ATTACK,
-        data: JSON.stringify({
-            position: {
-                x,
-                y,
-            },
-            currentPlayer: currentPlayer?.index,
-            status: ShipStatuses.MISS,
-        }),
-        id: 0,
-    };
-
-    enemyPlayer.ws.send(JSON.stringify(attackData));
-
-    playersTurn(enemyPlayer);
+    playersTurn(enemyPlayer!);
 };
 
 const getHitData = (
     ship: IShipsFullInterface[],
     data: IAttackData,
-    enemyPlayer: UserInterface | undefined,
-    currentPlayer: UserInterface | undefined
+    enemyPlayer: UserInterface,
+    currentPlayer: UserInterface,
 ) => {
     const shipType = ship[0]!.type;
-    const { gameId, x, y, indexPlayer } = data;
-
-    console.log('gameId', gameId);
-    console.log('indexPlayer', indexPlayer);
+    const { x, y } = data;
 
     if (shipType === ShipsTypes.SMALL) {
-        let attackData = {
-            type: WebsocketTypes.ATTACK,
-            data: JSON.stringify({
+        const wsData = getWsSendData(
+            {
                 position: {
                     x,
                     y,
                 },
                 currentPlayer: currentPlayer?.index,
                 status: ShipStatuses.KILLED,
-            }),
-            id: 0,
-        };
+            },
+            WebsocketTypes.ATTACK,
+        );
 
-        if (!currentPlayer?.ws) {
-            return;
-        }
-
-        currentPlayer.ws.send(JSON.stringify(attackData));
-
-        attackData = {
-            type: WebsocketTypes.ATTACK,
-            data: JSON.stringify({
-                position: {
-                    x,
-                    y,
-                },
-                currentPlayer: currentPlayer?.index,
-                status: ShipStatuses.KILLED,
-            }),
-            id: 0,
-        };
-
-        if (!enemyPlayer?.ws) {
-            return;
-        }
-
-        enemyPlayer.ws.send(JSON.stringify(attackData));
+        currentPlayer.ws!.send(wsData);
+        enemyPlayer.ws!.send(wsData);
 
         const borderCoordinates = addingBorderAroundShip(ship);
 
-        for (let coordinate of borderCoordinates) {
-            const borderData = {
-                type: WebsocketTypes.ATTACK,
-                data: JSON.stringify({
+        for (const coordinate of borderCoordinates) {
+            const wsData = getWsSendData(
+                {
                     position: {
                         x: coordinate.x,
                         y: coordinate.y,
                     },
                     currentPlayer: currentPlayer?.index,
                     status: ShipStatuses.MISS,
-                }),
-                id: 0,
-            }
-            currentPlayer.ws.send(JSON.stringify(borderData));
-            enemyPlayer.ws.send(JSON.stringify(borderData));
+                },
+                WebsocketTypes.ATTACK,
+            );
+
+            currentPlayer.ws!.send(wsData);
+            enemyPlayer.ws!.send(wsData);
         }
+
+        updateUserShips(enemyPlayer, ship, { x, y });
         playersTurn(currentPlayer!);
     }
 
-    if (shipType === ShipsTypes.MEDIUM) {
-
-    }
-
-    if (shipType === ShipsTypes.LARGE) {
-
-    }
-
-    if (shipType === ShipsTypes.HUGE) {
-
-    }
+    checkShipDecks(ship, enemyPlayer, currentPlayer, { x, y });
 };
 
-const addingBorderAroundShip = (
-    ship: IShipsFullInterface[]
-) => {
+const addingBorderAroundShip = (ship: IShipsFullInterface[]) => {
     const currentShip = ship[0]!;
     const { position, direction, length } = currentShip;
 
-    const coordinates = position.map(item => {
+    const coordinates = position.map((item) => {
         return {
             x: item.x,
-            y: item.y
-        }
+            y: item.y,
+        };
     });
-
-    console.log('coordinates', coordinates);
 
     let arrWithBorderCoordinates = [];
 
-    const  { x, y } = coordinates[0]!;
+    const { x, y } = coordinates[0]!;
 
     if (direction) {
         let currentY = y;
 
         for (let i = 0; i < length + 2; i++) {
-            arrWithBorderCoordinates.push({ x: x - 1, y: currentY - 1 }, { x, y: currentY - 1 }, { x: x + 1, y: currentY - 1});
+            arrWithBorderCoordinates.push(
+                { x: x - 1, y: currentY - 1 },
+                { x, y: currentY - 1 },
+                { x: x + 1, y: currentY - 1 },
+            );
             currentY++;
         }
     }
@@ -223,18 +164,130 @@ const addingBorderAroundShip = (
         let currentX = x;
 
         for (let i = 0; i < length + 2; i++) {
-            arrWithBorderCoordinates.push({ x: currentX - 1, y: y - 1 }, { x: currentX - 1, y }, { x: currentX - 1, y: y + 1});
+            arrWithBorderCoordinates.push(
+                { x: currentX - 1, y: y - 1 },
+                { x: currentX - 1, y },
+                { x: currentX - 1, y: y + 1 },
+            );
             currentX++;
         }
     }
-    console.log('arrWithBorderCoordinates', arrWithBorderCoordinates)
-    arrWithBorderCoordinates = arrWithBorderCoordinates.filter(item => item.x >= 0 && item.y >= 0);
 
-    const coordinatesSet = new Set(coordinates.map(item => JSON.stringify(item)));
-    const filteredArray = arrWithBorderCoordinates.filter(item => !coordinatesSet.has(JSON.stringify(item)));
-    console.log('filteredArray', filteredArray)
-    return filteredArray;
-}
+    arrWithBorderCoordinates = arrWithBorderCoordinates.filter(
+        (item) => item.x >= 0 && item.y >= 0,
+    );
+
+    const coordinatesSet = new Set(
+        coordinates.map((item) => JSON.stringify(item)),
+    );
+    return arrWithBorderCoordinates.filter(
+        (item) => !coordinatesSet.has(JSON.stringify(item)),
+    );
+};
+
+const checkShipDecks = (
+    ship: IShipsFullInterface[],
+    enemyPlayer: UserInterface,
+    currentPlayer: UserInterface,
+    attackPosition: IPositionInterface,
+) => {
+    const wsData = getWsSendData(
+        {
+            position: {
+                x: attackPosition.x,
+                y: attackPosition.y,
+            },
+            currentPlayer: currentPlayer?.index,
+            status: ShipStatuses.SHOT,
+        },
+        WebsocketTypes.ATTACK,
+    );
+
+    currentPlayer.ws!.send(wsData);
+    enemyPlayer.ws!.send(wsData);
+
+    updateUserShips(enemyPlayer, ship, attackPosition);
+
+    const userShips = localUserShips.find(
+        (item) => item.indexPlayer === enemyPlayer?.index,
+    );
+    const currentShip = userShips!.ships.filter((ship) =>
+        ship.position.find(
+            (position) =>
+                position.x === attackPosition.x &&
+                position.y === attackPosition.y,
+        ),
+    );
+
+    const isShipIntact =
+        currentShip[0]!.position.filter(
+            (item) => item.status === DeckStatus.DECK_INTACT,
+        ).length >= 1;
+
+    if (!isShipIntact) {
+        for (const position of ship[0]!.position) {
+            const wsData = getWsSendData(
+                {
+                    position: {
+                        x: position.x,
+                        y: position.y,
+                    },
+                    currentPlayer: currentPlayer?.index,
+                    status: ShipStatuses.KILLED,
+                },
+                WebsocketTypes.ATTACK,
+            );
+
+            currentPlayer.ws!.send(wsData);
+            enemyPlayer.ws!.send(wsData);
+        }
+
+        const borderCoordinates = addingBorderAroundShip(currentShip);
+
+        for (const coordinate of borderCoordinates) {
+            const wsData = getWsSendData(
+                {
+                    position: {
+                        x: coordinate.x,
+                        y: coordinate.y,
+                    },
+                    currentPlayer: currentPlayer?.index,
+                    status: ShipStatuses.MISS,
+                },
+                WebsocketTypes.ATTACK,
+            );
+
+            currentPlayer.ws!.send(wsData);
+            enemyPlayer.ws!.send(wsData);
+        }
+    }
+
+    playersTurn(currentPlayer!);
+
+    const playerIntactShips = userShips!.ships
+        .map((item) => {
+            return item.position.map((position) => {
+                return {
+                    status: position.status,
+                };
+            });
+        })
+        .flat();
+
+    if (playerIntactShips.every((item) => item.status === DeckStatus.HINT)) {
+        updateWinners(currentPlayer, enemyPlayer);
+
+        const wsData = getWsSendData(
+            {
+                winPlayer: currentPlayer!.index,
+            },
+            WebsocketTypes.FINISH,
+        );
+
+        currentPlayer.ws!.send(wsData);
+        enemyPlayer.ws!.send(wsData);
+    }
+};
 
 // export const randomAttack = (
 //     ws: WebSocket,

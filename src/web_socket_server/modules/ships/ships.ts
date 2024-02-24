@@ -1,7 +1,10 @@
 import { WebSocket } from 'ws';
+
 import { User } from '../users/user';
 import { localUserShips } from '../../local_data_base/local.user.ships';
 import {
+    IPositionInterface,
+    IShipsFullInterface,
     IUserFullShipsInterface,
     IUserShipsInterface,
 } from '../../interface/user.ships.interface';
@@ -10,18 +13,17 @@ import { localDataBase } from '../../local_data_base/local.data.base';
 import { playersTurn } from '../game/game.module';
 import { ReceivedDataInterface } from '../../interface/received.data.interface';
 import { DeckStatus } from '../../enum/deck.status';
+import { UserInterface } from '../../interface/user.interface';
+import { getWsSendData } from '../../utils/stringify.data';
 
 export const addUserShips = (
     ws: WebSocket,
     receivedData: ReceivedDataInterface,
     currentUser: User,
 ) => {
-    // console.log(currentUser);
-    // console.log(ws);
     const { data } = receivedData;
     const userDataWithShipsAndGameId: IUserShipsInterface = JSON.parse(data);
     const currentGameId = userDataWithShipsAndGameId.gameId;
-    // console.log('currentGameId', currentGameId);
 
     const enemyPlayer = localUserShips.find(
         (userShips) => userShips.gameId === currentGameId,
@@ -44,40 +46,34 @@ export const startGame = (
 ) => {
     const { data } = receivedData;
     const userDataWithShipsAndGameId = JSON.parse(data);
-    let shipsData = {
-        type: WebsocketTypes.START_GAME,
-        data: JSON.stringify({
+
+    let wsData = getWsSendData(
+        {
             ships: userDataWithShipsAndGameId.ships,
-        }),
-        indexPlayer: currentUser.getCurrentPlayer().index,
-    };
+            indexPlayer: currentUser.getCurrentPlayer().index,
+        },
+        WebsocketTypes.START_GAME,
+    );
 
-    // console.log('shipsData', shipsData);
-
-    ws.send(JSON.stringify(shipsData));
+    ws.send(wsData);
 
     const currentEnemyPlayer = localDataBase.find(
         (user) => user.index === enemyPlayer.indexPlayer,
     );
 
-    // console.log('currentEnemyPlayer', currentEnemyPlayer);
     const currentEnemyPlayerShips = localUserShips.find(
         (userShips) => userShips.indexPlayer === currentEnemyPlayer?.index,
     );
 
-    if (!currentEnemyPlayer?.ws) {
-        return;
-    }
-    // console.log('currentEnemyPlayerShips', currentEnemyPlayerShips);
-    shipsData = {
-        type: WebsocketTypes.START_GAME,
-        data: JSON.stringify({
+    wsData = getWsSendData(
+        {
             ships: currentEnemyPlayerShips,
-        }),
-        indexPlayer: currentEnemyPlayer.index,
-    };
+            currentPlayerIndex: currentEnemyPlayer?.index,
+        },
+        WebsocketTypes.START_GAME,
+    );
 
-    currentEnemyPlayer.ws.send(JSON.stringify(shipsData));
+    currentEnemyPlayer?.ws?.send(wsData);
     playersTurn(currentUser.getCurrentPlayer());
 };
 
@@ -112,7 +108,6 @@ export const getUserShipsCoordinates = (
                 });
             }
         }
-        console.log('arrayWithCoordinates', arrayWithCoordinates);
 
         return {
             ...ship,
@@ -124,4 +119,44 @@ export const getUserShipsCoordinates = (
         ...shipsData,
         ships: shipsWithCoordinates,
     };
+};
+
+export const updateUserShips = (
+    enemyPlayer: UserInterface | undefined,
+    ship: IShipsFullInterface[],
+    attackPosition: IPositionInterface,
+) => {
+    const userShipIndex = localUserShips.findIndex(
+        (item) => item.indexPlayer === enemyPlayer?.index,
+    );
+    const shipSet = new Set(ship.map((item) => JSON.stringify(item)));
+    const filteredArray = localUserShips[userShipIndex]!.ships.filter(
+        (item) => !shipSet.has(JSON.stringify(item)),
+    );
+    const shipPositionWithHitDeck = ship[0]!.position.map((item) => {
+        if (item.x === attackPosition.x && item.y === attackPosition.y) {
+            return {
+                ...item,
+                status: DeckStatus.HINT,
+            };
+        }
+        return item;
+    });
+
+    const shipWithHitDeck = [
+        {
+            ...ship[0]!,
+            position: shipPositionWithHitDeck,
+        },
+    ];
+
+    const updatedUserShipsState: IUserFullShipsInterface = {
+        ...localUserShips[userShipIndex],
+        ships: [...filteredArray, ...[shipWithHitDeck[0]!]],
+        gameId: localUserShips[userShipIndex]!.gameId,
+        indexPlayer: localUserShips[userShipIndex]!.indexPlayer,
+    };
+
+    delete localUserShips[userShipIndex];
+    localUserShips[userShipIndex] = updatedUserShipsState;
 };
