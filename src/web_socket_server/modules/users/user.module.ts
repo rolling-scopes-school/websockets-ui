@@ -9,7 +9,7 @@ import { UserInterface } from '../../interface/user.interface';
 import { ReceivedDataInterface } from '../../interface/received.data.interface';
 import { getWsSendData } from '../../utils/stringify.data';
 
-let userIndex = 0;
+let userIndex = 1;
 
 export const storeUserData = (
     ws: WebSocket,

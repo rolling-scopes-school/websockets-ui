@@ -130,3 +130,36 @@ export const addUserToRoom = (
 
     updateRoom(ws, currentUser, indexRoom);
 };
+
+export const createRoomForSingleMode = (ws: WebSocket, currentUser: User) => {
+    const currentPlayer = currentUser.getCurrentPlayer();
+
+    const currentUserIndex = localDataBase.findIndex(
+        (user) => user.index === currentPlayer.index,
+    );
+
+    const playerFromDB = localDataBase[currentUserIndex];
+    delete localDataBase[currentUserIndex];
+
+    localDataBase[currentUserIndex] = {
+        ...playerFromDB,
+        playWithBot: true,
+        name: playerFromDB!.name,
+        password: playerFromDB!.password,
+        index: playerFromDB!.index,
+    };
+
+    currentUser.setCurrentPlayer({
+        ...currentPlayer,
+        playWithBot: true,
+    });
+
+    const data = {
+        idGame: gameId,
+        idPlayer: currentPlayer.index,
+    };
+
+    const wsData = getWsSendData(data, WebsocketTypes.CREATE_GAME);
+
+    ws?.send(wsData);
+};

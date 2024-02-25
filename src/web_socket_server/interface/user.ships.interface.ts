@@ -12,7 +12,7 @@ interface IShipsInterface {
     type: ShipsTypes;
 }
 
-interface IShipsShortInterface extends IShipsInterface {
+export interface IShipsShortInterface extends IShipsInterface {
     position: IPositionInterface;
 }
 

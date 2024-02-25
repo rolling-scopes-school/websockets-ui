@@ -9,11 +9,15 @@ import {
 } from '../../interface/user.ships.interface';
 import { WebsocketTypes } from '../../enum/websocket.types';
 import { localDataBase } from '../../local_data_base/local.data.base';
-import { playersTurn } from '../game/game.module';
+import { playersTurn, startSingleGame } from '../game/game.module';
 import { ReceivedDataInterface } from '../../interface/received.data.interface';
 import { DeckStatus } from '../../enum/deck.status';
 import { UserInterface } from '../../interface/user.interface';
 import { getWsSendData } from '../../utils/stringify.data';
+import { getBotShips } from './ships.for.single.game';
+import { createBotTactics } from '../game/bot.tactics';
+
+let botIndex = -1;
 
 export const addUserShips = (
     ws: WebSocket,
@@ -26,6 +30,14 @@ export const addUserShips = (
     const currentUser = localDataBase.find(
         (users) => users.index === indexPlayer,
     );
+
+    if (currentUser?.playWithBot) {
+        return addUserShipsForSingleGame(
+            ws,
+            userDataWithShipsAndGameId,
+            currentUser,
+        );
+    }
 
     const enemyPlayer = localUserShips.find(
         (userShips) =>
@@ -170,4 +182,38 @@ export const updateUserShips = (
 
     delete localUserShips[userShipIndex];
     localUserShips[userShipIndex] = updatedUserShipsState;
+};
+
+export const addUserShipsForSingleGame = (
+    ws: WebSocket,
+    shipData: IUserShipsInterface,
+    player: UserInterface,
+) => {
+    const { gameId, ships } = shipData;
+
+    const botPlayer: UserInterface = {
+        name: `BotName${botIndex}`,
+        password: '',
+        index: botIndex,
+    };
+
+    localDataBase.push(botPlayer);
+
+    const userShipsWithCoordinates = getUserShipsCoordinates(shipData);
+
+    localUserShips.push(userShipsWithCoordinates);
+
+    const botShipsData = getBotShips();
+
+    localUserShips.push({
+        gameId,
+        ships: botShipsData,
+        indexPlayer: botIndex,
+    });
+
+    botIndex -= 1;
+
+    createBotTactics(gameId);
+
+    return startSingleGame(ws, player, botPlayer, ships, gameId);
 };

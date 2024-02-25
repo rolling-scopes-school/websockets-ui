@@ -2,7 +2,11 @@ import { RawData, WebSocket } from 'ws';
 
 import { WebsocketTypes } from './enum/websocket.types';
 import { storeUserData } from './modules/users/user.module';
-import { addUserToRoom, createRoom } from './modules/rooms/room.module';
+import {
+    addUserToRoom,
+    createRoom,
+    createRoomForSingleMode,
+} from './modules/rooms/room.module';
 import { User } from './modules/users/user';
 import { addUserShips } from './modules/ships/ships';
 import { playerAttack, randomAttack } from './modules/game/game.module';
@@ -46,12 +50,17 @@ export const requestHandler = (ws: WebSocket) => {
                     break;
                 }
 
+                case WebsocketTypes.SINGLE_PLAY: {
+                    createRoomForSingleMode(ws, currentUser);
+                    break;
+                }
+
                 default: {
                     console.log('Not implemented');
                 }
             }
         });
     } catch (e) {
-        console.log(e)
+        console.log(e);
     }
 };
