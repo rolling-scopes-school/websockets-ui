@@ -10,18 +10,37 @@ import { getWsSendData } from '../../utils/stringify.data';
 let roomIdCount = 1;
 const gameId = 1;
 
-export const createRoom = (ws: WebSocket) => {
-    const wsData = getWsSendData(
-        [
-            {
-                roomId: roomIdCount,
-                roomUsers: [],
-            },
-        ],
+export const createRoom = (ws: WebSocket, currentUser: User) => {
+    const currentPlayer = currentUser.getCurrentPlayer();
+
+    const roomWithThisPlayer = localListOfUsersRooms.find(
+        (room) => room.roomUsers[0]?.index === currentPlayer.index,
+    );
+
+    let wsData = getWsSendData(
+        [roomWithThisPlayer],
         WebsocketTypes.UPDATE_ROOM,
     );
 
-    roomIdCount += 1;
+    if (!roomWithThisPlayer) {
+        const roomData = {
+            roomId: roomIdCount,
+            roomUsers: [
+                {
+                    name: currentPlayer.name,
+                    index: currentPlayer.index,
+                },
+            ],
+        };
+
+        localListOfUsersRooms.push(roomData);
+
+        wsData = getWsSendData([roomData], WebsocketTypes.UPDATE_ROOM);
+
+        roomIdCount += 1;
+
+        return ws.send(wsData);
+    }
 
     ws.send(wsData);
 };
@@ -36,6 +55,14 @@ export const updateRoom = (
             (room) => room.roomId === indexRoom,
         );
 
+        const user = currentUser.getCurrentPlayer();
+        const userIndexInCurrentRoom =
+            localListOfUsersRooms[getCurrentRoomIndex]?.roomUsers?.[0]?.index;
+
+        if (user.index === userIndexInCurrentRoom) {
+            return;
+        }
+
         if (getCurrentRoomIndex !== -1) {
             const room = localListOfUsersRooms.splice(getCurrentRoomIndex, 1);
             const firstPlayerId = room[0]?.roomUsers[0]?.index;
@@ -43,7 +70,6 @@ export const updateRoom = (
                 (player) => player.index === firstPlayerId,
             );
 
-            const user = currentUser.getCurrentPlayer();
             const data = {
                 idGame: gameId,
                 idPlayer: user.index,

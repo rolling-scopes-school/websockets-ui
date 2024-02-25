@@ -1,6 +1,5 @@
 import { WebSocket } from 'ws';
 
-import { User } from '../users/user';
 import { localUserShips } from '../../local_data_base/local.user.ships';
 import {
     IPositionInterface,
@@ -19,29 +18,36 @@ import { getWsSendData } from '../../utils/stringify.data';
 export const addUserShips = (
     ws: WebSocket,
     receivedData: ReceivedDataInterface,
-    currentUser: User,
 ) => {
     const { data } = receivedData;
     const userDataWithShipsAndGameId: IUserShipsInterface = JSON.parse(data);
-    const currentGameId = userDataWithShipsAndGameId.gameId;
+    const { gameId, indexPlayer } = userDataWithShipsAndGameId;
+
+    const currentUser = localDataBase.find(
+        (users) => users.index === indexPlayer,
+    );
 
     const enemyPlayer = localUserShips.find(
-        (userShips) => userShips.gameId === currentGameId,
+        (userShips) =>
+            userShips.gameId === gameId &&
+            userShips.indexPlayer !== currentUser?.index,
     );
+
     const userShipsWithCoordinates = getUserShipsCoordinates(
         userDataWithShipsAndGameId,
     );
+
     localUserShips.push(userShipsWithCoordinates);
 
     if (enemyPlayer) {
-        startGame(ws, receivedData, currentUser, enemyPlayer);
+        startGame(ws, receivedData, currentUser!, enemyPlayer);
     }
 };
 
 export const startGame = (
     ws: WebSocket,
     receivedData: any,
-    currentUser: User,
+    currentUser: UserInterface,
     enemyPlayer: IUserFullShipsInterface,
 ) => {
     const { data } = receivedData;
@@ -50,7 +56,7 @@ export const startGame = (
     let wsData = getWsSendData(
         {
             ships: userDataWithShipsAndGameId.ships,
-            indexPlayer: currentUser.getCurrentPlayer().index,
+            indexPlayer: currentUser.index,
         },
         WebsocketTypes.START_GAME,
     );
@@ -74,7 +80,12 @@ export const startGame = (
     );
 
     currentEnemyPlayer?.ws?.send(wsData);
-    playersTurn(currentUser.getCurrentPlayer());
+
+    playersTurn(
+        currentUser,
+        currentEnemyPlayer!,
+        currentEnemyPlayerShips!.gameId!,
+    );
 };
 
 export const getUserShipsCoordinates = (

@@ -18,8 +18,42 @@ import { DeckStatus } from '../../enum/deck.status';
 import { updateUserShips } from '../ships/ships';
 import { updateWinners } from '../users/user.module';
 import { getWsSendData } from '../../utils/stringify.data';
+import { listOfPlayersTurn } from '../../local_data_base/local.list.of.players.turn';
+import { IPlayerInterface } from '../../interface/list.of.players.turn.interface';
 
-export const playersTurn = (currentUser: UserInterface) => {
+export const playersTurn = (
+    currentUser: UserInterface,
+    enemyPlayer: UserInterface,
+    gameId: number,
+) => {
+    const activePlayersTurnIndex = listOfPlayersTurn.findIndex(
+        (item) => item.gameId === gameId,
+    );
+
+    if (activePlayersTurnIndex === -1) {
+        const playerTurn = createPlayerListTurn();
+        listOfPlayersTurn.push({
+            gameId,
+            indexPlayer: currentUser.index,
+            [currentUser.index]: {
+                indexPlayer: currentUser.index,
+                playerTurns: playerTurn,
+            },
+            [enemyPlayer.index]: {
+                indexPlayer: enemyPlayer.index,
+                playerTurns: playerTurn,
+            },
+        });
+    } else {
+        const currentPlayerTurn = {
+            ...listOfPlayersTurn[activePlayersTurnIndex]!,
+            gameId,
+            indexPlayer: currentUser.index,
+        };
+        delete listOfPlayersTurn[activePlayersTurnIndex];
+        listOfPlayersTurn[activePlayersTurnIndex] = currentPlayerTurn;
+    }
+
     const wsData = getWsSendData(
         {
             currentPlayer: currentUser.index,
@@ -38,6 +72,12 @@ export const playerAttack = (
     const parsedData = JSON.parse(data);
     const { gameId, x, y, indexPlayer } = parsedData;
 
+    const isCurrentPlayerTurn = checkUserTurn(indexPlayer, gameId);
+
+    if (!isCurrentPlayerTurn) {
+        return;
+    }
+
     const shipData = localUserShips.find(
         (userShip) =>
             userShip.gameId === gameId && userShip.indexPlayer !== indexPlayer,
@@ -52,6 +92,8 @@ export const playerAttack = (
     const currentShip = shipData!.ships.filter((ship) =>
         ship.position.find((position) => position.x === x && position.y === y),
     );
+
+    removeCurrentAttackCoordinates(gameId, indexPlayer, { x, y });
 
     if (currentShip.length !== 0) {
         return getHitData(
@@ -78,7 +120,7 @@ export const playerAttack = (
 
     enemyPlayer!.ws?.send(wsData);
 
-    playersTurn(enemyPlayer!);
+    playersTurn(enemyPlayer!, currentPlayer!, gameId);
 };
 
 const getHitData = (
@@ -88,7 +130,7 @@ const getHitData = (
     currentPlayer: UserInterface,
 ) => {
     const shipType = ship[0]!.type;
-    const { x, y } = data;
+    const { x, y, gameId } = data;
 
     if (shipType === ShipsTypes.SMALL) {
         const wsData = getWsSendData(
@@ -106,7 +148,11 @@ const getHitData = (
         currentPlayer.ws!.send(wsData);
         enemyPlayer.ws!.send(wsData);
 
-        const borderCoordinates = addingBorderAroundShip(ship);
+        const borderCoordinates = addingBorderAroundShip(
+            ship,
+            gameId,
+            currentPlayer.index,
+        );
 
         for (const coordinate of borderCoordinates) {
             const wsData = getWsSendData(
@@ -126,13 +172,17 @@ const getHitData = (
         }
 
         updateUserShips(enemyPlayer, ship, { x, y });
-        playersTurn(currentPlayer!);
+        playersTurn(currentPlayer!, enemyPlayer, gameId);
     }
 
-    checkShipDecks(ship, enemyPlayer, currentPlayer, { x, y });
+    checkShipDecks(ship, enemyPlayer, currentPlayer, { x, y }, gameId);
 };
 
-const addingBorderAroundShip = (ship: IShipsFullInterface[]) => {
+const addingBorderAroundShip = (
+    ship: IShipsFullInterface[],
+    gameId: number,
+    indexPlayer: number,
+) => {
     const currentShip = ship[0]!;
     const { position, direction, length } = currentShip;
 
@@ -177,6 +227,10 @@ const addingBorderAroundShip = (ship: IShipsFullInterface[]) => {
         (item) => item.x >= 0 && item.y >= 0,
     );
 
+    arrWithBorderCoordinates.forEach((item) => {
+        removeCurrentAttackCoordinates(gameId, indexPlayer, item);
+    });
+
     const coordinatesSet = new Set(
         coordinates.map((item) => JSON.stringify(item)),
     );
@@ -190,6 +244,7 @@ const checkShipDecks = (
     enemyPlayer: UserInterface,
     currentPlayer: UserInterface,
     attackPosition: IPositionInterface,
+    gameId: number,
 ) => {
     const wsData = getWsSendData(
         {
@@ -242,7 +297,11 @@ const checkShipDecks = (
             enemyPlayer.ws!.send(wsData);
         }
 
-        const borderCoordinates = addingBorderAroundShip(currentShip);
+        const borderCoordinates = addingBorderAroundShip(
+            currentShip,
+            gameId,
+            currentPlayer.index,
+        );
 
         for (const coordinate of borderCoordinates) {
             const wsData = getWsSendData(
@@ -262,7 +321,7 @@ const checkShipDecks = (
         }
     }
 
-    playersTurn(currentPlayer!);
+    playersTurn(currentPlayer!, enemyPlayer!, gameId);
 
     const playerIntactShips = userShips!.ships
         .map((item) => {
@@ -289,12 +348,94 @@ const checkShipDecks = (
     }
 };
 
-// export const randomAttack = (
-//     ws: WebSocket,
-//     receivedData: any,
-//     currentUser: User,
-// ) => {
-//     console.log(ws)
-//     console.log(receivedData)
-//     console.log(currentUser)
-// }
+const checkUserTurn = (indexPlayer: number, gameId: number): boolean => {
+    const currentUserTurn = listOfPlayersTurn.find(
+        (gameSession) => gameSession.gameId === gameId,
+    );
+
+    if (currentUserTurn?.indexPlayer !== indexPlayer) {
+        return false;
+    }
+    return true;
+};
+
+export const randomAttack = (ws: WebSocket, receivedData: any) => {
+    const { data } = receivedData;
+    const { gameId, indexPlayer } = JSON.parse(data);
+
+    const currentUser = localDataBase.find(
+        (users) => users.index === indexPlayer,
+    );
+
+    const activeSessionTurns = listOfPlayersTurn.find(
+        (session) => session.gameId === gameId,
+    )!;
+
+    const { playerTurns } = activeSessionTurns[
+        currentUser!.index!
+    ] as IPlayerInterface;
+
+    const coordinate = getRandomCoordinate(playerTurns);
+    const attackData = {
+        type: WebsocketTypes.ATTACK,
+        data: JSON.stringify({
+            gameId,
+            x: coordinate!.x,
+            y: coordinate!.y,
+            indexPlayer: currentUser?.index,
+        }),
+        id: 0,
+    };
+    playerAttack(ws, attackData);
+};
+
+const createPlayerListTurn = () => {
+    const listOfPlayerTurns = [];
+
+    for (let i = 0; i < 10; i++) {
+        for (let j = 0; j < 10; j++) {
+            listOfPlayerTurns.push({ x: i, y: j });
+        }
+    }
+    return listOfPlayerTurns;
+};
+
+const getRandomCoordinate = (coordinates: IPositionInterface[]) => {
+    const index = Math.floor(Math.random() * (coordinates.length - 0)) + 0;
+    return coordinates[index];
+};
+
+const removeCurrentAttackCoordinates = (
+    gameId: number,
+    indexPlayer: number,
+    coordinates: IPositionInterface,
+) => {
+    const currentSessionIndex = listOfPlayersTurn.findIndex(
+        (session) => session.gameId === gameId,
+    );
+
+    const { playerTurns } = listOfPlayersTurn[currentSessionIndex]![
+        indexPlayer
+    ] as IPlayerInterface;
+
+    const coordinatesSet = new Set(
+        [coordinates].map((item) => JSON.stringify(item)),
+    );
+
+    const playerTurnsWithoutThisTurn = playerTurns.filter(
+        (item) => !coordinatesSet.has(JSON.stringify(item)),
+    );
+
+    const sessionPlayersTurnData = {
+        ...listOfPlayersTurn[currentSessionIndex],
+        indexPlayer: listOfPlayersTurn[currentSessionIndex]!.indexPlayer,
+        gameId: listOfPlayersTurn[currentSessionIndex]!.gameId,
+        [indexPlayer]: {
+            indexPlayer,
+            playerTurns: playerTurnsWithoutThisTurn,
+        },
+    };
+
+    delete listOfPlayersTurn[currentSessionIndex];
+    listOfPlayersTurn[currentSessionIndex] = sessionPlayersTurnData;
+};
