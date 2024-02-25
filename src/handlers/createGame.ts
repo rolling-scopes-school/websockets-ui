@@ -9,7 +9,7 @@ const createGame = (
   data: any,
   userId: string,
   clients: IClients,
-) => {
+): IRoom[] => {
   const roomWithOneUser = rooms.find(
     (room) =>
       room.roomId === data?.indexRoom &&
@@ -42,6 +42,8 @@ const createGame = (
       }
     });
   }
+
+  return rooms;
 };
 
 export default createGame;

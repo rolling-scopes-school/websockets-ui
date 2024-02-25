@@ -17,14 +17,15 @@ const handleAttack = (
 } => {
   const parsedData = JSON.parse(parsedMessage?.data?.toString());
 
-  const {
-    gameId,
-    indexPlayer: shooterIndex,
-  } = parsedData;
+  const { gameId, indexPlayer: shooterIndex } = parsedData;
 
   const shotCoordinates = defineCoordinates(parsedMessage);
   const { isHit, isKilled, killedShip, rivalData, updatedShooterId } =
-    defineAttackResult(gameData[gameId] as IPlayers, shooterId, shotCoordinates);
+    defineAttackResult(
+      gameData[gameId] as IPlayers,
+      shooterId,
+      shotCoordinates,
+    );
 
   shooterId = updatedShooterId;
 
@@ -66,7 +67,8 @@ const handleAttack = (
           }
         });
 
-        const coordinatesAroundKilledShip = findCoordinatesAroundKilledShip(killedShip);
+        const coordinatesAroundKilledShip =
+          findCoordinatesAroundKilledShip(killedShip);
 
         coordinatesAroundKilledShip.forEach((coordinate) => {
           const missedAttackResultData = {

@@ -1,7 +1,16 @@
 import { WebSocketServer, WebSocket } from 'ws';
-import { IClientData, IClients, IGame, IRegData, IRoom } from '../../types';
+import crypto from 'node:crypto';
+import {
+  IClientData,
+  IClients,
+  IGame,
+  IPlayers,
+  IRegData,
+  IRoom,
+} from '../../types';
 import { WS_COMMAND_TYPES } from '../../constants';
 import {
+  createBotConnection,
   createGame,
   createRoomWithUser,
   defineGameData,
@@ -9,11 +18,14 @@ import {
   handleWsSendEvent,
   startGame,
 } from 'handlers';
+import sendBotRandomAttack from 'utils/sendBotRandomAttack';
 
 let rooms: IRoom[] = [];
 let userName: string = '';
 let gameData = {} as IGame;
 let shooterId = '';
+let gameWithBot = false;
+let botWebsocket = {} as WebSocket;
 
 export const wsServer = new WebSocketServer({ port: 3000 });
 
@@ -53,16 +65,30 @@ export const handleWsMessageEvent = (
       createRoomWithUser(rooms, userName, userId);
     }
 
+    if (parsedMessage?.type === WS_COMMAND_TYPES.SINGLE_PLAY) {
+      botWebsocket = createBotConnection();
+
+      const gameId = crypto.randomUUID();
+      gameWithBot = true;
+
+      const gameDataResponse = {
+        idGame: gameId,
+        idPlayer: userId,
+      };
+
+      handleWsSendEvent(ws, WS_COMMAND_TYPES.CREATE_GAME, gameDataResponse);
+    }
+
     if (parsedMessage?.type === WS_COMMAND_TYPES.ADD_USER_TO_ROOM) {
       const parsedData = JSON.parse(parsedMessage?.data?.toString());
 
-      createGame(rooms, parsedData, userId, clients);
+      rooms = createGame(rooms, parsedData, userId, clients);
     }
 
     if (parsedMessage?.type === WS_COMMAND_TYPES.ADD_SHIPS) {
       const parsedData = JSON.parse(parsedMessage?.data?.toString());
 
-      defineGameData(parsedData, gameData);
+      defineGameData(parsedData, gameData, gameWithBot);
 
       shooterId = startGame(gameData, parsedData.gameId, shooterId, clients);
     }
@@ -82,6 +108,21 @@ export const handleWsMessageEvent = (
         parsedMessage,
         shooterId,
         rooms,
+      );
+
+      const isGameFinished = !Object.keys(
+        updatedGameData[parsedData?.gameId] as IPlayers,
+      ).length;
+
+      if (isGameFinished && botWebsocket.readyState === WebSocket.OPEN) {
+        botWebsocket.close();
+      }
+
+      sendBotRandomAttack(
+        updatedShooterId,
+        parsedData?.gameId,
+        isGameFinished,
+        botWebsocket,
       );
 
       gameData = updatedGameData;
