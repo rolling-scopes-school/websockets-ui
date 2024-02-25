@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "CommonJS",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist", // Output directory for compiled TypeScript files
+    "baseUrl": "./",
+    "paths": {
+      "*": [
+        "node_modules/*",
+        "src/types/*" // Additional paths for TypeScript module resolution
+      ]
+    }
+  },
+  "include": [
+    "src/**/*.ts", // Include TypeScript files in the src directory
+    "src/**/*.d.ts" // Include TypeScript declaration files
+  ],
+  "exclude": [
+    "node_modules" // Exclude the node_modules directory from compilation
+  ]
+}
