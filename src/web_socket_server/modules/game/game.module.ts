@@ -21,7 +21,7 @@ import { updateWinners } from '../users/user.module';
 import { getWsSendData } from '../../utils/stringify.data';
 import { listOfPlayersTurn } from '../../local_data_base/local.list.of.players.turn';
 import { IPlayerInterface } from '../../interface/list.of.players.turn.interface';
-import {botTactics, removeBotHits} from './bot.tactics';
+import { botTactics, removeBotHits, updateBotHits } from './bot.tactics';
 
 export const playersTurn = (
     currentUser: UserInterface,
@@ -121,7 +121,7 @@ export const playerAttack = (
     ws.send(wsData);
 
     if (currentPlayer?.playWithBot) {
-        return botTurn(gameId, currentPlayer!, enemyPlayer!);
+        return botTurn(gameId, currentPlayer!, enemyPlayer!, ShipStatuses.MISS);
     }
 
     if (!currentPlayer?.playWithBot) {
@@ -130,7 +130,6 @@ export const playerAttack = (
 
     playersTurn(enemyPlayer!, currentPlayer!, gameId);
 };
-
 const getHitData = (
     ship: IShipsFullInterface[],
     data: IAttackData,
@@ -155,7 +154,7 @@ const getHitData = (
         );
 
         if (isSingleGame) {
-            sendDataForRealPlayer(currentPlayer, enemyPlayer, wsData);
+            sendDataForRealPlayer(currentPlayer, wsData, enemyPlayer);
         } else {
             currentPlayer.ws!.send(wsData);
             enemyPlayer.ws!.send(wsData);
@@ -181,11 +180,15 @@ const getHitData = (
             );
 
             if (isSingleGame) {
-                sendDataForRealPlayer(currentPlayer, enemyPlayer, wsData);
+                sendDataForRealPlayer(currentPlayer, wsData, enemyPlayer);
             } else {
                 currentPlayer.ws!.send(wsData);
                 enemyPlayer.ws!.send(wsData);
             }
+        }
+
+        if (isSingleGame && currentPlayer.index < 0) {
+            updateBotHits(borderCoordinates, gameId);
         }
 
         if (!currentPlayer.playWithBot) {
@@ -219,7 +222,7 @@ const getHitData = (
             );
 
             if (isSingleGame) {
-                sendDataForRealPlayer(currentPlayer, enemyPlayer, wsData);
+                sendDataForRealPlayer(currentPlayer, wsData, enemyPlayer);
             } else {
                 currentPlayer.ws!.send(wsData);
                 enemyPlayer.ws!.send(wsData);
@@ -227,7 +230,12 @@ const getHitData = (
         }
 
         if (currentPlayer.index < 0) {
-            return botTurn(gameId, enemyPlayer!, currentPlayer!);
+            return botTurn(
+                gameId,
+                enemyPlayer!,
+                currentPlayer!,
+                ShipStatuses.KILLED,
+            );
         }
 
         return playersTurn(currentPlayer!, enemyPlayer, gameId);
@@ -318,7 +326,7 @@ const checkShipDecks = (
     );
 
     if (isSingleGame) {
-        sendDataForRealPlayer(currentPlayer, enemyPlayer, wsData);
+        sendDataForRealPlayer(currentPlayer, wsData, enemyPlayer);
     } else {
         currentPlayer.ws!.send(wsData);
         enemyPlayer.ws!.send(wsData);
@@ -357,8 +365,7 @@ const checkShipDecks = (
             );
 
             if (isSingleGame) {
-                sendDataForRealPlayer(currentPlayer, enemyPlayer, wsData);
-                removeBotHits(gameId);
+                sendDataForRealPlayer(currentPlayer, wsData, enemyPlayer);
             } else {
                 currentPlayer.ws!.send(wsData);
                 enemyPlayer.ws!.send(wsData);
@@ -385,20 +392,25 @@ const checkShipDecks = (
             );
 
             if (isSingleGame) {
-                sendDataForRealPlayer(currentPlayer, enemyPlayer, wsData);
+                sendDataForRealPlayer(currentPlayer, wsData, enemyPlayer);
             } else {
                 currentPlayer.ws!.send(wsData);
                 enemyPlayer.ws!.send(wsData);
             }
         }
+
+        if (isSingleGame && currentPlayer.index < 0) {
+            removeBotHits(gameId);
+            updateBotHits(borderCoordinates, gameId);
+        }
     }
+    const status = !isShipIntact ? ShipStatuses.KILLED : ShipStatuses.SHOT;
 
     if (currentPlayer.index < 0) {
-        return botTurn(gameId, enemyPlayer!, currentPlayer!, attackPosition);
+        botTurn(gameId, enemyPlayer!, currentPlayer!, status, attackPosition);
     } else {
         playersTurn(currentPlayer!, enemyPlayer!, gameId);
     }
-
     const playerIntactShips = userShips!.ships
         .map((item) => {
             return item.position.map((position) => {
@@ -420,7 +432,7 @@ const checkShipDecks = (
         );
 
         if (isSingleGame) {
-            sendDataForRealPlayer(currentPlayer, enemyPlayer, wsData);
+            sendDataForRealPlayer(currentPlayer, wsData, enemyPlayer);
         } else {
             currentPlayer.ws!.send(wsData);
             enemyPlayer.ws!.send(wsData);
@@ -520,7 +532,6 @@ const removeCurrentAttackCoordinates = (
     listOfPlayersTurn[currentSessionIndex] = sessionPlayersTurnData;
 };
 
-
 export const startSingleGame = (
     ws: WebSocket,
     player: UserInterface,
@@ -545,26 +556,25 @@ export const botTurn = (
     gameId: number,
     currentUser: UserInterface,
     enemyPlayer: UserInterface,
+    status: ShipStatuses,
     attackPosition?: IPositionInterface,
 ) => {
     playersTurn(enemyPlayer, currentUser, gameId);
-    botTactics(gameId, currentUser, enemyPlayer, attackPosition);
+    botTactics(gameId, currentUser, enemyPlayer, status, attackPosition);
 };
-
-const sendDataForRealPlayer = (
+export const sendDataForRealPlayer = (
     currentUser: UserInterface,
-    enemyPlayer: UserInterface,
     wsData: string,
+    enemyPlayer?: UserInterface,
 ) => {
     const currentUserIndex = currentUser.index;
-    const enemyPlayerIndex = enemyPlayer.index;
+    const enemyPlayerIndex = enemyPlayer?.index;
 
     if (currentUserIndex >= 0) {
         currentUser.ws!.send(wsData);
     }
 
-    if (enemyPlayerIndex >= 0) {
+    if (enemyPlayerIndex && enemyPlayerIndex >= 0) {
         enemyPlayer.ws!.send(wsData);
     }
 };
-

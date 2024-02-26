@@ -8,6 +8,7 @@ import { localDataBase } from '../../local_data_base/local.data.base';
 import { UserInterface } from '../../interface/user.interface';
 import { ReceivedDataInterface } from '../../interface/received.data.interface';
 import { getWsSendData } from '../../utils/stringify.data';
+import { sendDataForRealPlayer } from '../game/game.module';
 
 let userIndex = 1;
 
@@ -70,7 +71,9 @@ export const updateWinners = (
     currentUser: UserInterface,
     enemyPlayer?: UserInterface,
 ) => {
-    if (enemyPlayer) {
+    const isSingleGame = currentUser.playWithBot || enemyPlayer?.playWithBot;
+
+    if (enemyPlayer && !isSingleGame) {
         const playerWinsIndexData = localWinnersBase.findIndex(
             (item) => item.name === currentUser.name,
         );
@@ -90,14 +93,27 @@ export const updateWinners = (
         }
     }
 
-    const wsData = getWsSendData(
-        localWinnersBase,
-        WebsocketTypes.UPDATE_WINNERS,
-    );
+    let wsData = getWsSendData(localWinnersBase, WebsocketTypes.UPDATE_WINNERS);
 
-    currentUser!.ws!.send(wsData);
+    if (isSingleGame) {
+        const { wins, name } = localWinnersBase[0]!;
 
-    if (enemyPlayer?.ws) {
-        enemyPlayer.ws!.send(wsData);
+        const updateBotData = {
+            wins: wins + 1,
+            name,
+        };
+
+        delete localWinnersBase[0];
+        localWinnersBase[0] = updateBotData;
+
+        wsData = getWsSendData(localWinnersBase, WebsocketTypes.UPDATE_WINNERS);
+
+        sendDataForRealPlayer(currentUser, wsData, enemyPlayer);
+    } else {
+        currentUser!.ws!.send(wsData);
+
+        if (enemyPlayer?.ws) {
+            enemyPlayer.ws!.send(wsData);
+        }
     }
 };

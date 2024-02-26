@@ -3,7 +3,11 @@ import { listOfBotHits } from '../../local_data_base/local.bot.hits';
 import { WebsocketTypes } from '../../enum/websocket.types';
 import { UserInterface } from '../../interface/user.interface';
 import { playerAttack } from './game.module';
-import {BotHitsInterface} from "../../interface/bot.hits.interface";
+import { BotHitsInterface } from '../../interface/bot.hits.interface';
+import { listOfPlayersTurn } from '../../local_data_base/local.list.of.players.turn';
+import { localUserShips } from '../../local_data_base/local.user.ships';
+import { IPlayerInterface } from '../../interface/list.of.players.turn.interface';
+import { ShipStatuses } from '../../enum/ship.statuses';
 
 const getShotCoordinate = (gameId: number): IPositionInterface | null => {
     const currentGameHitsIndex = listOfBotHits.findIndex(
@@ -14,64 +18,120 @@ const getShotCoordinate = (gameId: number): IPositionInterface | null => {
         return null;
     }
 
-    const { botHits, aroundHits } = listOfBotHits[currentGameHitsIndex]!;
+    const { botHits, aroundHits, firstHit } =
+        listOfBotHits[currentGameHitsIndex]!;
+
+    const listOfPlayersTurnIndex = listOfPlayersTurn.findIndex(
+        (item) => item.gameId === gameId,
+    );
+
+    const { indexPlayer } = localUserShips.find(
+        (item) => item.gameId === gameId && item.indexPlayer < 0,
+    )!;
+
+    const botHitsData = listOfPlayersTurn[listOfPlayersTurnIndex]![
+        indexPlayer
+    ]! as IPlayerInterface;
+    const { playerTurns } = botHitsData;
 
     if (aroundHits.length > 0) {
-        console.log('aroundHits', aroundHits);
-        const index = Math.floor(Math.random() * (aroundHits.length - 0)) + 0;
-
-        const aroundHitsSet = new Set(
-            [aroundHits[index]].map((item) => JSON.stringify(item)),
+        const botHitsSet = new Set(
+            aroundHits.map((item) => JSON.stringify(item)),
         );
 
-        const botHitsWithoutThisHits = aroundHits.filter(
-            (item) => !aroundHitsSet.has(JSON.stringify(item)),
+        const botHitsWithoutThisHits = playerTurns.filter((item) =>
+            botHitsSet.has(JSON.stringify(item)),
         );
 
-        const updatedBotHits = {
-            aroundHits: botHitsWithoutThisHits,
-            gameId,
-            botHits,
-        };
+        if (botHitsWithoutThisHits.length > 0) {
+            const index =
+                Math.floor(
+                    Math.random() * (botHitsWithoutThisHits.length - 0),
+                ) + 0;
 
-        delete listOfBotHits[currentGameHitsIndex];
-        listOfBotHits[currentGameHitsIndex] = updatedBotHits;
+            const updatedBotHits = {
+                aroundHits: botHitsWithoutThisHits,
+                gameId,
+                botHits,
+                firstHit,
+            };
 
-        return aroundHits[index] as IPositionInterface;
+            delete listOfBotHits[currentGameHitsIndex];
+            listOfBotHits[currentGameHitsIndex] = updatedBotHits;
+
+            return botHitsWithoutThisHits[index] as IPositionInterface;
+        } else {
+            const index =
+                Math.floor(Math.random() * (playerTurns.length - 0)) + 0;
+
+            const updatedBotHits = {
+                aroundHits: [],
+                gameId,
+                botHits,
+                firstHit,
+            };
+
+            delete listOfBotHits[currentGameHitsIndex];
+            listOfBotHits[currentGameHitsIndex] = updatedBotHits;
+
+            return playerTurns[index] as IPositionInterface;
+        }
     }
 
     if (botHits.length > 0) {
-        const index = Math.floor(Math.random() * (botHits.length - 0)) + 0;
+        const botHitsSet = new Set(botHits.map((item) => JSON.stringify(item)));
 
-        const botHitsSet = new Set(
-            [botHits[index]].map((item) => JSON.stringify(item)),
+        const botHitsWithoutThisHits = playerTurns.filter((item) =>
+            botHitsSet.has(JSON.stringify(item)),
         );
 
-        const botHitsWithoutThisHits = botHits.filter(
-            (item) => !botHitsSet.has(JSON.stringify(item)),
-        );
+        if (botHitsWithoutThisHits.length > 0) {
+            const index =
+                Math.floor(
+                    Math.random() * (botHitsWithoutThisHits.length - 0),
+                ) + 0;
 
-        const updatedBotHits = {
-            aroundHits,
-            gameId,
-            botHits: botHitsWithoutThisHits,
-        };
+            const updatedBotHits = {
+                aroundHits,
+                gameId,
+                botHits: botHitsWithoutThisHits,
+                firstHit,
+            };
 
-        delete listOfBotHits[currentGameHitsIndex];
-        listOfBotHits[currentGameHitsIndex] = updatedBotHits;
+            delete listOfBotHits[currentGameHitsIndex];
+            listOfBotHits[currentGameHitsIndex] = updatedBotHits;
 
-        return botHits[index] as IPositionInterface;
+            return botHits[index] as IPositionInterface;
+        } else {
+            const index =
+                Math.floor(Math.random() * (playerTurns.length - 0)) + 0;
+
+            const updatedBotHits = {
+                aroundHits,
+                gameId,
+                botHits: [],
+                firstHit,
+            };
+
+            delete listOfBotHits[currentGameHitsIndex];
+            listOfBotHits[currentGameHitsIndex] = updatedBotHits;
+
+            return playerTurns[index] as IPositionInterface;
+        }
     }
-};
 
+    const index = Math.floor(Math.random() * (playerTurns.length - 0)) + 0;
+    return playerTurns[index] as IPositionInterface;
+};
 export const botTactics = (
     gameId: number,
     currentUser: UserInterface,
     enemyPlayer: UserInterface,
+    status: ShipStatuses,
     attackPosition?: IPositionInterface,
 ) => {
     if (attackPosition) {
-        createHitCoordinates(attackPosition, gameId);
+        createHitCoordinates(attackPosition, gameId, status);
     }
 
     const coordinates = getShotCoordinate(gameId);
@@ -137,58 +197,129 @@ export const createBotTactics = (gameId: number) => {
         botHits,
         aroundHits,
         gameId,
+        firstHit: [],
     });
 };
 
 export const createHitCoordinates = (
     attackPosition: IPositionInterface,
     gameId: number,
+    status: ShipStatuses,
 ) => {
+    const currentSessionIndex = listOfBotHits.findIndex(
+        (item) => item.gameId === gameId,
+    );
+
+    const { botHits, firstHit, aroundHits } =
+        listOfBotHits[currentSessionIndex]!;
     const { x, y } = attackPosition;
-    let coordinatesWithoutShip = [
-        { x: x - 1, y: y - 1 },
-        { x: x - 1, y: y + 1 },
-        { x: x + 1, y: y - 1 },
-        { x: x + 1, y: y + 1 },
-    ];
-    coordinatesWithoutShip = coordinatesWithoutShip.filter(
-        (item) => item.x >= 0 && item.y >= 0,
-    );
 
+    let coordinatesWithShip = [] as IPositionInterface[];
+    let coordinatesWithoutShip = [] as IPositionInterface[];
 
-    const currentSessionIndex = listOfBotHits.findIndex((item) => item.gameId === gameId);
+    if (status === ShipStatuses.SHOT) {
+        coordinatesWithShip = [
+            { x: x - 1, y },
+            { x: x + 1, y },
+            { x, y: y - 1 },
+            { x, y: y + 1 },
+        ];
 
-    const { botHits, firstHit } = listOfBotHits[currentSessionIndex]!;
+        coordinatesWithShip = coordinatesWithShip.filter(
+            (item) => item.x >= 0 && item.x <= 9 && item.y >= 0 && item.y <= 9,
+        );
 
-    const hitsSet = new Set(coordinatesWithoutShip.map((item) => JSON.stringify(item)));
-    const filteredArray = botHits.filter(
-        (item) => !hitsSet.has(JSON.stringify(item)),
-    );
+        coordinatesWithoutShip = [
+            { x: x - 1, y: y - 1 },
+            { x: x - 1, y: y + 1 },
+            { x: x + 1, y: y - 1 },
+            { x: x + 1, y: y + 1 },
+        ];
 
-    let coordinatesWithShip = [
-        { x: x - 1, y },
-        { x: x + 1, y },
-        { x, y: y - 1 },
-        { x, y: y + 1 },
-    ];
-
-    coordinatesWithShip = coordinatesWithShip.filter(
-        (item) => item.x >= 0 && item.y >= 0,
-    );
+        coordinatesWithoutShip = coordinatesWithoutShip.filter(
+            (item) => item.x >= 0 && item.x <= 9 && item.y >= 0 && item.y <= 9,
+        );
+    }
 
     if (firstHit.length > 0) {
         const { x: firstHitX, y: firstHitY } = firstHit[0]!;
 
-        if (x !== firstHitX  && y !== firstHitY) {
+        if (x === firstHitX) {
+            let newAroundHits = [
+                { x, y: y + 1 },
+                { x, y: y - 1 },
+            ];
+            const updatedAroundHits = aroundHits.filter(
+                (item) => item.x === firstHitX,
+            );
+            newAroundHits = newAroundHits.filter(
+                (item) => item.x !== firstHitX && item.y !== firstHitY,
+            );
+            const result = newAroundHits.concat(updatedAroundHits);
 
+            if (result.length === 0) {
+                let beginningAndEndOfShip = [
+                    { x, y: y - 2 },
+                    { x, y: y + 2 },
+                ];
+                beginningAndEndOfShip = beginningAndEndOfShip.filter(
+                    (item) =>
+                        item.x >= 0 &&
+                        item.x <= 9 &&
+                        item.y >= 0 &&
+                        item.y <= 9,
+                );
+                coordinatesWithShip.push(...beginningAndEndOfShip);
+            }
+
+            const currentAroundHits = hitsSynchronization(result, gameId);
+            coordinatesWithShip = currentAroundHits;
+        }
+
+        if (y === firstHitY) {
+            let newAroundHits = [
+                { x: x - 1, y },
+                { x: x + 1, y },
+            ];
+            const updatedAroundHits = aroundHits.filter(
+                (item) => item.y === firstHitY,
+            );
+            newAroundHits = newAroundHits.filter(
+                (item) => item.x !== firstHitX && item.y !== firstHitY,
+            );
+            const result = newAroundHits.concat(updatedAroundHits);
+            if (result.length === 0) {
+                let beginningAndEndOfShip = [
+                    { x: x + 2, y },
+                    { x: x - 2, y },
+                ];
+                beginningAndEndOfShip = beginningAndEndOfShip.filter(
+                    (item) =>
+                        item.x >= 0 &&
+                        item.x <= 9 &&
+                        item.y >= 0 &&
+                        item.y <= 9,
+                );
+                coordinatesWithShip.push(...beginningAndEndOfShip);
+            }
+
+            const currentAroundHits = hitsSynchronization(result, gameId);
+            coordinatesWithShip = currentAroundHits;
         }
     }
+
+    const hitsSet = new Set(
+        coordinatesWithoutShip.map((item) => JSON.stringify(item)),
+    );
+    const filteredArray = botHits.filter(
+        (item) => !hitsSet.has(JSON.stringify(item)),
+    );
 
     const updatedHits: BotHitsInterface = {
         gameId,
         aroundHits: coordinatesWithShip,
         botHits: filteredArray,
-        firstHit: [attackPosition]
+        firstHit: [attackPosition],
     };
 
     delete listOfBotHits[currentSessionIndex];
@@ -196,16 +327,78 @@ export const createHitCoordinates = (
 };
 
 export const removeBotHits = (gameId: number) => {
-    const currentSessionIndex = listOfBotHits.findIndex((item) => item.gameId === gameId);
+    const currentSessionIndex = listOfBotHits.findIndex(
+        (item) => item.gameId === gameId,
+    );
     const { botHits } = listOfBotHits[currentSessionIndex]!;
 
     const updatedHits: BotHitsInterface = {
         gameId,
         aroundHits: [],
         botHits,
-        firstHit: []
+        firstHit: [],
     };
 
     delete listOfBotHits[currentSessionIndex];
     listOfBotHits[currentSessionIndex] = updatedHits;
-}
+};
+
+export const updateBotHits = (
+    positions: IPositionInterface[],
+    gameId: number,
+) => {
+    const botListOfHitsIndex = listOfPlayersTurn.findIndex(
+        (item) => (item.gameId = gameId),
+    );
+    const botHitsDataFromDb = listOfPlayersTurn[botListOfHitsIndex];
+
+    const { indexPlayer } = localUserShips.find(
+        (item) => item.gameId === gameId && item.indexPlayer < 0,
+    )!;
+
+    const botHitsData = listOfPlayersTurn[botListOfHitsIndex]![
+        indexPlayer
+    ]! as IPlayerInterface;
+    const { playerTurns } = botHitsData;
+
+    const hitsSet = new Set(positions.map((item) => JSON.stringify(item)));
+    const filteredArray = playerTurns.filter(
+        (item) => !hitsSet.has(JSON.stringify(item)),
+    );
+
+    delete listOfPlayersTurn[botListOfHitsIndex];
+
+    listOfPlayersTurn[botListOfHitsIndex] = {
+        ...botHitsDataFromDb,
+        gameId,
+        [indexPlayer]: {
+            indexPlayer,
+            playerTurns: filteredArray,
+        },
+        indexPlayer: botHitsDataFromDb!.indexPlayer,
+    };
+};
+
+const hitsSynchronization = (
+    positions: IPositionInterface[],
+    gameId: number,
+) => {
+    const botListOfHitsIndex = listOfPlayersTurn.findIndex(
+        (item) => (item.gameId = gameId),
+    );
+    const { indexPlayer } = localUserShips.find(
+        (item) => item.gameId === gameId && item.indexPlayer < 0,
+    )!;
+
+    const botHitsData = listOfPlayersTurn[botListOfHitsIndex]![
+        indexPlayer
+    ]! as IPlayerInterface;
+    const { playerTurns } = botHitsData;
+
+    const hitsSet = new Set(playerTurns.map((item) => JSON.stringify(item)));
+    const filteredArray = positions.filter((item) =>
+        hitsSet.has(JSON.stringify(item)),
+    );
+
+    return filteredArray;
+};

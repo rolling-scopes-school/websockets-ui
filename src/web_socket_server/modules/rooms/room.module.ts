@@ -13,6 +13,11 @@ const gameId = 1;
 export const createRoom = (ws: WebSocket, currentUser: User) => {
     const currentPlayer = currentUser.getCurrentPlayer();
 
+    currentUser.setCurrentPlayer({
+        ...currentPlayer,
+        playWithBot: false,
+    });
+
     const roomWithThisPlayer = localListOfUsersRooms.find(
         (room) => room.roomUsers[0]?.index === currentPlayer.index,
     );
@@ -56,6 +61,12 @@ export const updateRoom = (
         );
 
         const user = currentUser.getCurrentPlayer();
+
+        currentUser.setCurrentPlayer({
+            ...user,
+            playWithBot: false,
+        });
+
         const userIndexInCurrentRoom =
             localListOfUsersRooms[getCurrentRoomIndex]?.roomUsers?.[0]?.index;
 
@@ -137,7 +148,6 @@ export const createRoomForSingleMode = (ws: WebSocket, currentUser: User) => {
     const currentUserIndex = localDataBase.findIndex(
         (user) => user.index === currentPlayer.index,
     );
-
     const playerFromDB = localDataBase[currentUserIndex];
     delete localDataBase[currentUserIndex];
 
