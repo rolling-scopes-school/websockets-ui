@@ -14,7 +14,8 @@
     "license": "ISC",
     "devDependencies": {
         "@types/ws": "^8.5.10",
-        "nodemon": "^2.0.16"
+        "nodemon": "^2.0.16",
+        "ts-node": "^10.9.2"
     },
     "dependencies": {
         "dotenv": "^16.4.5",
